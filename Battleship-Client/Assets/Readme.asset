@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcf7219bab7fe46a1ad266029b2fee19, type: 3}
+  m_Name: Readme
+  m_EditorClassIdentifier: 
+  title: Battleship
+  sections:
+  - heading: About
+    text: Battleship is a turn-based multiplayer game that uses Colyseus (0.13) to
+      employ a client-server architecture.
+    linkText: 
+    url: 
+  - heading: Project Setup
+    text: Choose the server type in Assets/Data/Options/NetworkOptions
+    linkText: 
+    url: 
+  - heading: Links
+    text: 
+    linkText: 
+    url: 
+  - heading: 
+    text: What is Colyseus?
+    linkText: Colyseus 0.13
+    url: https://0-13-x.docs.colyseus.io/
+  - heading: 
+    text: Look for updates to this project
+    linkText: GitHub Repository
+    url: https://github.com/musapkahraman/battleship

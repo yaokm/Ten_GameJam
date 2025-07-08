@@ -1,0 +1,172 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40442e4c7f40ccc4f971f4fd8084ac01, type: 3}
+  m_Name: Turkish
+  m_EditorClassIdentifier: 
+  title: 37
+  items:
+  - key: {fileID: 11400000, guid: 5f5fb7d5f1c2ad84594a8cc5da8d27c5, type: 2}
+    value: "AM\u0130RAL BATTI"
+  - key: {fileID: 11400000, guid: 4ef7ef657ba119949a80daf1071235c7, type: 2}
+    value: TEK OYUNCU
+  - key: {fileID: 11400000, guid: 40d06b0f47dbac14494df9bfabc13877, type: 2}
+    value: "\xD6\u011ERENC\u0130"
+  - key: {fileID: 11400000, guid: a2ad99fc809be7c439932533f3407d2b, type: 2}
+    value: "AM\u0130RAL"
+  - key: {fileID: 11400000, guid: b2f4fef974b067746bd397b246a8c8a7, type: 2}
+    value: "\u0130K\u0130 OYUNCU"
+  - key: {fileID: 11400000, guid: 3ff14d31b54719c4abeccad34ab455ea, type: 2}
+    value: "\u0130PTAL"
+  - key: {fileID: 11400000, guid: b9ebc95b2665e9f46b9a23a92e0bcbf5, type: 2}
+    value: "SE\xC7ENEKLER"
+  - key: {fileID: 11400000, guid: e8ef3800822174041bf0479d1845e818, type: 2}
+    value: "\xC7IKI\u015E"
+  - key: {fileID: 11400000, guid: c8c2e3ad6d01cb64c8e2ee0f53349c43, type: 2}
+    value: "D\u0130L"
+  - key: {fileID: 11400000, guid: 4030a10ecae1be2468fcf8e3eeebef96, type: 2}
+    value: "GER\u0130"
+  - key: {fileID: 11400000, guid: 5bb696b2457d62249bf2166926cf860c, type: 2}
+    value: "ATE\u015E!"
+  - key: {fileID: 11400000, guid: 4aa12b5cf80068649858022a6e504c01, type: 2}
+    value: DEVAM ET
+  - key: {fileID: 11400000, guid: 9ef79952847b99f4c9cca7a7b0bab24c, type: 2}
+    value: RASTGELE
+  - key: {fileID: 11400000, guid: 5ffe9b213302cad4597ee463c3cfbc7a, type: 2}
+    value: "TEM\u0130ZLE"
+  - key: {fileID: 11400000, guid: 08616d1e61ca2854380f8c1a6e23e57f, type: 2}
+    value: "YEN\u0130 OYUN"
+  - key: {fileID: 11400000, guid: e12dee244a42bd94c8670e08f5e5b5c5, type: 2}
+    value: OYUNA KATIL
+  - key: {fileID: 11400000, guid: d65e293f039444345abf6f7b4a1bb28c, type: 2}
+    value: OYUNDAN AYRIL
+  - key: {fileID: 11400000, guid: 7f81efe06d0bae44b9ac9d5d6ce409d9, type: 2}
+    value: NASIL OYNANIR
+  - key: {fileID: 11400000, guid: 9ff8e1de03c391d4d861c5a063219d1a, type: 2}
+    value: "ANA MEN\xDC"
+  - key: {fileID: 11400000, guid: 340e7215d3e3eb348bc8015e1debad97, type: 2}
+    value: "T\u0130TRE\u015E\u0130M\u0130 A\xC7"
+  - key: {fileID: 11400000, guid: 65d965200a34a934d909cc024cd8721d, type: 2}
+    value: "T\u0130TRE\u015E\u0130M\u0130 KAPAT"
+  - key: {fileID: 11400000, guid: fc09360fd70a3a348a582ea9d894d3d3, type: 2}
+    value: OYUNDAN AYRIL
+  - key: {fileID: 11400000, guid: c629e22e052ceee419921e752d5901f6, type: 2}
+    value: "Oyundan ayr\u0131lmak m\u0131 istiyorsun?"
+  - key: {fileID: 11400000, guid: 0cace234b09edc8448c7a0bcd9fd757f, type: 2}
+    value: EVET
+  - key: {fileID: 11400000, guid: 963492208423c654d97603e4441ad50e, type: 2}
+    value: HAYIR
+  - key: {fileID: 11400000, guid: b9302d08149e4744f9196ae3c2f02327, type: 2}
+    value: MAALESEF...
+  - key: {fileID: 11400000, guid: 7e81c8458b2ceda4eb34089f5b61dfcb, type: 2}
+    value: "Rakibin oyundan ayr\u0131ld\u0131."
+  - key: {fileID: 11400000, guid: e1772d2e2ff245b4fbd4f36d0977744c, type: 2}
+    value: TAMAM
+  - key: {fileID: 11400000, guid: 96a683305f1559a409e51bea13ef1f0f, type: 2}
+    value: "Oyun sunucusuyla ba\u011Flant\u0131n\u0131z kesildi."
+  - key: {fileID: 11400000, guid: cdf1b444b73f3364c97b41cff0cb0e7d, type: 2}
+    value: Rakibin oynamak istemiyor.
+  - key: {fileID: 11400000, guid: 9e93f755bbde41e4aa60a262f909d8d3, type: 2}
+    value: KAZANDIN! :)
+  - key: {fileID: 11400000, guid: c99c5863ede04794dbc95c29f9be011a, type: 2}
+    value: "KAYBETT\u0130N :("
+  - key: {fileID: 11400000, guid: 4fdc81841e5e945409752cbb4f2e86c1, type: 2}
+    value: "Kazananlar asla vazge\xE7mez."
+  - key: {fileID: 11400000, guid: 3563094dd7fb68642bfe4df94510fd84, type: 2}
+    value: "Vazge\xE7enler asla kazanamaz."
+  - key: {fileID: 11400000, guid: 1793b59b4b9ee4848984568b2a3b1267, type: 2}
+    value: "B\u0130R EL DAHA"
+  - key: {fileID: 11400000, guid: 9b5e06cf4d5dc114ab4f5bce3a7eeeec, type: 2}
+    value: AYRIL
+  - key: {fileID: 11400000, guid: f13ac9662bae7f64e9292f7a8b826d9a, type: 2}
+    value: PES ET
+  - key: {fileID: 11400000, guid: 385eac45d16cbc3459be7f5900ee601e, type: 2}
+    value: "YEN\u0130 OYUN OLU\u015ETUR"
+  - key: {fileID: 11400000, guid: ba17881284af2ad41b877224b817b1c6, type: 2}
+    value: "\u0130stersen oyun odas\u0131na bir isim verebilir ve parola koyabilirsin."
+  - key: {fileID: 11400000, guid: 51b1ade5acbdad841acaeeb25f63451e, type: 2}
+    value: "OLU\u015ETUR"
+  - key: {fileID: 11400000, guid: bf126cb7538dfeb4eb66029a800a787a, type: 2}
+    value: "\u0130PTAL ET"
+  - key: {fileID: 11400000, guid: 96874c31f2ff5b64781d5c95d3edc300, type: 2}
+    value: "Oyun ad\u0131n\u0131 buraya yaz"
+  - key: {fileID: 11400000, guid: f1976d3930acf47419a8a28c3a992177, type: 2}
+    value: "Parolay\u0131 buraya yaz"
+  - key: {fileID: 11400000, guid: 1cadc8f9b4ae6a843952a87fe22efdbe, type: 2}
+    value: OYUNA KATIL
+  - key: {fileID: 11400000, guid: 8aee189c81eb38b488f69898d9682518, type: 2}
+    value: "Bu oyuna kat\u0131lmak i\xE7in parola gerekli."
+  - key: {fileID: 11400000, guid: 0d3e28c52f9ff2a409e171ae744955c1, type: 2}
+    value: DEVAM ET
+  - key: {fileID: 11400000, guid: 05217b01fcaccc24589f64592e249625, type: 2}
+    value: "\u0130PTAL"
+  - key: {fileID: 11400000, guid: b39f0a34d1f42c64896399b800cede56, type: 2}
+    value: "Zorluk se\xE7"
+  - key: {fileID: 11400000, guid: 95de6b00230aecb4d87320511c0289d0, type: 2}
+    value: "RAK\u0130B\u0130N KARAR VERMES\u0130 BEKLEN\u0130YOR."
+  - key: {fileID: 11400000, guid: d9f9687533159ed498c8ed69bfa39e84, type: 2}
+    value: "RAK\u0130B\u0130N ATI\u015E YAPMASI BEKLEN\u0130YOR."
+  - key: {fileID: 11400000, guid: f343f65ffbc83c643a218f1c91c3afa6, type: 2}
+    value: "\u0130K\u0130NC\u0130 OYUNCUNUN KATILMASI BEKLEN\u0130YOR."
+  - key: {fileID: 11400000, guid: 8c732283d28c98a4fbe8c5ea89460484, type: 2}
+    value: "RAK\u0130B\u0130N GEM\u0130LER\u0130N\u0130 YERLE\u015ET\u0130RMES\u0130
+      BEKLEN\u0130YOR."
+  - key: {fileID: 11400000, guid: b9b627bf575502d4ab39ee094188f0e0, type: 2}
+    value: SIRA SENDE!
+  - key: {fileID: 11400000, guid: b218aff91e1431049bc00a1ecf7eac5b, type: 2}
+    value: "OYNAMAK \u0130\xC7\u0130N B\u0130R MOD SE\xC7"
+  - key: {fileID: 11400000, guid: 96f28e78bd9533347834f8fbe583adeb, type: 2}
+    value: "SUNUCUYA BA\u011ELANILIYOR..."
+  - key: {fileID: 11400000, guid: 458424d558a735246bfb13ae40d17fd1, type: 2}
+    value: "GEM\u0130LER\u0130 BU \u015EEK\u0130LDE YERLE\u015ET\u0130RMEK \u0130MKANSIZ!"
+  - key: {fileID: 11400000, guid: 8f35226fcc30be04fb3075d5b96ae3bc, type: 2}
+    value: "HER\u015EEY G\xDCZEL G\xD6R\xDCN\xDCYOR."
+  - key: {fileID: 11400000, guid: 514e772fe1f84a142a2705138b7936ae, type: 2}
+    value: "GEM\u0130LER\u0130N\u0130 YERLE\u015ET\u0130R"
+  - key: {fileID: 11400000, guid: 35a339a664576714c83365856c352726, type: 2}
+    value: "SUNUCUYA BA\u011ELANMAYA \xC7ALI\u015EIRKEN B\u0130R HATA OLU\u015ETU."
+  - key: {fileID: 11400000, guid: fd1d0e9c958112b4e870d7818f094670, type: 2}
+    value: "DE\u011E\u0130\u015ET\u0130RMEK \u0130\xC7\u0130N B\u0130R AYAR SE\xC7"
+  - key: {fileID: 11400000, guid: c5c19390e55e1544087de481d7f56831, type: 2}
+    value: "B\u0130R D\u0130L SE\xC7\u0130N"
+  - key: {fileID: 11400000, guid: e752df6245066c44ea5bc10d0e1a9373, type: 2}
+    value: "Nas\u0131l oynan\u0131r"
+  - key: {fileID: 11400000, guid: 55c616549200878418ebabc403f7b2b4, type: 2}
+    value: "Ortadaki kareler, rakibinizin gemilerinin sakland\u0131\u011F\u0131 yerdir.
+      S\u0131ra size geldi\u011Finde, hedeflerinizi se\xE7mek i\xE7in o karelerde
+      \xFC\xE7 farkl\u0131 h\xFCcreye dokunun. Se\xE7ti\u011Finiz hedefi silmek i\xE7in
+      o h\xFCcreye tekrar dokunun. Se\xE7ti\u011Finiz hedeflerden memnun kald\u0131\u011F\u0131n\u0131zda,
+      karelerin alt\u0131ndaki ate\u015F d\xFC\u011Fmesine basmal\u0131s\u0131n\u0131z."
+  - key: {fileID: 11400000, guid: 754bea3c4146bb24ca794c3153336ec7, type: 2}
+    value: Geri bildirim
+  - key: {fileID: 11400000, guid: 20b303039119b9e4f8ac45b3ecf191d2, type: 2}
+    value: "At\u0131\u015Flar\u0131n\u0131z rakibinizin gemilerini \u0131skalarsa
+      herhangi bir geri bildirim almazs\u0131n\u0131z ve rakibinizin at\u0131\u015F
+      yapmas\u0131n\u0131 beklersiniz. At\u0131\u015Flar\u0131n\u0131z bir veya daha
+      fazla gemiyi vurursa, soldaki karelerde baz\u0131 gemilerin k\u0131rm\u0131z\u0131ya
+      d\xF6nd\xFC\u011F\xFCn\xFC g\xF6r\xFCrs\xFCn\xFCz. Bu gemilerin bulundu\u011Fu
+      b\xF6l\xFCm, rakibinizin filosu i\xE7in bir hasar g\xF6stergesidir. K\u0131rm\u0131z\u0131
+      b\xF6l\xFCmler, isabetinizin tam yerini g\xF6stermez, sadece bir geminin ka\xE7
+      par\xE7as\u0131n\u0131n vuruldu\u011Funu g\xF6sterir."
+  - key: {fileID: 11400000, guid: a251cbd84a724624b97c418d805c403e, type: 2}
+    value: Tahmin
+  - key: {fileID: 11400000, guid: 0caa6da7d5c589b47a5260161ebec566, type: 2}
+    value: "Hangi at\u0131\u015F\u0131n isabetli oldu\u011Funu ve hangisinin \u0131skalad\u0131\u011F\u0131n\u0131
+      tahmin etmeniz gerekiyor. \xD6nceden at\u0131\u015F yapt\u0131\u011F\u0131n\u0131z
+      bir kareye dokunursan\u0131z o elde i\u015Faretledi\u011Finiz hedef grubu vurgulan\u0131r.
+      \u0130leri geri bakarak gemilerin desenlerini g\xF6rmeye \xE7al\u0131\u015F\u0131n.
+      Bunu kolayla\u015Ft\u0131rmak i\xE7in istedi\u011Finiz kadar gemiyi sol taraftan
+      rakibinizin karelerine s\xFCr\xFCkleyip b\u0131rakabilirsiniz. Buraya koydu\u011Funuz
+      gemilerin yerini de\u011Fi\u015Ftirebilir ve d\u0131\u015Far\u0131 s\xFCr\xFCkleyerek
+      silebilirsiniz."
+  - key: {fileID: 11400000, guid: c6bbeceee7344754ba5d40730fb68262, type: 2}
+    value: "D\u0130L SE\xC7ENEKLER\u0130"
+  keyName: title_lang_options

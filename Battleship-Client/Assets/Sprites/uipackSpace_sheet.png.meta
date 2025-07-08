@@ -1,0 +1,365 @@
+fileFormatVersion: 2
+guid: 6ef2d4e6edd6bf645bacba94f7f95baa
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8064986394201839719
+    second: metalPanel_blue
+  - first:
+      213: -3149080751089927819
+    second: metalPanel
+  - first:
+      213: 7305025650002627939
+    second: squareWhite_verical
+  - first:
+      213: -4820332787661257093
+    second: glassPanel_corners
+  - first:
+      213: -2971685843185732473
+    second: glassPanel
+  - first:
+      213: -4054645116845792896
+    second: glassPanel_cornerTR
+  - first:
+      213: -1867471744214486524
+    second: glassPanel_tab
+  - first:
+      213: -7305116295349812189
+    second: glassPanel_projection
+  - first:
+      213: 6574061092719365580
+    second: metalPanel
+  - first:
+      213: -8387751379867746058
+    second: metalPanel_blue
+  - first:
+      213: -7686184513379155958
+    second: metalPanel_blueCorner
+  - first:
+      213: -5101312401461952751
+    second: metalPanel_green
+  - first:
+      213: -47828434629211411
+    second: metalPanel_greenCorner
+  - first:
+      213: -7466474258902802528
+    second: metalPanel_plate
+  - first:
+      213: -8163541527685898568
+    second: metalPanel_red
+  - first:
+      213: -8476104339530421244
+    second: metalPanel_redCorner
+  - first:
+      213: -7799606758824376140
+    second: metalPanel_yellowCorner
+  - first:
+      213: 5788360045085674988
+    second: uipackSpace_metalPanel_yellow
+  - first:
+      213: -3697638588053745643
+    second: barVertical_blue
+  - first:
+      213: 6093199521058172504
+    second: glassPanel_mask
+  - first:
+      213: 3769083766744375755
+    second: squareWhite
+  - first:
+      213: -1304872339431382713
+    second: Show
+  - first:
+      213: -8123458820953776852
+    second: Hide
+  externalObjects: {}
+  serializedVersion: 11
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: -1
+    mipBias: -100
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 50
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  applyGammaDecoding: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 1
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 1
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 1
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 1
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: metalPanel_blue
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 411
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 30, y: 30, z: 30, w: 30}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 997ad37ca99631090800000000000000
+      internalID: -8064986394201839719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassPanel
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 410
+        width: 100
+        height: 101
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 30, y: 30, z: 30, w: 30}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7847bd4687372c6d0800000000000000
+      internalID: -2971685843185732473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassPanel_mask
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 304
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 30, y: 30, z: 30, w: 30}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85ea0466ea46f8450800000000000000
+      internalID: 6093199521058172504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: squareWhite
+      rect:
+        serializedVersion: 2
+        x: 478
+        y: 438
+        width: 19
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 12, z: 8, w: 12}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc16d7567b97e4430800000000000000
+      internalID: 3769083766744375755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Show
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 475
+        width: 46
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 741a5f2558924ede0800000000000000
+      internalID: -1304872339431382713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hide
+      rect:
+        serializedVersion: 2
+        x: 457
+        y: 476
+        width: 46
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2d59850e3da34f80800000000000000
+      internalID: -8123458820953776852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: metalPanel
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 305
+        width: 100
+        height: 99
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 30, y: 30, z: 30, w: 30}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 579b34ecdb73c44d0800000000000000
+      internalID: -3149080751089927819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: squareWhite_verical
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 441
+        width: 26
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 12, y: 8, z: 12, w: 8}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36d068fff1aa06560800000000000000
+      internalID: 7305025650002627939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+  spritePackingTag: 
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
