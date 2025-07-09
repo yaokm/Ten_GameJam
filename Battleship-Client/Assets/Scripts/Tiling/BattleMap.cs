@@ -11,6 +11,8 @@ namespace BattleshipGame.Tiling
     public class BattleMap : Map, IPointerClickHandler, IBeginDragHandler, IEndDragHandler
     {
         private const int FlashGridCount = 2;
+        private const int GridSize = 10;
+        private const int ShotsSize = GridSize * GridSize;
         [SerializeField] private Camera sceneCamera;
         [SerializeField] private Rules rules;
         [SerializeField] private ScreenType screenType;
@@ -41,12 +43,33 @@ namespace BattleshipGame.Tiling
         private bool _isFlashingGrids;
         public bool IsMarkingTargets { get; set; }
 
+        [SerializeField] private Tile gridTile; // 拖入你想用的网格线Tile
+
+        private void GenerateGridLines()
+        {
+            gridsLayer.ClearAllTiles();
+            for (int x = 0; x < rules.areaSize.x; x++)
+            {
+                for (int y = 0; y < rules.areaSize.y; y++)
+                {
+                    Vector3Int pos = new Vector3Int(x, y, 0);
+                    gridsLayer.SetTile(pos, gridTile);
+                }
+            }
+        }
+
         private void Start()
         {
             if (sceneCamera == null) sceneCamera = Camera.main;
             _grid = GetComponent<Grid>();
+            GenerateGridLines(); // 动态生成网格线
         }
-
+#if UNITY_EDITOR
+        public void Print()
+        {
+            GenerateGridLines();
+        }
+#endif
         public void OnPointerClick(PointerEventData eventData)
         {
             if (!_isDragging && screenType == ScreenType.Opponent)

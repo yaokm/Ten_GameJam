@@ -20,4 +20,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1cb9faa54e35a9d48889969c0669d2c2, type: 2}
   - {fileID: 11400000, guid: f8874e7b665575b4f8f031a95342dea3, type: 2}
   - {fileID: 11400000, guid: 1f850cf7c4a63e949a987393be9478f4, type: 2}
-  areaSize: {x: 9, y: 9}
+  areaSize: {x: 10, y: 10}

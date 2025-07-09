@@ -1062,7 +1062,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1280, y: 720}
+  m_ReferenceResolution: {x: 720, y: 1280}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
@@ -1192,7 +1192,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Language Settings
+  m_text: Language Options
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 02da81d8be4e74541aef52715039535b, type: 2}
   m_sharedMaterial: {fileID: 393446398567770681, guid: 02da81d8be4e74541aef52715039535b,
@@ -1929,10 +1929,25 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 6911123088306777244, guid: f7615f27ecc264c41b81c95627428e90,
+        type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 720
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911123088306777244, guid: f7615f27ecc264c41b81c95627428e90,
+        type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 1280
+      objectReference: {fileID: 0}
     - target: {fileID: 6911123088306777245, guid: f7615f27ecc264c41b81c95627428e90,
         type: 3}
       propertyPath: m_Name
       value: Background
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911123088306777245, guid: f7615f27ecc264c41b81c95627428e90,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6911123088306777246, guid: f7615f27ecc264c41b81c95627428e90,
         type: 3}

@@ -7,7 +7,7 @@ export class GameRoom extends Room<State> {
     maxClients: number = 2;
     password: string;
     name: string;
-    gridSize: number = 9;
+    gridSize: number = 10;
     startingFleetHealth: number = 19;
     placements: any;
     playerHealth: any;

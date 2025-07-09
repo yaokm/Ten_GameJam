@@ -9,7 +9,7 @@ namespace BattleshipGame.AI
     public class LocalRoom
     {
         private const int StartingFleetHealth = 19;
-        private const int GridSize = 9;
+        private const int GridSize = 10;
         private const int ShotsSize = GridSize * GridSize;
         public readonly State State;
         private Dictionary<string, int> _health;

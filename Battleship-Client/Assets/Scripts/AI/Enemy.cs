@@ -143,32 +143,27 @@ namespace BattleshipGame.AI
             {
                 (int shipWidth, int shipHeight) = ship.GetShipSize();
                 if (!GridUtils.IsInsideBoundaries(shipWidth, shipHeight, pivot, rules.areaSize)) return false;
-                if (DoesCollideWithOtherShip(shipId, pivot, shipWidth, shipHeight)) return false;
+                if (DoesCollideWithOtherShip(shipId, pivot, ship)) return false;
                 RegisterShipToCells(shipId, ship, pivot);
                 return true;
             }
 
-            bool DoesCollideWithOtherShip(int shipId, Vector3Int pivot, int shipWidth, int shipHeight)
+            bool DoesCollideWithOtherShip(int shipId, Vector3Int pivot, Ship ship)
             {
-                // Create a frame of one cell thickness
-                int xMin = pivot.x - 1;
-                int xMax = pivot.x + shipWidth;
-                int yMin = pivot.y - shipHeight;
-                int yMax = pivot.y + 1;
-                for (int y = yMin; y <= yMax; y++)
+                // 使用船只的实际部件坐标来检查重叠
+                foreach (var part in ship.partCoordinates)
                 {
-                    if (y < 0 || y > rules.areaSize.y - 1) continue; // Avoid this row if it is out of the map
-                    for (int x = xMin; x <= xMax; x++)
+                    int checkX = pivot.x + part.x;
+                    int checkY = pivot.y + part.y;
+                    
+                    if (checkX < 0 || checkX >= rules.areaSize.x || checkY < 0 || checkY >= rules.areaSize.y) continue;
+                    
+                    int cellIndex = GridUtils.CoordinateToCellIndex(new Vector3Int(checkX, checkY, 0), rules.areaSize);
+                    if (cellIndex != OutOfMap && cells[cellIndex] != EmptyCell && cells[cellIndex] != shipId)
                     {
-                        if (x < 0 || x > rules.areaSize.x - 1) continue; // Avoid this column if it is out of the map
-                        int cellIndex = GridUtils.CoordinateToCellIndex(new Vector3Int(x, y, 0), rules.areaSize);
-                        if (cellIndex != OutOfMap &&
-                            (cells[cellIndex] == EmptyCell || cells[cellIndex] == shipId)) continue;
-
-                        return true;
+                        return true; // 发现重叠
                     }
                 }
-
                 return false;
             }
 

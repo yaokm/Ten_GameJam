@@ -206,17 +206,25 @@ namespace BattleshipGame.Managers
             var shouldRemoveFromPool = false;
             if (shipId == EmptyCell)
             {
-                shipId = GetShipId(from);
+                shipId = GetShipId(from, ship, isMovedIn);
                 shouldRemoveFromPool = true;
             }
 
             (int shipWidth, int shipHeight) = ship.GetShipSize();
             if (!IsInsideBoundaries(shipWidth, shipHeight, to, MapAreaSize)) return false;
-            if (DoesCollideWithOtherShip(shipId, to)) return false;
+            
+            // 先检查是否有重叠
+            if (DoesCollideWithOtherShip(shipId, to, ship)) return false;
+            
+            // 如果没有重叠，先清除旧位置
+            ClearShipFromCells(shipId);
+            
+            // 然后设置新位置
             clearButton.SetInteractable(true);
             planMap.SetShip(ship, to);
             RegisterShipToCells(shipId, ship, to);
             placementMap.PlaceShip(shipId, ship, to);
+            
             if (shouldRemoveFromPool)
             {
                 _pool.Remove(shipId);
@@ -229,43 +237,50 @@ namespace BattleshipGame.Managers
             continueButton.SetInteractable(true);
             statusData.State = PlacementReady;
             return true;
+        }
 
-            int GetShipId(Vector3Int grabbedFrom)
+        private void ClearShipFromCells(int shipId)
+        {
+            // 清除指定船只的所有格子
+            for (var i = 0; i < _cellCount; i++)
             {
-                if (!isMovedIn)
+                if (_cells[i] == shipId)
                 {
-                    int cellIndex = CoordinateToCellIndex(grabbedFrom, MapAreaSize);
-                    if (_cells[cellIndex] != EmptyCell) return _cells[cellIndex];
+                    _cells[i] = EmptyCell;
                 }
+            }
+        }
 
-                foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) return kvp.Key;
-
-                return EmptyCell;
+        private int GetShipId(Vector3Int grabbedFrom, Ship ship, bool isMovedIn)
+        {
+            if (!isMovedIn)
+            {
+                int cellIndex = CoordinateToCellIndex(grabbedFrom, MapAreaSize);
+                if (_cells[cellIndex] != EmptyCell) return _cells[cellIndex];
             }
 
-            bool DoesCollideWithOtherShip(int selfShipId, Vector3Int cellCoordinate)
+            foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) return kvp.Key;
+
+            return EmptyCell;
+        }
+
+        bool DoesCollideWithOtherShip(int selfShipId, Vector3Int cellCoordinate, Ship ship)
+        {
+            // 使用船只的实际部件坐标来检查重叠
+            foreach (var part in ship.partCoordinates)
             {
-                // Create a frame of one cell thickness
-                int xMin = cellCoordinate.x - 1;
-                int xMax = cellCoordinate.x + shipWidth;
-                int yMin = cellCoordinate.y - shipHeight;
-                int yMax = cellCoordinate.y + 1;
-                for (int y = yMin; y <= yMax; y++)
+                int checkX = cellCoordinate.x + part.x;
+                int checkY = cellCoordinate.y + part.y;
+                
+                if (checkX < 0 || checkX >= MapAreaSize.x || checkY < 0 || checkY >= MapAreaSize.y) continue;
+                
+                int cellIndex = CoordinateToCellIndex(new Vector3Int(checkX, checkY, 0), MapAreaSize);
+                if (cellIndex != OutOfMap && _cells[cellIndex] != EmptyCell && _cells[cellIndex] != selfShipId)
                 {
-                    if (y < 0 || y > MapAreaSize.y - 1) continue; // Avoid this row if it is out of the map
-                    for (int x = xMin; x <= xMax; x++)
-                    {
-                        if (x < 0 || x > MapAreaSize.x - 1) continue; // Avoid this column if it is out of the map
-                        int cellIndex = CoordinateToCellIndex(new Vector3Int(x, y, 0), MapAreaSize);
-                        if (cellIndex != OutOfMap &&
-                            (_cells[cellIndex] == EmptyCell || _cells[cellIndex] == selfShipId)) continue;
-
-                        return true;
-                    }
+                    return true; // 发现重叠
                 }
-
-                return false;
             }
+            return false;
         }
 
         private void RegisterShipToCells(int shipId, Ship ship, Vector3Int pivot)

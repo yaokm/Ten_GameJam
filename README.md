@@ -10,9 +10,9 @@ You can [play this game](https://muk.itch.io/amiral) on my itch.io page.
 
 ## Game
 
-The rules are a bit different from the classic battleship game. Each player has three shots per turn. This makes it harder to guess the coordinates of your opponent's ships.
+The rules are a bit different from the classic battleship game. Each player has one shots per turn. This makes it harder to guess the coordinates of your opponent's ships.
 
-You can drag and drop ships into a map from the pool next to it. You can also highlight a set of three shots that you fired in previous turns by clicking on a shot. These options help you find where your opponent's ships are placed.
+You can drag and drop ships into a map from the pool next to it. You can also highlight a set of one shots that you fired in previous turns by clicking on a shot. These options help you find where your opponent's ships are placed.
 
 For now, this game has only one mode of the classic battleship game we played on paper when we were children. The world-wide known modes will be implemented in the future.
 
