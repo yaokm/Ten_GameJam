@@ -1,79 +1,40 @@
 fileFormatVersion: 2
-guid: 07250fcc871756246be609926cd790c9
+guid: c5097cc1c335d014f81a9e0c80ac06cb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 385173514463150410
-    second: Grid_0
+      213: -1183681620893836794
+    second: Sample_A0
   - first:
-      213: 8119703020421595460
-    second: Fleet_Scout
+      213: -476568084062224559
+    second: Sample_B0
   - first:
-      213: 6108982779496689341
-    second: Fleet_HGunBoat
+      213: 3108737332184059735
+    second: Sample_C0
   - first:
-      213: 4927151648187961526
-    second: Fleet_HCruiser
+      213: 1094631400899017902
+    second: Sample_C1
   - first:
-      213: -4435417356244048945
-    second: Fleet_VGunBoat
+      213: 4146482477124128311
+    second: Sample_D0
   - first:
-      213: 8868918045991000700
-    second: Fleet_VCruiser
+      213: 847730864110857850
+    second: Sample_D1
   - first:
-      213: -8325962913616430414
-    second: Fleet_Admiral
+      213: 7607286487261155614
+    second: Sample_D2
   - first:
-      213: 8485601669589115460
-    second: Grid
+      213: -2526810302523561198
+    second: Sample_D3
   - first:
-      213: 1256899974826948278
-    second: Background_Radar
+      213: -8976820346177863745
+    second: Sample_E0
   - first:
-      213: 3134392563574524116
-    second: Cursor_Target
+      213: 1649974545127028144
+    second: Sample_E1
   - first:
-      213: -9142349075121489125
-    second: Marker_Miss
-  - first:
-      213: -7857300941268490051
-    second: Marker_Hit
-  - first:
-      213: 5941352665731707020
-    second: Marker_Explosion
-  - first:
-      213: 7277177742205591692
-    second: Marker_TargetFired
-  - first:
-      213: -4466346963816401347
-    second: Marker_TargetMarked
-  - first:
-      213: -2980439902397685020
-    second: Cursor
-  - first:
-      213: 608915791917558460
-    second: Fill
-  - first:
-      213: 3013520669368065377
-    second: Mask_Admiral_Part_2
-  - first:
-      213: 8605912892858903855
-    second: Mask_Admiral_Part_3
-  - first:
-      213: -1114702655520293475
-    second: Mask_Admiral_Part_4
-  - first:
-      213: 1084685374406363524
-    second: Mask_Admiral_Part_5
-  - first:
-      213: 3468688319409275891
-    second: Mask_HCruiser_Part_1
-  - first:
-      213: 6050155635186072011
-    second: Mask_HCruiser_Part_2
-  - first:
-      213: 3872581591661879906
-    second: Mask_HCruiser_Part_3
+      213: -6045377075552409143
+    second: Sample_E2
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -118,7 +79,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 32
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -160,13 +121,13 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 256
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
-    crunchedCompression: 0
+    crunchedCompression: 1
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
@@ -175,13 +136,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fleet_Scout
+      name: Sample_A0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 224
-        width: 32
-        height: 32
+        x: 1425
+        y: 847
+        width: 68
+        height: 69
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -189,125 +150,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 44145e580eafea070800000000000000
-      internalID: 8119703020421595460
+      spriteID: 60ad67356d7b29fe0800000000000000
+      internalID: -1183681620893836794
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Fleet_HGunBoat
+      name: Sample_B0
       rect:
         serializedVersion: 2
-        x: 32
-        y: 224
-        width: 64
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: dbee0ee987777c450800000000000000
-      internalID: 6108982779496689341
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Fleet_HCruiser
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 192
-        width: 96
-        height: 32
-      alignment: 9
-      pivot: {x: 0.16666667, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 6b059b0a152c06440800000000000000
-      internalID: 4927151648187961526
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Fleet_VGunBoat
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 192
-        width: 32
-        height: 64
-      alignment: 9
-      pivot: {x: 0.5, y: 0.75}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: fc3a8721a6b3272c0800000000000000
-      internalID: -4435417356244048945
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Fleet_VCruiser
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 96
-        width: 32
-        height: 96
-      alignment: 9
-      pivot: {x: 0.5, y: 0.8333333}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: c7a585929f9b41b70800000000000000
-      internalID: 8868918045991000700
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Fleet_Admiral
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 96
-        width: 95
-        height: 97
-      alignment: 9
-      pivot: {x: 0.16666667, y: 0.8333333}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 2baf0d8c7dc347c80800000000000000
-      internalID: -8325962913616430414
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Grid
-      rect:
-        serializedVersion: 2
-        x: 128
-        y: 224
-        width: 32
-        height: 32
+        x: 1562
+        y: 846
+        width: 67
+        height: 138
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -315,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 442225582c9e2c570800000000000000
-      internalID: 8485601669589115460
+      spriteID: 15fbe2e3ad3e269f0800000000000000
+      internalID: -476568084062224559
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Marker_Miss
+      name: Sample_C0
       rect:
         serializedVersion: 2
-        x: 192
-        y: 224
-        width: 32
-        height: 32
+        x: 1764
+        y: 779
+        width: 69
+        height: 203
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -336,20 +192,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b1b33c454f9df1180800000000000000
-      internalID: -9142349075121489125
+      spriteID: 75f83d00224742b20800000000000000
+      internalID: 3108737332184059735
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Marker_Hit
+      name: Sample_C1
       rect:
         serializedVersion: 2
-        x: 224
-        y: 224
-        width: 32
-        height: 32
+        x: 1698
+        y: 574
+        width: 135
+        height: 135
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -357,20 +213,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: db869567c6245f290800000000000000
-      internalID: -7857300941268490051
+      spriteID: eacf292a579e03f00800000000000000
+      internalID: 1094631400899017902
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Cursor
+      name: Sample_D0
       rect:
         serializedVersion: 2
-        x: 160
-        y: 224
-        width: 32
-        height: 32
+        x: 1357
+        y: 235
+        width: 68
+        height: 272
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -378,20 +234,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4e2af2723b953a6d0800000000000000
-      internalID: -2980439902397685020
+      spriteID: 73e8d5c08d34b8930800000000000000
+      internalID: 4146482477124128311
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Fill
+      name: Sample_D1
       rect:
         serializedVersion: 2
-        x: 128
-        y: 192
-        width: 32
-        height: 32
+        x: 1221
+        y: 30
+        width: 138
+        height: 205
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -399,8 +255,113 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cba2f53cfad437800800000000000000
-      internalID: 608915791917558460
+      spriteID: a7e667cbabeb3cb00800000000000000
+      internalID: 847730864110857850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sample_D2
+      rect:
+        serializedVersion: 2
+        x: 1494
+        y: 301
+        width: 136
+        height: 206
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1194d941c2829960800000000000000
+      internalID: 7607286487261155614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sample_D3
+      rect:
+        serializedVersion: 2
+        x: 1493
+        y: 97
+        width: 137
+        height: 138
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21b294fda67feecd0800000000000000
+      internalID: -2526810302523561198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sample_E0
+      rect:
+        serializedVersion: 2
+        x: 1697
+        y: 166
+        width: 70
+        height: 340
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbfb195d47deb6380800000000000000
+      internalID: -8976820346177863745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sample_E1
+      rect:
+        serializedVersion: 2
+        x: 1834
+        y: 301
+        width: 205
+        height: 205
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b5bbba5b13e5e610800000000000000
+      internalID: 1649974545127028144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sample_E2
+      rect:
+        serializedVersion: 2
+        x: 1832
+        y: 31
+        width: 139
+        height: 205
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c9a86e54918a1ca0800000000000000
+      internalID: -6045377075552409143
       vertices: []
       indices: 
       edges: []

@@ -25,8 +25,16 @@ namespace BattleshipGame.Tiling
         {
             foreach (var position in tilemap.cellBounds.allPositionsWithin)
             {
+                
                 var sprite = tilemap.GetSprite(position);
-                if (!sprite) continue;
+                if (!sprite)
+                {
+                    Debug.Log("No sprite at " + position);
+                    continue;
+                }
+                else{
+                    Debug.Log("Sprite at " + position + " is " + sprite.name);
+                }
                 int spriteId = sprite.GetInstanceID();
                 if (!_sprites.ContainsKey(spriteId))
                     _sprites.Add(spriteId, sprite);
