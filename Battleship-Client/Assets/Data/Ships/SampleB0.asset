@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33c9d6e4631bd8f46bf82eda3238d01c, type: 3}
-  m_Name: SampleA0
+  m_Name: SampleB0
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: afb16b45d5833844cab9adbfedcd06d0, type: 2}
-  rankOrder: 6
-  amount: 4
+  tile: {fileID: 11400000, guid: eb80a05e46750ae42bbd0cfea971fef0, type: 2}
+  rankOrder: 5
+  amount: 2
   partCoordinates:
   - {x: 0, y: 0}
