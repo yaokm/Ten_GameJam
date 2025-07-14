@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: SampleC0
   m_EditorClassIdentifier: 
   tile: {fileID: 11400000, guid: e13ee350700f8264b810ecd1d092cf3c, type: 2}
-  rankOrder: 4
-  amount: 0
+  rankOrder: 3
+  amount: 1
   partCoordinates:
   - {x: 0, y: 0}
+  - {x: 0, y: -1}
+  - {x: 0, y: -2}

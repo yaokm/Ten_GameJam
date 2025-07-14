@@ -33,6 +33,7 @@ namespace BattleshipGame.Tiling
         [SerializeField] private Tile missedMarker;
         [SerializeField] private Tile markedTargetMarker;
         [SerializeField] private Tile shotTargetMarker;
+        [SerializeField] private Tile shotFleetMarker;
         [Space] 
         // @formatter:on
         private readonly WaitForSecondsRealtime _flashGridInterval = new WaitForSecondsRealtime(0.3f);
@@ -154,6 +155,9 @@ namespace BattleshipGame.Tiling
                     break;
                 case Marker.ShotTarget:
                     markerTile = shotTargetMarker;
+                    break;
+                case Marker.ShotFleet:
+                    markerTile = shotFleetMarker;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(marker), marker, null);

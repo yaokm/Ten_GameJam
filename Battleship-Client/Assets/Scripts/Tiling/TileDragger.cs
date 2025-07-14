@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using BattleshipGame.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,7 +8,7 @@ using UnityEngine.Tilemaps;
 namespace BattleshipGame.Tiling
 {
     [RequireComponent(typeof(Grid), typeof(BoxCollider2D))]
-    public class TileDragger : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class TileDragger : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler // 新增接口
     {
         [SerializeField] private GameObject dragShipPrefab;
         [SerializeField] private Camera sceneCamera;
@@ -34,12 +35,20 @@ namespace BattleshipGame.Tiling
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            Debug.Log("OnBeginDrag");
             _isGrabbedFromTarget = eventData.hovered.Contains(targetMap.gameObject);
             _grabCell = GridUtils.ScreenToCell(eventData.position, sceneCamera, _grid, rules.areaSize);
             _sprite = _selfGridSpriteMapper.GetSpriteAt(ref _grabCell);
+
             var grabPoint = transform.position + _grabCell + new Vector3(0.5f, 0.5f, 0);
             _grabOffset = grabPoint - GetWorldPoint(eventData.position);
-            if (!_sprite) return;
+            if (!_sprite)
+            {
+                Debug.Log("No sprite");
+                return;
+            }else{
+                Debug.Log(_sprite.name);
+            }
             _grabbedShip = Instantiate(dragShipPrefab, _grabCell, Quaternion.identity);
             _grabbedShip.GetComponent<SpriteRenderer>().sprite = _sprite;
             if (removeFromSource) sourceTileMap.SetTile(_grabCell, null);
@@ -96,6 +105,11 @@ namespace BattleshipGame.Tiling
 
         private bool SpriteRepresentsShip(out Ship spriteShip)
         {
+            if(_sprite == null) {
+                Debug.Log("No Sprite");
+                spriteShip = null;
+                return false;
+            }
             foreach (var ship in rules.ships.Where(ship => ship.tile.sprite.Equals(_sprite)))
             {
                 spriteShip = ship;
@@ -110,6 +124,107 @@ namespace BattleshipGame.Tiling
         {
             var worldPoint = sceneCamera.ScreenToWorldPoint(position);
             return new Vector3(worldPoint.x, worldPoint.y, 0);
+        }
+
+        //新增：实现IPointerClickHandler接口，处理点击事件
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            Debug.Log("OnPointerClick");
+            // 关键修改1：若当前正在拖拽（_grabbedShip存在），跳过点击逻辑
+            if (_grabbedShip != null)
+            {
+                Debug.Log("Skipping click: Dragging in progress");
+                return;
+            }
+
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                Debug.Log("Not Left Click");
+                return;
+            }
+
+            // 关键修改2：使用局部变量存储点击状态，不覆盖类共享变量
+            var clickCell = GridUtils.ScreenToCell(eventData.position, sceneCamera, _grid, rules.areaSize);
+            var anchorCell = clickCell; 
+            Sprite clickedSprite = _selfGridSpriteMapper.GetSpriteAt(ref anchorCell); // 局部变量
+            if (clickedSprite == null)
+            {
+                Debug.Log("No Sprite at " + clickCell);
+                return;
+            }
+
+            if (!SpriteRepresentsShip(out var ship, clickedSprite)) // 传递局部Sprite
+            {
+                Debug.Log("No Ship associated with the sprite");
+                return;
+            }
+
+            RotateShip(ship, anchorCell); // 传递局部锚点
+        }
+
+        // 关键修改3：重构SpriteRepresentsShip，支持传入特定Sprite
+        private bool SpriteRepresentsShip(out Ship spriteShip, Sprite targetSprite)
+        {
+            if (targetSprite == null)
+            {
+                Debug.Log("No Sprite");
+                spriteShip = null;
+                return false;
+            }
+            foreach (var ship in rules.ships.Where(ship => ship.tile.sprite.Equals(targetSprite)))
+            {
+                spriteShip = ship;
+                return true;
+            }
+
+            spriteShip = null;
+            return false;
+        }
+
+        private void RotateShip(Ship ship, Vector3Int anchorCell)
+        {
+            // 记录原方向，用于回退
+            var originalDirection = ship.CurrentDirection;
+            
+            // 执行逆时针旋转
+            ship.RotateCounterclockwise();
+            
+            // 计算旋转后的占据单元格
+            var newCells = ship.GetOccupiedCells(anchorCell);
+            
+            // 校验是否合法（不越界、不重叠）
+            if (true==false
+                //!IsRotationValid(ship, newCells)
+            )
+            {
+                Debug.Log("Invalid rotation.");
+                ship.RotateCounterclockwise(); // 非法则回退方向
+                return;
+            }
+
+            // 更新实际 Tilemap 中的棋子显示（传递锚点位置）
+            UpdateShipSprite(ship, anchorCell); // 新增：传递锚点位置
+            
+            // 更新地图记录（保持原有逻辑）
+            _selfGridSpriteMapper.ClearSpritePositions();
+            _selfGridSpriteMapper.CacheSpritePositions();
+        }
+
+        // 关键修改：调整 UpdateShipSprite，作用于 Tilemap 中的实际棋子
+        private void UpdateShipSprite(Ship ship, Vector3Int anchorCell)
+        {
+            // 1. 获取当前棋子在 Tilemap 中的变换矩阵（用于旋转）
+            var tileTransform = sourceTileMap.GetTransformMatrix(anchorCell);
+            
+            // 2. 计算新的旋转角度（根据当前方向）
+            float rotationAngle = (int)ship.CurrentDirection * 90f;
+            tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));
+            
+            // 3. 更新 Tilemap 中该位置的瓷砖变换
+            sourceTileMap.SetTransformMatrix(anchorCell, tileTransform);
+            
+            // 4. 可选：若需要更新精灵（如不同方向使用不同 Sprite），可在此处设置
+            // sourceTileMap.SetSprite(anchorCell, ship.tile.sprite); // 根据实际需求调整
         }
     }
 }

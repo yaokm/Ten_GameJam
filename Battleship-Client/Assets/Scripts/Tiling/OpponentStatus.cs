@@ -7,7 +7,7 @@ namespace BattleshipGame.Tiling
 {
     public class OpponentStatus : MonoBehaviour
     {
-        private const int NotShot = -1;
+        public const int NotShot = -1;
         [SerializeField] private GameObject maskPrefab;
         [SerializeField] private Rules rules;
         private readonly List<(int ShotTurn, Vector3Int Coordinate)> _shipParts = new List<(int, Vector3Int)>();

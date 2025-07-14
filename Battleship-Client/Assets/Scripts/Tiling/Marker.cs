@@ -5,6 +5,8 @@
         Hit,
         Missed,
         MarkedTarget,
-        ShotTarget
+        ShotTarget,
+        ShotFleet,
+
     }
 }

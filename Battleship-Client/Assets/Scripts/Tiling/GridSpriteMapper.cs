@@ -20,7 +20,6 @@ namespace BattleshipGame.Tiling
         {
             CacheSpritePositions();
         }
-
         public void CacheSpritePositions()
         {
             foreach (var position in tilemap.cellBounds.allPositionsWithin)
@@ -101,10 +100,11 @@ namespace BattleshipGame.Tiling
                     if (!cell.Equals(position)) continue;
                     _sprites.TryGetValue(spriteId, out var result);
                     position = spritePosition;
+                    
+                    Debug.Log("GetSpriteAt " + position+" "+result.name);
                     return result;
                 }
             }
-
             return null;
         }
     }

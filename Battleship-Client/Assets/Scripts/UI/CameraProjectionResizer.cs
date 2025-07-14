@@ -8,12 +8,12 @@ namespace BattleshipGame.UI
 
         private void Awake()
         {
-            float screenRatio = (float) Screen.width / Screen.height;
-            if (screenRatio < ReferenceRatio)
-            {
-                float multiplier = ReferenceRatio / screenRatio;
-                GetComponent<Camera>().orthographicSize *= multiplier;
-            }
+            //float screenRatio = (float) Screen.width / Screen.height;
+            //if (screenRatio < ReferenceRatio)
+            //{
+            //    float multiplier = ReferenceRatio / screenRatio;
+            //    GetComponent<Camera>().orthographicSize *= multiplier;
+            //}
         }
     }
 }
