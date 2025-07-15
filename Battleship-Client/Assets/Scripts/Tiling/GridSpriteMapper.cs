@@ -26,17 +26,27 @@ namespace BattleshipGame.Tiling
 
         private void Awake()
         {
-            //CacheSpritePositions();
+            Debug.Log("Grid_Awake");
+            CacheSpritePositions();
         }
         private void Start(){
             Debug.Log("Grid_Start");
-            CacheSpritePositions();
+            //CacheSpritePositions();
         }
         public void CacheSpritePositions()
         {
             foreach (var position in tilemap.cellBounds.allPositionsWithin)
             {                
                 var sprite = tilemap.GetSprite(position);
+                var tile = tilemap.GetTile(position);
+                var ThisShip=new Ship();
+                foreach (var ship in rules.ships){
+                    if (ship.tile.Equals(tile)){
+                        ThisShip = ship;
+                        break;
+                    }
+                }
+
                 if (!sprite)
                 {
                     //Debug.Log("No sprite at " + position);
@@ -47,15 +57,29 @@ namespace BattleshipGame.Tiling
                 }
                 int spriteId = sprite.GetInstanceID();
                 if (!_sprites.ContainsKey(spriteId))
-                    _sprites.Add(spriteId, sprite);
+                {
+                    foreach(var Tile in ThisShip.tiles){
+                        Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
+                        _sprites.Add(Tile.sprite.GetInstanceID(), Tile.sprite);
+                    }
+                    //_sprites.Add(spriteId, sprite);
+                }
                 else
                     _sprites[spriteId] = sprite;
 
                 if (!_spritePositionsOnTileMap.ContainsKey(spriteId))
-                    _spritePositionsOnTileMap.Add(spriteId, new List<Vector3Int> {position});
+                {
+                    foreach(var Tile in ThisShip.tiles){
+                        Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
+                        _spritePositionsOnTileMap.Add(Tile.sprite.GetInstanceID(), new List<Vector3Int> { position });
+                    }
+                    //Debug.Log("No sprite positions on tile map for " + spriteId);
+                    //_spritePositionsOnTileMap.Add(spriteId, new List<Vector3Int> { position });
+                }
                 else
                     _spritePositionsOnTileMap[spriteId].Add(position);
             }
+            Debug.Log("_spritePositionsOnTileMap.size=="+_spritePositionsOnTileMap.Count);
         }
 
         public void ClearSpritePositions()
@@ -92,6 +116,11 @@ namespace BattleshipGame.Tiling
 
         public Dictionary<int, List<Vector3Int>> GetSpritePositions()
         {
+            Debug.Log("GetSpritePositions.size=="+_spritePositionsOnTileMap.Count);
+            foreach (var kvp in _spritePositionsOnTileMap)
+            {
+                Debug.Log($"Sprite ID: {kvp.Key}"+"Positions: " + string.Join(", ", kvp.Value.Select(pos => $"({pos.x}, {pos.y}, {pos.z})")));
+            }
             return new Dictionary<int, List<Vector3Int>>(_spritePositionsOnTileMap);
         }
 

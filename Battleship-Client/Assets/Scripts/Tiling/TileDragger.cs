@@ -187,11 +187,11 @@ namespace BattleshipGame.Tiling
             // 记录原方向，用于回退
             var originalDirection = ship.CurrentDirection;
             
-            // 执行逆时针旋转，此处修改了direction这个ship成员变量而已
-            ship.RotateCounterclockwise();
+            // // 执行逆时针旋转，此处修改了direction这个ship成员变量而已
+             ship.RotateCounterclockwise();
             
-            // 计算旋转后的占据单元格（此处修改的是part coordinates）
-            var newCells = ship.GetOccupiedCells(anchorCell);
+            // // 计算旋转后的占据单元格（此处修改的是part coordinates）
+             var newCells = ship.GetOccupiedCells(anchorCell);
             
             // 校验是否合法（不越界、不重叠，先不管这个）
             if (true==false
@@ -207,8 +207,8 @@ namespace BattleshipGame.Tiling
             UpdateShipSprite(ship, anchorCell); // 新增：传递锚点位置
             
             // 更新地图记录（保持原有逻辑）
-            _selfGridSpriteMapper.ClearSpritePositions();
-            _selfGridSpriteMapper.CacheSpritePositions();
+             _selfGridSpriteMapper.ClearSpritePositions();
+             _selfGridSpriteMapper.CacheSpritePositions();
         }
 
         // 关键修改：调整 UpdateShipSprite，作用于 Tilemap 中的实际棋子
@@ -217,12 +217,12 @@ namespace BattleshipGame.Tiling
             // 1. 获取当前棋子在 Tilemap 中的变换矩阵（用于旋转）
             var tileTransform = sourceTileMap.GetTransformMatrix(anchorCell);
             
-            // 2. 计算新的旋转角度（根据当前方向）
+            // // 2. 计算新的旋转角度（根据当前方向）
             float rotationAngle = (int)ship.CurrentDirection * 90f;
             tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));
             
-            // 3. 更新 Tilemap 中该位置的瓷砖变换
-            sourceTileMap.SetTransformMatrix(anchorCell, tileTransform);
+            // // 3. 更新 Tilemap 中该位置的瓷砖变换
+             sourceTileMap.SetTransformMatrix(anchorCell, tileTransform);
 
             // 4. 可选：若需要更新精灵（如不同方向使用不同 Sprite），可在此处设置
             var oldtile =ScriptableObject.CreateInstance<Tile>();

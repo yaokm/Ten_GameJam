@@ -15,14 +15,19 @@ namespace BattleshipGame.Tiling
         private void Start()
         {
             var spritePositions = GetComponent<GridSpriteMapper>().GetSpritePositions();
+            foreach (var sprite in spritePositions.Keys)
+                Debug.Log("Sprite: " + sprite+"spritePosition"+spritePositions[sprite][0]);
             foreach (var ship in rules.ships)
-                for (var i = 0; i < ship.amount; i++)
+                for (var i = 0; i < ship.amount; i++){
+                    Debug.Log("Ship: " + ship.tile.sprite.GetInstanceID() + " " + i);
                     foreach (var partCoordinate in ship.partCoordinates.Select(coordinate =>
                         spritePositions[ship.tile.sprite.GetInstanceID()][i] + (Vector3Int)coordinate))
                     {
                         Debug.Log("Part coordinate: " + partCoordinate);
                         _shipParts.Add((NotShot, partCoordinate));
                     }
+                }
+                    
 
             // 新增：初始化完成后打印所有敌方船只位置
             PrintAllEnemyShipPositions();

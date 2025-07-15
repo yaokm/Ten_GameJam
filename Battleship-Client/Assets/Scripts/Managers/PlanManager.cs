@@ -115,6 +115,10 @@ namespace BattleshipGame.Managers
                 continueButton.SetInteractable(false);
                 randomButton.SetInteractable(false);
                 clearButton.SetInteractable(false);
+                Debug.Log("cells.size:"+_cells.Length);
+                foreach(var cell in _cells){
+                    Debug.Log("cell:"+cell);
+                }
                 _client.SendPlacement(_cells);
                 statusData.State = WaitingOpponentPlacement;
             }

@@ -5572,9 +5572,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2649060168375701185, guid: 88ddd787738efa54ca51cccc955a634a,
         type: 3}
+      propertyPath: targetMap
+      value: 
+      objectReference: {fileID: 167099665}
+    - target: {fileID: 2649060168375701185, guid: 88ddd787738efa54ca51cccc955a634a,
+        type: 3}
       propertyPath: sceneCamera
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 415742562}
     - target: {fileID: 2661583440753739579, guid: 88ddd787738efa54ca51cccc955a634a,
         type: 3}
       propertyPath: m_Name

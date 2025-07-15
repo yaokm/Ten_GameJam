@@ -51,7 +51,9 @@ namespace BattleshipGame.Tiling
 
         public override void SetShip(Ship ship, Vector3Int coordinate)
         {
+
             fleetLayer.SetTile(coordinate, ship.tile);
+            
         }
 
         public override bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn)
