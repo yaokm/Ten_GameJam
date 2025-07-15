@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33c9d6e4631bd8f46bf82eda3238d01c, type: 3}
   m_Name: SampleA0
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: afb16b45d5833844cab9adbfedcd06d0, type: 2}
+  tiles:
+  - {fileID: 11400000, guid: ad856ddec089d0346b1fa010201a8b02, type: 2}
+  - {fileID: 11400000, guid: b4b4258e4fbd81745a6822c207ffbd9a, type: 2}
+  - {fileID: 11400000, guid: 7f2a6ef10ff124b48b827db095d517c3, type: 2}
+  - {fileID: 11400000, guid: 490787c3fc4a0e142b1dca0ecea92b20, type: 2}
   rankOrder: 5
   amount: 1
-  partCoordinates:
+  PartCoordinates:
   - {x: 0, y: 0}
-  _currentDirection: 2
+  _currentDirection: 0

@@ -144,6 +144,7 @@ namespace BattleshipGame.Tiling
             }
 
             // 关键修改2：使用局部变量存储点击状态，不覆盖类共享变量
+            //获得点击单位的网格坐标
             var clickCell = GridUtils.ScreenToCell(eventData.position, sceneCamera, _grid, rules.areaSize);
             var anchorCell = clickCell; 
             Sprite clickedSprite = _selfGridSpriteMapper.GetSpriteAt(ref anchorCell); // 局部变量
@@ -186,13 +187,13 @@ namespace BattleshipGame.Tiling
             // 记录原方向，用于回退
             var originalDirection = ship.CurrentDirection;
             
-            // 执行逆时针旋转
+            // 执行逆时针旋转，此处修改了direction这个ship成员变量而已
             ship.RotateCounterclockwise();
             
-            // 计算旋转后的占据单元格
+            // 计算旋转后的占据单元格（此处修改的是part coordinates）
             var newCells = ship.GetOccupiedCells(anchorCell);
             
-            // 校验是否合法（不越界、不重叠）
+            // 校验是否合法（不越界、不重叠，先不管这个）
             if (true==false
                 //!IsRotationValid(ship, newCells)
             )
@@ -222,9 +223,16 @@ namespace BattleshipGame.Tiling
             
             // 3. 更新 Tilemap 中该位置的瓷砖变换
             sourceTileMap.SetTransformMatrix(anchorCell, tileTransform);
-            
+
             // 4. 可选：若需要更新精灵（如不同方向使用不同 Sprite），可在此处设置
-            // sourceTileMap.SetSprite(anchorCell, ship.tile.sprite); // 根据实际需求调整
+            var oldtile =ScriptableObject.CreateInstance<Tile>();
+            for(int i = 0; i < ship.tiles.Count; i++){
+                if(ship.tiles[i] == ship.tile){
+                    oldtile = ship.tiles[i==0?3:i-1];
+                    break;
+                }
+            }
+            sourceTileMap.SwapTile(oldtile, ship.tile); // 根据实际需求调整
         }
     }
 }

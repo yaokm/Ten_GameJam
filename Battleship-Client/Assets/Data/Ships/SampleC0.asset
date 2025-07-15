@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33c9d6e4631bd8f46bf82eda3238d01c, type: 3}
   m_Name: SampleC0
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: e13ee350700f8264b810ecd1d092cf3c, type: 2}
+  tiles:
+  - {fileID: 11400000, guid: 907f38ada237b6a40bac5ac9c3f94fcb, type: 2}
+  - {fileID: 11400000, guid: 14aec8e7388c09f46af3efef6d8b4b2a, type: 2}
+  - {fileID: 11400000, guid: 5fa284d0be10b1b4c87369a17a101ee6, type: 2}
+  - {fileID: 11400000, guid: f061e8f3f0f93de4b817d945c823f91c, type: 2}
   rankOrder: 3
   amount: 1
-  partCoordinates:
+  PartCoordinates:
   - {x: 0, y: 0}
   - {x: 0, y: -1}
   - {x: 0, y: -2}
+  _currentDirection: 1

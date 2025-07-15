@@ -8,7 +8,7 @@ namespace BattleshipGame.AI
 {
     public class LocalRoom
     {
-        private const int StartingFleetHealth = 19;
+        private const int StartingFleetHealth = 25;
         private const int GridSize = 10;
         private const int ShotsSize = GridSize * GridSize;
         public readonly State State;
@@ -95,26 +95,29 @@ namespace BattleshipGame.AI
 
                     switch (opponentPlacements[targetIndex])
                     {
-                        case 0: // Admiral
-                            UpdateShips(opponentShips, 0, 5, State.currentTurn);
+                        case 0: // F0
+                            UpdateShips(opponentShips, 0, 6, State.currentTurn);
                             break;
-                        case 1: // Vertical Cruiser
-                            UpdateShips(opponentShips, 5, 8, State.currentTurn);
+                        case 1: // E0
+                            UpdateShips(opponentShips, 6,11, State.currentTurn);
                             break;
-                        case 2: // Horizontal Cruiser
-                            UpdateShips(opponentShips, 8, 11, State.currentTurn);
+                        case 2: // D0
+                            UpdateShips(opponentShips, 11, 15, State.currentTurn);
                             break;
-                        case 3: // VerticalGunBoat
-                            UpdateShips(opponentShips, 11, 13, State.currentTurn);
+                        case 3: // C0
+                            UpdateShips(opponentShips, 15, 18, State.currentTurn);
                             break;
-                        case 4: // HorizontalGunBoat
-                            UpdateShips(opponentShips, 13, 15, State.currentTurn);
+                        case 4: // B0
+                            UpdateShips(opponentShips, 18, 20, State.currentTurn);
                             break;
-                        case 5: // Scout
-                        case 6: // Scout
+                        case 5: // A0
+                            UpdateShips(opponentShips, 20, 21, State.currentTurn);
+                            break;
+                        case 6: // D1
+                            UpdateShips(opponentShips, 21, 25, State.currentTurn);
+                            break;
                         case 7: // Scout
                         case 8: // Scout
-                            UpdateShips(opponentShips, 15, 19, State.currentTurn);
                             break;
                     }
                 }

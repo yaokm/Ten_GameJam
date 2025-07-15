@@ -11,6 +11,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using static BattleshipGame.Core.StatusData.Status;
 using static BattleshipGame.Core.GridUtils;
+using UnityEngine.Tilemaps;
 
 namespace BattleshipGame.Managers
 {
@@ -42,6 +43,7 @@ namespace BattleshipGame.Managers
 
         private void Awake()
         {
+            Debug.Log("BattleManager Awake");
             if (GameManager.TryGetInstance(out var gameManager))
             {
                 _client = gameManager.Client;
@@ -55,13 +57,21 @@ namespace BattleshipGame.Managers
 
         private void Start()
         {
+            Debug.Log("BattleManager Start");
             opponentMap.SetClickListener(this);
             opponentTurnHighlighter.SetClickListener(this);
             opponentStatusMapTurnHighlighter.SetClickListener(this);
 
             foreach (var placement in placementMap.GetPlacements())
+            {
                 userMap.SetShip(placement.ship, placement.Coordinate);
-
+                // var tilemap = userMap.GetComponent<Tilemap>(); // 假设UserMap有Tilemap组件
+                // if (tilemap == null) return;
+                // // 根据当前方向计算旋转角度
+                // float rotationAngle = (int)placement.ship.CurrentDirection * 90f;
+                // var tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));
+                // tilemap.SetTransformMatrix(placement.Coordinate, tileTransform);
+            }
             statusData.State = BeginBattle;
             leaveButton.AddListener(LeaveGame);
             fireButton.AddListener(FireShots);
@@ -74,6 +84,13 @@ namespace BattleshipGame.Managers
                 if (key != _client.GetSessionId())
                 {
                     _enemy = _state.players[key].sessionId;
+
+                    var Eships = _state.players[_enemy].ships.Items;
+                    foreach (var ship in Eships)
+                    {
+                        Debug.Log("eship:"+ship);
+                    }
+
                     break;
                 }
 
@@ -264,25 +281,25 @@ namespace BattleshipGame.Managers
         {
             if (turn <= 0) return;
             
-            // 将目标索引转换为网格坐标（用于查询敌方船只状态）
-            var coordinate = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
+            // // 将目标索引转换为网格坐标（用于查询敌方船只状态）
+            // var coordinate = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
             
-            // 通过OpponentStatus查询该坐标是否是敌方船只的部件（未被击中时返回-1）
-            int shotTurn = opponentStatus.GetShotTurn(coordinate);
+            // // 通过OpponentStatus查询该坐标是否是敌方船只的部件（未被击中时返回-1）
+            // int shotTurn = opponentStatus.GetShotTurn(coordinate);
             
-            // 根据是否命中选择标记类型
-            Marker marker = shotTurn != OpponentStatus.NotShot 
-                ? Marker.ShotFleet    // 命中船只部件时使用shotFleetMarker
-                : Marker.ShotTarget;  // 未命中时使用shotTargetMarker
-        
+            // // 根据是否命中选择标记类型
+            // Marker marker = shotTurn != OpponentStatus.NotShot 
+            //     ? Marker.ShotFleet    // 命中船只部件时使用shotFleetMarker
+            //     : Marker.ShotTarget;  // 未命中时使用shotTargetMarker
+            // Debug.Log($"turn: {turn}, cellIndex: {cellIndex}, coordinate: {coordinate}, shotTurn: {shotTurn}");
             // 在对手地图设置标记
-            opponentMap.SetMarker(cellIndex, marker);
+            SetMarker(cellIndex, turn, true);
             
-            // 记录回合与射击位置（用于后续回合高亮）
-            if (_shots.ContainsKey(turn))
-                _shots[turn].Add(cellIndex);
-            else
-                _shots.Add(turn, new List<int> { cellIndex });
+            // // 记录回合与射击位置（用于后续回合高亮）
+            // if (_shots.ContainsKey(turn))
+            //     _shots[turn].Add(cellIndex);
+            // else
+            //     _shots.Add(turn, new List<int> { cellIndex });
         }
 
         private void OnEnemyShotsChanged(int turn, int cellIndex)
