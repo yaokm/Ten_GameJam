@@ -83,5 +83,9 @@ namespace BattleshipGame.AI
         {
             enabled = false;
         }
+        public async void GetOpponentShipData(Action<int[], int[], int[]> callback)
+        { 
+            
+        }
     }
 }

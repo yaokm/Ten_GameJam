@@ -116,14 +116,16 @@ namespace BattleshipGame.Tiling
         public override void SetShip(Ship ship, Vector3Int coordinate)
         {
             
-            fleetLayer.SetTile(coordinate, ship.tile);
+            
             var dir=(int)ship.CurrentDirection;
+            var tile = ship.tile;
             if (screenType == ScreenType.Opponent)
             {
                 dir =(int) ship._enemyDirection;
-                return;
+                tile = ship.Tiles[dir];
+
             }
-            
+            fleetLayer.SetTile(coordinate, tile);
             // 1. 获取当前棋子在 Tilemap 中的变换矩阵（用于旋转）
             var tileTransform = fleetLayer.GetTransformMatrix(coordinate);
             

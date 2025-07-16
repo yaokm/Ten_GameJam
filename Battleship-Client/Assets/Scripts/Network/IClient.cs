@@ -13,5 +13,6 @@ namespace BattleshipGame.Network
         void SendRematch(bool isRematching);
 
         void LeaveRoom();
+        public void GetOpponentShipData(Action<int[], int[], int[]> callback);
     }
 }

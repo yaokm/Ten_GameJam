@@ -166,5 +166,17 @@ namespace BattleshipGame.Network
         {
             RoomsChanged?.Invoke(_rooms);
         }
+
+        public async void GetOpponentShipData(Action<int[], int[], int[]> callback)
+        {
+            _room.Send("getOpponentShipData");
+            _room.OnMessage<object[]>("opponentShipData", message => {
+                callback?.Invoke(
+                    (int[])message[0], // directions
+                    (int[])message[1], // coordinates 
+                    (int[])message[2]  // rankOrders
+                );
+            });
+        }
     }
 }

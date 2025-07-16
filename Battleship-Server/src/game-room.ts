@@ -26,7 +26,7 @@ export class GameRoom extends Room<State> {
         this.onMessage("place", (client, message) => this.playerPlace(client, message));
         this.onMessage("turn", (client, message) => this.playerTurn(client, message));
         this.onMessage("rematch", (client, message) => this.rematch(client, message));
-        this.onMessage("direction",(client,message)=>this.playerDirection(client,message));
+        //this.onMessage("direction",(client,message)=>this.playerDirection(client,message));
     }
 
     onJoin(client: Client) {
@@ -68,7 +68,7 @@ export class GameRoom extends Room<State> {
     playerPlace(client: Client, message: any) {
         let player: Player = this.state.players[client.sessionId];
         this.placements[player.sessionId] = message;
-        this.eDirections[player.sessionId] = message;
+        //this.eDirections[player.sessionId] = message;
         this.playersPlaced++;
 
         if (this.playersPlaced == 2) {

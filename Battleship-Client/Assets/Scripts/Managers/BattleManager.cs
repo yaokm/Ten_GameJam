@@ -65,13 +65,9 @@ namespace BattleshipGame.Managers
             foreach (var placement in placementMap.GetPlacements())
             {
                 userMap.SetShip(placement.ship, placement.Coordinate);
-                // var tilemap = userMap.GetComponent<Tilemap>(); // 假设UserMap有Tilemap组件
-                // if (tilemap == null) return;
-                // // 根据当前方向计算旋转角度
-                // float rotationAngle = (int)placement.ship.CurrentDirection * 90f;
-                // var tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));
-                // tilemap.SetTransformMatrix(placement.Coordinate, tileTransform);
             }
+
+            //opponentMap.SetShip(rules.ships[0], new Vector3Int(5, 5, 0));
             statusData.State = BeginBattle;
             leaveButton.AddListener(LeaveGame);
             fireButton.AddListener(FireShots);
@@ -336,5 +332,9 @@ namespace BattleshipGame.Managers
         {
             opponentStatus.DisplayShotEnemyShipParts(part, turn);
         }
+        
+         
+        
+        
     }
 }
