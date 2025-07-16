@@ -20,7 +20,7 @@ namespace BattleshipGame.Tiling
             foreach (var ship in rules.ships)
                 for (var i = 0; i < ship.amount; i++){
                     Debug.Log("Ship: " + ship.tile.sprite.GetInstanceID() + " " + i);
-                    foreach (var partCoordinate in ship.partCoordinates.Select(coordinate =>
+                    foreach (var partCoordinate in ship.PartCoordinates.Select(coordinate =>
                         spritePositions[ship.tile.sprite.GetInstanceID()][i] + (Vector3Int)coordinate))
                     {
                         Debug.Log("Part coordinate: " + partCoordinate);
@@ -79,7 +79,7 @@ namespace BattleshipGame.Tiling
             return result;
         }
 
-
+        
         //changedShipPart: 0-25,shotTurn:击中回合
         public void DisplayShotEnemyShipParts(int changedShipPart, int shotTurn)
         {

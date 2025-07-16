@@ -63,12 +63,11 @@ namespace BattleshipGame.AI
             _room.Start();
         }
 
-        public void SendPlacement(int[] placement)
+        public void SendPlacement(int[] placement,int[] direction=null)
         {
             _room.Place(PlayerId, placement);
             _room.Place(EnemyId, _enemy.PlaceShipsRandomly());
         }
-
         public void SendTurn(int[] targetIndexes)
         {
             _room.Turn(PlayerId, targetIndexes);

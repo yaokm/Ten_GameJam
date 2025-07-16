@@ -53,6 +53,13 @@ namespace BattleshipGame.Tiling
         {
 
             fleetLayer.SetTile(coordinate, ship.tile);
+            // 1. 获取当前棋子在 Tilemap 中的变换矩阵（用于旋转）
+            var tileTransform = fleetLayer.GetTransformMatrix(coordinate);
+            // // 2. 计算新的旋转角度（根据当前方向）
+            float rotationAngle = (int)ship.CurrentDirection * 90f;
+            tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));            
+            // // 3. 更新 Tilemap 中该位置的瓷砖变换
+            fleetLayer.SetTransformMatrix(coordinate, tileTransform);
             
         }
 

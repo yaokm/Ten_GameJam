@@ -9,7 +9,9 @@ namespace BattleshipGame.Core
     [CreateAssetMenu(fileName = "New Ship", menuName = "Battleship/Ship", order = 0)]
     public class Ship : ScriptableObject
     {
-        public List<Tile> tiles=new List<Tile>();
+        [SerializeField]
+        private List<Tile> tiles=new List<Tile>();
+        public List<Tile> Tiles => tiles;
         //public Tile tile;
         public Tile tile{
             get{
@@ -36,6 +38,7 @@ namespace BattleshipGame.Core
 
         [Tooltip("Start with the sprite's pivot. First value must be (0, 0)")]
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
+        //初始化
         public List<Vector2Int> PartCoordinates = new List<Vector2Int>();
         /// <summary>
         /// 根据当前方向获取船只部件的坐标
@@ -66,8 +69,29 @@ namespace BattleshipGame.Core
                 PartCoordinates[0] = Vector2Int.zero;
         }
 
+        //我方船的方向
         [SerializeField] 
-        private Direction _currentDirection = Direction.Right; // 当前方向
+        public Direction _currentDirection = Direction.Right; // 当前方向
+
+        //敌方船的方向
+        public Direction _enemyDirection = Direction.Right;
+        public List<Vector2Int> EpartCoordinates
+        {
+            get
+            {
+                return PartCoordinates.Select(p =>
+                {
+                    return _enemyDirection switch
+                    {
+                        Direction.Right => new Vector2Int(p.x, p.y),       // 原始方向（右）
+                        Direction.Up => new Vector2Int(-p.y, p.x),         // 逆时针90°：(x,y)→(-y,x)（向上延伸）
+                        Direction.Left => new Vector2Int(-p.x, -p.y),      // 逆时针180°：(x,y)→(-x,-y)（向左延伸）
+                        Direction.Down => new Vector2Int(p.y, -p.x),       // 逆时针270°：(x,y)→(y,-x)（向下延伸）
+                        _ => new Vector2Int(p.x, p.y)
+                    };
+                }).ToList();
+            }
+        }
         private void OnEnable()
         {
             _currentDirection = Direction.Right;

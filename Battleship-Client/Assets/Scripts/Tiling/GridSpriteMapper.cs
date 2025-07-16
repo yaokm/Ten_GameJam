@@ -35,16 +35,25 @@ namespace BattleshipGame.Tiling
         }
         public void CacheSpritePositions()
         {
+            
             foreach (var position in tilemap.cellBounds.allPositionsWithin)
             {                
                 var sprite = tilemap.GetSprite(position);
                 var tile = tilemap.GetTile(position);
-                var ThisShip=new Ship();
+
+                if(tile!=null)
+                Debug.Log("Tile "+tile.name+" "+(tile as Tile).sprite.GetInstanceID());
+
+                var ThisShip=ScriptableObject.CreateInstance<Ship>();
                 foreach (var ship in rules.ships){
-                    if (ship.tile.Equals(tile)){
+                    foreach(var Tile in ship.Tiles){
+                    if (Tile.Equals(tile)){
                         ThisShip = ship;
+                        Debug.Log("thisShip "+ThisShip.name+" "+ThisShip.tile.name);
                         break;
+                        }
                     }
+
                 }
 
                 if (!sprite)
@@ -53,23 +62,28 @@ namespace BattleshipGame.Tiling
                     continue;
                 }
                 else{
-                    Debug.Log("Sprite at " + position + " is " + sprite.name);
+                    Debug.Log("Sprite at " + position + " is " + sprite.name+" "+sprite.GetInstanceID());
                 }
                 int spriteId = sprite.GetInstanceID();
                 if (!_sprites.ContainsKey(spriteId))
                 {
-                    foreach(var Tile in ThisShip.tiles){
+                    Debug.Log("ThisShip.tiles.size=="+ThisShip.Tiles.Count);
+                    foreach(var Tile in ThisShip.Tiles){
                         Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
                         _sprites.Add(Tile.sprite.GetInstanceID(), Tile.sprite);
                     }
                     //_sprites.Add(spriteId, sprite);
                 }
                 else
+                {
+                    Debug.Log("Sprite already exists with ID " + spriteId);
                     _sprites[spriteId] = sprite;
+                }
+                   
 
                 if (!_spritePositionsOnTileMap.ContainsKey(spriteId))
                 {
-                    foreach(var Tile in ThisShip.tiles){
+                    foreach(var Tile in ThisShip.Tiles){
                         Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
                         _spritePositionsOnTileMap.Add(Tile.sprite.GetInstanceID(), new List<Vector3Int> { position });
                     }

@@ -8,16 +8,24 @@ namespace BattleshipGame.AI
 {
     public class LocalRoom
     {
-        private const int StartingFleetHealth = 25;
-        private const int GridSize = 10;
-        private const int ShotsSize = GridSize * GridSize;
-        public readonly State State;
-        private Dictionary<string, int> _health;
-        private bool _isRematching;
-        private int _placementCompleteCounter;
-        private Dictionary<string, int[]> _placements;
-        private string _startingPlayerLastTurn;
-
+        // 游戏常量定义
+        private const int StartingFleetHealth = 25; // 初始舰队总生命值（所有船只部件总和）
+        private const int GridSize = 10;           // 棋盘网格尺寸（10x10）
+        private const int ShotsSize = GridSize * GridSize; // 总射击位置数量（100个）
+    
+        // 核心游戏状态（公开只读）
+        public readonly State State;                // 房间状态机，包含玩家、回合等核心数据
+    
+        // 玩家状态数据
+        private Dictionary<string, int> _health;    // 玩家ID到剩余生命值的映射
+        private Dictionary<string, int[]> _placements; // 玩家ID到舰队布局数组的映射
+        private Dictionary<string, int[]> _directions; // 玩家ID到舰队方向的映射
+        
+        // 回合控制相关
+        private string _startingPlayerLastTurn;     // 上一局的先手玩家ID（用于重新匹配时交换先手）
+        private bool _isRematching;                // 是否处于重新匹配状态
+        private int _placementCompleteCounter;     // 已完成舰队布置的玩家计数（达到2时开始战斗）
+    
         public LocalRoom(string playerId, string enemyId)
         {
             State = new State {players = new MapSchema<Player>(), phase = RoomPhase.Waiting, currentTurn = 1};
@@ -30,6 +38,9 @@ namespace BattleshipGame.AI
             {
                 {playerId, new int[ShotsSize]}, {enemyId, new int[ShotsSize]}
             };
+            _directions = new Dictionary<string, int[]>{
+                {playerId, new int[7]}, {enemyId, new int[7]}
+            };
             ResetPlayers();
         }
 
@@ -39,10 +50,11 @@ namespace BattleshipGame.AI
             State.TriggerAll();
         }
 
-        public void Place(string clientId, int[] placement)
+        public void Place(string clientId, int[] placement,int[] directions=null)
         {
             var player = State.players[clientId];
             _placements[player.sessionId] = placement;
+            _directions[player.sessionId] = directions;
             _placementCompleteCounter++;
             if (_placementCompleteCounter == 2)
             {
@@ -197,6 +209,7 @@ namespace BattleshipGame.AI
 
             _health = _health.ToDictionary(kvp => kvp.Key, kvp => StartingFleetHealth);
             _placements = _placements.ToDictionary(kvp => kvp.Key, kvp => new int[ShotsSize]);
+            _directions = _directions.ToDictionary(kvp => kvp.Key, kvp => new int[7]);
         }
     }
 }

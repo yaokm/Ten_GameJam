@@ -85,11 +85,11 @@ namespace BattleshipGame.Managers
                 {
                     _enemy = _state.players[key].sessionId;
 
-                    var Eships = _state.players[_enemy].ships.Items;
-                    foreach (var ship in Eships)
-                    {
-                        Debug.Log("eship:"+ship);
-                    }
+                    // var Eships = _state.players[_enemy].ships.Items;
+                    // foreach (var ship in Eships)
+                    // {
+                    //     Debug.Log("eship:"+ship);
+                    // }
 
                     break;
                 }

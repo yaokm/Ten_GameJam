@@ -27,16 +27,23 @@ namespace BattleshipGame.Network
             return _room?.SessionId;
         }
 
-        public void SendPlacement(int[] placement)
+        public void SendPlacement(int[] placement,int[] directions=null)
         {
             _room.Send(RoomMessage.Place, placement);
+            _room.Send(RoomMessage.Direction, directions);
         }
 
         public void SendTurn(int[] targetIndexes)
         {
             _room.Send(RoomMessage.Turn, targetIndexes);
         }
-
+        public void SendBasePositions(int[][] basePositions)
+        {
+            _room.Send(RoomMessage.BasePosition, basePositions);
+        }
+        public void SendDirection(int[] direction){
+            _room.Send(RoomMessage.Direction, direction);
+        }
         public void SendRematch(bool isRematching)
         {
             _room.Send(RoomMessage.Rematch, isRematching);

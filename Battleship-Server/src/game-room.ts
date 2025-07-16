@@ -8,12 +8,12 @@ export class GameRoom extends Room<State> {
     password: string;
     name: string;
     gridSize: number = 10;
-    startingFleetHealth: number = 19;
+    startingFleetHealth: number = 25;
     placements: any;
     playerHealth: any;
     playersPlaced: number = 0;
     playerCount: number = 0;
-
+    eDirections: any;//敌军方向
     onCreate(options) {
         console.log(options);
         if (options.password) {
@@ -26,6 +26,7 @@ export class GameRoom extends Room<State> {
         this.onMessage("place", (client, message) => this.playerPlace(client, message));
         this.onMessage("turn", (client, message) => this.playerTurn(client, message));
         this.onMessage("rematch", (client, message) => this.rematch(client, message));
+        this.onMessage("direction",(client,message)=>this.playerDirection(client,message));
     }
 
     onJoin(client: Client) {
@@ -67,6 +68,7 @@ export class GameRoom extends Room<State> {
     playerPlace(client: Client, message: any) {
         let player: Player = this.state.players[client.sessionId];
         this.placements[player.sessionId] = message;
+        this.eDirections[player.sessionId] = message;
         this.playersPlaced++;
 
         if (this.playersPlaced == 2) {
@@ -112,26 +114,29 @@ export class GameRoom extends Room<State> {
                 hit = true;
                 this.playerHealth[enemy.sessionId]--;
                 switch (targetedPlacement[targetIndex]) {
-                    case 0: // Admiral
-                        this.updateShips(targetShips, 0, 5, this.state.currentTurn);
+                    case 0: // F0
+                        this.updateShips(targetShips, 0, 6, this.state.currentTurn);
                         break;
-                    case 1: // VTrio
-                        this.updateShips(targetShips, 5, 8, this.state.currentTurn);
+                    case 1: // E0
+                        this.updateShips(targetShips, 6, 11, this.state.currentTurn);
                         break;
-                    case 2: // HTrio
-                        this.updateShips(targetShips, 8, 11, this.state.currentTurn);
+                    case 2: // D0
+                        this.updateShips(targetShips, 11, 15, this.state.currentTurn);
                         break;
-                    case 3: // VDuo
-                        this.updateShips(targetShips, 11, 13, this.state.currentTurn);
+                    case 3: // C0
+                        this.updateShips(targetShips, 15, 18, this.state.currentTurn);
                         break;
-                    case 4: // HDuo
-                        this.updateShips(targetShips, 13, 15, this.state.currentTurn);
+                    case 4: // B0
+                        this.updateShips(targetShips, 18, 20, this.state.currentTurn);
                         break;
-                    case 5: // S
-                    case 6: // S
+                    case 5: // A0
+                        this.updateShips(targetShips, 20, 21, this.state.currentTurn);
+                        break;
+                    case 6: // D1
+                    this.updateShips(targetShips, 21, 25, this.state.currentTurn);
+                        break;
                     case 7: // S
                     case 8: // S
-                        this.updateShips(targetShips, 15, 19, this.state.currentTurn);
                         break;
                 }
             }
@@ -175,7 +180,10 @@ export class GameRoom extends Room<State> {
             this.state.phase = 'place';
         }
     }
-
+    playerDirection(client:Client,message:any){
+        const player:Player = this.state.players[client.sessionId];
+        this.eDirections[player.sessionId] = message;
+    }
     reset() {
         this.rematchCount = {};
         this.playerHealth = {};

@@ -50,6 +50,12 @@ namespace BattleshipGame.Tiling
                 Debug.Log(_sprite.name);
             }
             _grabbedShip = Instantiate(dragShipPrefab, _grabCell, Quaternion.identity);
+             // 新增：根据船只方向设置旋转
+            if (SpriteRepresentsShip(out var ship))
+            {
+            float rotationAngle = (int)ship.CurrentDirection * 90f;
+            _grabbedShip.transform.rotation = Quaternion.Euler(0, 0, rotationAngle);
+            }
             _grabbedShip.GetComponent<SpriteRenderer>().sprite = _sprite;
             if (removeFromSource) sourceTileMap.SetTile(_grabCell, null);
         }
@@ -91,7 +97,8 @@ namespace BattleshipGame.Tiling
                     targetMap.MoveShip(ship, _grabCell, dropCell, !_isGrabbedFromTarget))
                 {
                     if (removeFromSource) _selfGridSpriteMapper.RemoveSpritePosition(_sprite, _grabCell);
-                    _targetGridSpriteMapper.ChangeSpritePosition(_sprite, _grabCell, dropCell);
+                    _targetGridSpriteMapper.ChangeSpritePosition(_sprite, _grabCell, dropCell);    
+
                 }
                 else if (removeFromSource)
                     // The tile is already removed inside the OnBeginDrag callback. Place the tile back.
@@ -205,7 +212,7 @@ namespace BattleshipGame.Tiling
 
             // 更新实际 Tilemap 中的棋子显示（传递锚点位置）
             UpdateShipSprite(ship, anchorCell); // 新增：传递锚点位置
-            
+             targetMap.MoveShip(ship, anchorCell, anchorCell, false);
             // 更新地图记录（保持原有逻辑）
              _selfGridSpriteMapper.ClearSpritePositions();
              _selfGridSpriteMapper.CacheSpritePositions();
@@ -226,9 +233,9 @@ namespace BattleshipGame.Tiling
 
             // 4. 可选：若需要更新精灵（如不同方向使用不同 Sprite），可在此处设置
             var oldtile =ScriptableObject.CreateInstance<Tile>();
-            for(int i = 0; i < ship.tiles.Count; i++){
-                if(ship.tiles[i] == ship.tile){
-                    oldtile = ship.tiles[i==0?3:i-1];
+            for(int i = 0; i < ship.Tiles.Count; i++){
+                if(ship.Tiles[i] == ship.tile){
+                    oldtile = ship.Tiles[i==0?3:i-1];
                     break;
                 }
             }

@@ -115,7 +115,24 @@ namespace BattleshipGame.Tiling
 
         public override void SetShip(Ship ship, Vector3Int coordinate)
         {
+            
             fleetLayer.SetTile(coordinate, ship.tile);
+            var dir=(int)ship.CurrentDirection;
+            if (screenType == ScreenType.Opponent)
+            {
+                dir =(int) ship._enemyDirection;
+                return;
+            }
+            
+            // 1. 获取当前棋子在 Tilemap 中的变换矩阵（用于旋转）
+            var tileTransform = fleetLayer.GetTransformMatrix(coordinate);
+            
+            // // 2. 计算新的旋转角度（根据当前方向）
+            float rotationAngle = dir * 90f;
+            tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));
+            
+            // // 3. 更新 Tilemap 中该位置的瓷砖变换
+             fleetLayer.SetTransformMatrix(coordinate, tileTransform);
         }
 
         public override bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn)

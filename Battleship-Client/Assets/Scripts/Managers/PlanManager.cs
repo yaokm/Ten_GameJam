@@ -116,13 +116,22 @@ namespace BattleshipGame.Managers
                 randomButton.SetInteractable(false);
                 clearButton.SetInteractable(false);
                 Debug.Log("cells.size:"+_cells.Length);
-                foreach(var cell in _cells){
-                    Debug.Log("cell:"+cell);
+                for (int i = 0; i < 10;++i){
+                    for (int j = 0; j < 10;++j){
+                        Debug.Log("cells["+i+","+j+"]:"+_cells[i*10+j]);
+                    }
                 }
-                _client.SendPlacement(_cells);
+                _client.SendPlacement(_cells,GetDirection());
+                //_client.SendBasePositions(placementMap.GetBasePositions());
                 statusData.State = WaitingOpponentPlacement;
             }
-
+            int[] GetDirection(){
+                int[] dir = new int[7];
+                for (int i = 0; i < 7;++i){
+                    dir[i] = (int)rules.ships[i].CurrentDirection;
+                }
+                return dir;
+            }
             void ResetPlacementMap()
             {
                 BeginShipPlacement();
