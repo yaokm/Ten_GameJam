@@ -20,6 +20,7 @@ namespace BattleshipGame.AI
         private Dictionary<string, int> _health;    // 玩家ID到剩余生命值的映射
         private Dictionary<string, int[]> _placements; // 玩家ID到舰队布局数组的映射
         private Dictionary<string, int[]> _directions; // 玩家ID到舰队方向的映射
+        private Dictionary<string, int[][]> _basePositions; // 玩家ID到舰队基座位置的映射
         
         // 回合控制相关
         private string _startingPlayerLastTurn;     // 上一局的先手玩家ID（用于重新匹配时交换先手）
@@ -41,6 +42,10 @@ namespace BattleshipGame.AI
             _directions = new Dictionary<string, int[]>{
                 {playerId, new int[7]}, {enemyId, new int[7]}
             };
+            _basePositions = new Dictionary<string, int[][]>
+            {
+                {playerId, new int[7][]}, {enemyId, new int[7][]}
+            };
             ResetPlayers();
         }
 
@@ -50,11 +55,12 @@ namespace BattleshipGame.AI
             State.TriggerAll();
         }
 
-        public void Place(string clientId, int[] placement,int[] directions=null)
+        public void Place(string clientId, int[] placement,int[] directions=null,int[][] basePositions=null)
         {
             var player = State.players[clientId];
-            _placements[player.sessionId] = placement;
-            _directions[player.sessionId] = directions;
+            _placements[player.sessionId] = placement;//舰队位置  
+            _directions[player.sessionId] = directions;//舰队方向
+            _basePositions[player.sessionId] = basePositions;//舰队基座位置
             _placementCompleteCounter++;
             if (_placementCompleteCounter == 2)
             {

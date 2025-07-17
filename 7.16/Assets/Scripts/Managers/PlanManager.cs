@@ -121,8 +121,17 @@ namespace BattleshipGame.Managers
                         Debug.Log("cells["+i+","+j+"]:"+_cells[i*10+j]);
                     }
                 }
-                _client.SendPlacement(_cells,GetDirection());
-                //_client.SendBasePositions(placementMap.GetBasePositions());
+                var placements=placementMap.GetPlacements();//var myCoordinates=rules.ships.Select(ship=>ship.Coordinate).ToList();
+                var coordinates=new int[7][];
+                var directions=new int[7];
+                foreach (var placement in placements){
+                    int idx=placement.ship.rankOrder;
+                    coordinates[idx]=new int[]{placements[idx].Coordinate.x,placements[idx].Coordinate.y};
+                    directions[idx]=(int)placements[idx].ship.CurrentDirection;
+                    Debug.Log("placement.shipId:"+placement.ship.rankOrder+"placement.Coordinate:"+placement.Coordinate+"placement.ship.partCoordinates:"+placement.ship.CurrentDirection);
+                }
+                //发送舰队位置和方向和cell棋盘
+                _client.SendPlacement(_cells,directions,coordinates);
                 statusData.State = WaitingOpponentPlacement;
             }
             int[] GetDirection(){

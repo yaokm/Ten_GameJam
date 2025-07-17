@@ -101,7 +101,10 @@ namespace BattleshipGame.AI
             for (var i = 0; i < size; i++) _uncheckedCells.Remove(cells[i]);
             return cells;
         }
-
+        public Rules GetRules()
+        {
+            return rules;
+        }
         private int[] GetRandomCells()
         {
             if (_prediction == null || _uncheckedCells == null) return null;
@@ -117,7 +120,16 @@ namespace BattleshipGame.AI
 
             return cells;
         }
-
+        private int[] _directions=new int[7];
+        private int[][] _basePositions=new int[7][];
+        public int[] GetDirections()
+        {
+            return _directions;
+        }
+        public int[][] GetBasePositions()
+        {
+            return _basePositions;
+        }
         /// <summary>
         /// 随机在网格中放置所有船只，并返回表示网格状态的数组。
         /// 数组中的每个元素对应一个网格单元格，值为船只ID或 EmptyCell（-1）表示空单元格。
@@ -165,14 +177,17 @@ namespace BattleshipGame.AI
             bool PlaceShip(int shipId, Ship ship, Vector3Int pivot)
             {
                 // 获取船只的宽度和高度
-                (int shipWidth, int shipHeight) = ship.GetShipSize();
+                (int shipWidth, int shipHeight) = ship.GetShipSize(true);                    
                 // 检查船只是否在网格边界内，如果不在则返回 false
-                if (!GridUtils.IsInsideBoundaries(shipWidth, shipHeight, pivot, rules.areaSize)) return false;
+                if (!GridUtils.IsInsideBoundaries(shipWidth, shipHeight, pivot, rules.areaSize,ship._enemyDirection)) return false;
                 // 检查船只是否与其他已放置的船只碰撞，如果碰撞则返回 false
                 if (DoesCollideWithOtherShip(shipId, pivot, ship)) return false;
                 // 如果通过上述检查，将船只注册到对应的单元格中
                 RegisterShipToCells(shipId, ship, pivot);
-                return true;
+                _directions[ship.rankOrder] = (int)ship._enemyDirection;
+                _basePositions[ship.rankOrder] = new int[]{pivot.x,pivot.y};
+                Debug.Log("shipWidth:"+shipWidth+"shipHeight:"+shipHeight+"pivot:"+pivot+" ship.rankOrder:"+ship.rankOrder+"ship._enemyDirection:"+ship._enemyDirection);
+                return true;    
             }
 
             /// <summary>

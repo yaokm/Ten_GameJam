@@ -14,6 +14,7 @@ export class GameRoom extends Room<State> {
     playersPlaced: number = 0;
     playerCount: number = 0;
     eDirections: any;//敌军方向
+    eBasePositions: any;//敌军基座位置
     onCreate(options) {
         console.log(options);
         if (options.password) {
@@ -27,8 +28,28 @@ export class GameRoom extends Room<State> {
         this.onMessage("turn", (client, message) => this.playerTurn(client, message));
         this.onMessage("rematch", (client, message) => this.rematch(client, message));
         this.onMessage("direction",(client,message)=>this.playerDirection(client,message));
+        // 添加对opponentInfoRequest消息的处理
+        this.onMessage("opponentInfoRequest", (client, message) => this.handleOpponentInfoRequest(client));
     }
-
+    // 添加新方法处理对手信息请求
+    handleOpponentInfoRequest(client: Client) {
+        // 获取当前玩家
+        const player = this.state.players[client.sessionId];
+    
+        // 获取对手
+        const enemyId = Object.keys(this.state.players).find(id => id !== client.sessionId);
+        if (!enemyId) return; // 如果没有对手，直接返回
+    
+        // 获取对手的方向和基点信息
+        const enemyDirections = this.eDirections[enemyId] || [];
+        const enemyBasePositions = this.eBasePositions[enemyId] || [];
+    
+        // 发送对手信息给请求的客户端
+        client.send("opponentInfo", {
+                        directions: enemyDirections,
+                        basePositions: enemyBasePositions
+                        });
+}
     onJoin(client: Client) {
         let player: Player = new Player(client.sessionId, this.gridSize * this.gridSize, this.startingFleetHealth);
         this.state.players[client.sessionId] = player;
@@ -67,8 +88,9 @@ export class GameRoom extends Room<State> {
 
     playerPlace(client: Client, message: any) {
         let player: Player = this.state.players[client.sessionId];
-        this.placements[player.sessionId] = message;
-        this.eDirections[player.sessionId] = message;
+        this.placements[player.sessionId] = message.placement;
+        this.eDirections[player.sessionId] = message.directions;
+        this.eBasePositions[player.sessionId] = message.basePositions;
         this.playersPlaced++;
 
         if (this.playersPlaced == 2) {
@@ -77,6 +99,19 @@ export class GameRoom extends Room<State> {
             });
             this.state.playerTurn = this.getRandomUser();
             this.state.phase = 'battle';
+             // 双方都布阵完成后，主动向双方发送对方的船只信息
+        Object.keys(this.state.players).forEach(playerId => {
+            const enemyId = Object.keys(this.state.players).find(id => id !== playerId);
+            if (enemyId) {
+                const client = this.clients.find(c => c.sessionId === playerId);
+                if (client) {
+                    client.send("opponentInfo", {
+                        directions: this.eDirections[enemyId] || [],
+                        basePositions: this.eBasePositions[enemyId] || []
+                    });
+                }
+            }
+        });
         }
     }
 

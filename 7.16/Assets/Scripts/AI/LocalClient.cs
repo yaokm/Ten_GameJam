@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using BattleshipGame.Core;
 using BattleshipGame.Network;
 using UnityEngine;
 
@@ -63,11 +65,14 @@ namespace BattleshipGame.AI
             _room.Start();
         }
 
-        public void SendPlacement(int[] placement,int[] direction=null)
+        public void SendPlacement(int[] placement,int[] direction=null,int[][] basePositions=null)
         {
-            _room.Place(PlayerId, placement);
-            _room.Place(EnemyId, _enemy.PlaceShipsRandomly());
+            _room.Place(PlayerId, placement,direction,basePositions);
+            int[] ecell=_enemy.PlaceShipsRandomly();
+            _room.Place(EnemyId, ecell,_enemy.GetDirections(),_enemy.GetBasePositions());
+            
         }
+
         public void SendTurn(int[] targetIndexes)
         {
             _room.Turn(PlayerId, targetIndexes);
@@ -78,7 +83,17 @@ namespace BattleshipGame.AI
             _enemy.ResetForRematch();
             _room.Rematch(isRematching);
         }
-
+        public void SendGetOpponentInfoRequest()
+        {
+            var ships=_enemy.GetRules().ships;
+            var directions=_enemy.GetDirections();
+            var basePositions=_enemy.GetBasePositions();
+            foreach(var ship in ships){
+                ship._enemyDirection=(Direction)directions[ship.rankOrder];
+                var basePosition=basePositions[ship.rankOrder];
+                ship.EnemyCoordinate=new Vector2Int(basePosition[0],basePosition[1]);
+            }           
+        }
         public void LeaveRoom()
         {
             enabled = false;

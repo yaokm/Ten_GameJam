@@ -70,10 +70,17 @@ namespace BattleshipGame.Core
         /// <param name="pivot">船只的枢轴点坐标。</param>
         /// <param name="areaSize">地图区域的二维整数尺寸。</param>
         /// <returns>若船只完全在地图边界内返回 <c>true</c>，否则返回 <c>false</c>。</returns>
-        public static bool IsInsideBoundaries(int shipWidth, int shipHeight, Vector3Int pivot, Vector2Int areaSize)
+        public static bool IsInsideBoundaries(int shipWidth, int shipHeight, Vector3Int pivot, Vector2Int areaSize,Direction direction=Direction.Right)
         {
-            return pivot.x >= 0 && pivot.y < areaSize.y &&
-                   pivot.x + shipWidth <= areaSize.x && pivot.y - (shipHeight - 1) >= 0;
+            bool removed=direction switch{
+                Direction.Right=>pivot.x + shipWidth <= areaSize.x&&pivot.y - (shipHeight - 1) >= 0,//左上
+                Direction.Left=>pivot.x - (shipWidth-1) >= 0&&pivot.y+shipHeight <= areaSize.y,//右下
+                Direction.Up=>pivot.x + shipWidth <= areaSize.x&&pivot.y+shipHeight <= areaSize.y,//左下
+                Direction.Down=>pivot.x - (shipWidth-1) >= 0&&pivot.y - (shipHeight - 1) >= 0,//右上
+                _=>true
+            };
+
+            return pivot.x >= 0&&pivot.y >= 0&&pivot.x < areaSize.x && pivot.y < areaSize.y && removed;
         }
     }
 }

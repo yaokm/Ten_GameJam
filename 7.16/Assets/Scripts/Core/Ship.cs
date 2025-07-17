@@ -73,8 +73,10 @@ namespace BattleshipGame.Core
         [SerializeField] 
         public Direction _currentDirection = Direction.Right; // 当前方向
 
-        //敌方船的方向
+        //敌方船的方向，需要房间发送过来
         public Direction _enemyDirection = Direction.Right;
+        //敌方船的坐标，需要房间发送过来
+        public Vector2Int EnemyCoordinate=Vector2Int.zero;
         public List<Vector2Int> EpartCoordinates
         {
             get
@@ -105,7 +107,7 @@ namespace BattleshipGame.Core
         }
 
         // 根据方向返回船只尺寸（修复尺寸计算逻辑）
-        public (int width, int height) GetShipSize()
+        public (int width, int height) GetShipSize(bool isEnemy=false)
         {
             // 计算原始尺寸（考虑正负坐标）
             var minX = PartCoordinates.Min(p => p.x);
@@ -114,10 +116,21 @@ namespace BattleshipGame.Core
             var maxY = PartCoordinates.Max(p => p.y);
             var originalSize = (shipWidth: maxX - minX + 1, shipHeight: maxY - minY + 1);
 
-            // 旋转后宽高互换（仅当方向为Up或Down时）
-            return _currentDirection == Direction.Right || _currentDirection == Direction.Left 
-                ? (originalSize.shipWidth, originalSize.shipHeight) 
-                : (originalSize.shipHeight, originalSize.shipWidth);
+            //先看是敌人还是自己
+            var direction=isEnemy?_enemyDirection:_currentDirection;
+            var result=direction switch{
+                 Direction.Right=> (originalSize.shipWidth, originalSize.shipHeight),
+                 Direction.Left=> (originalSize.shipWidth, originalSize.shipHeight),
+                 Direction.Up=> (originalSize.shipHeight, originalSize.shipWidth),
+                 Direction.Down=> (originalSize.shipHeight, originalSize.shipWidth),
+                 _=> (originalSize.shipWidth, originalSize.shipHeight)
+            };
+            return result;
+            // // 旋转后宽高互换（仅当方向为Up或Down时）
+            // return direction == Direction.Right || direction == Direction.Left 
+            //     ? (originalSize.shipWidth, originalSize.shipHeight) 
+            //     : (originalSize.shipHeight, originalSize.shipWidth);
+
         }
 
         // 根据方向计算实际占据的单元格（修复坐标变换逻辑）

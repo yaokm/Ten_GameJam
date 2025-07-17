@@ -54,7 +54,28 @@ namespace BattleshipGame.Managers
                 SceneManager.LoadScene(0);
             }
         }
-
+        // 添加处理敌方船只信息的方法
+        private void SetEnemyShipPositionsAndDirections(int[][] basePositions, int[] directions)
+        {
+            // 获取所有船只
+            var ships = rules.ships;
+            // 为每艘船设置敌方位置和方向
+            for (int i = 0; i < ships.Count; i++)
+            {
+                if (i < basePositions.Length && i < directions.Length)
+                {
+                    // 设置敌方坐标和方向
+                    ships[i].EnemyCoordinate = new Vector2Int(
+                        basePositions[ships[i].rankOrder][0],
+                        basePositions[ships[i].rankOrder][1]
+                    );
+                    ships[i]._enemyDirection = (Direction)directions[ships[i].rankOrder];
+                }
+            }
+            foreach (var ship in ships){
+                opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
+            }
+        }
         private void Start()
         {
             Debug.Log("BattleManager Start");
@@ -65,12 +86,20 @@ namespace BattleshipGame.Managers
             foreach (var placement in placementMap.GetPlacements())
             {
                 userMap.SetShip(placement.ship, placement.Coordinate);
-                // var tilemap = userMap.GetComponent<Tilemap>(); // 假设UserMap有Tilemap组件
-                // if (tilemap == null) return;
-                // // 根据当前方向计算旋转角度
-                // float rotationAngle = (int)placement.ship.CurrentDirection * 90f;
-                // var tileTransform = Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotationAngle));
-                // tilemap.SetTransformMatrix(placement.Coordinate, tileTransform);
+            }
+            // 注册敌方船只信息接收事件
+            if (_client is NetworkClient networkClient)
+            {
+                networkClient.OnOpponentInfoReceived += SetEnemyShipPositionsAndDirections;
+            }
+            _client.SendGetOpponentInfoRequest();
+            //如果是本地对战，则直接设置敌方船只信息，如果是网络对战，则需要等待服务器返回敌方船只信息，走SetEnemyShipPositionsAndDirections的回调
+            if (_client is LocalClient)
+            {
+                foreach (var ship in rules.ships)
+                {
+                    opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));//设置敌方船只信息
+                }
             }
             statusData.State = BeginBattle;
             leaveButton.AddListener(LeaveGame);
@@ -154,9 +183,9 @@ namespace BattleshipGame.Managers
         {
             int cellIndex = CoordinateToCellIndex(coordinate, rules.areaSize);
             foreach (var keyValuePair in from keyValuePair in _shots
-                     from cell in keyValuePair.Value
-                     where cell == cellIndex
-                     select keyValuePair)
+                                         from cell in keyValuePair.Value
+                                         where cell == cellIndex
+                                         select keyValuePair)
             {
                 HighlightTurn(keyValuePair.Key);
                 return;
@@ -270,7 +299,7 @@ namespace BattleshipGame.Managers
                 statusData.State = OpponentTurn;
             }
         }
-        
+
         private void OnStateChanged(List<DataChange> changes)
         {
             foreach (var _ in changes.Where(change => change.Field == RoomState.PlayerTurn))
@@ -280,13 +309,13 @@ namespace BattleshipGame.Managers
         private void OnPlayerShotsChanged(int turn, int cellIndex)
         {
             if (turn <= 0) return;
-            
+
             // // 将目标索引转换为网格坐标（用于查询敌方船只状态）
             // var coordinate = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
-            
+
             // // 通过OpponentStatus查询该坐标是否是敌方船只的部件（未被击中时返回-1）
             // int shotTurn = opponentStatus.GetShotTurn(coordinate);
-            
+
             // // 根据是否命中选择标记类型
             // Marker marker = shotTurn != OpponentStatus.NotShot 
             //     ? Marker.ShotFleet    // 命中船只部件时使用shotFleetMarker
@@ -294,7 +323,7 @@ namespace BattleshipGame.Managers
             // Debug.Log($"turn: {turn}, cellIndex: {cellIndex}, coordinate: {coordinate}, shotTurn: {shotTurn}");
             // 在对手地图设置标记
             SetMarker(cellIndex, turn, true);
-            
+
             // // 记录回合与射击位置（用于后续回合高亮）
             // if (_shots.ContainsKey(turn))
             //     _shots[turn].Add(cellIndex);
@@ -322,12 +351,12 @@ namespace BattleshipGame.Managers
             }
 
             userMap.SetMarker(cellIndex, !(from placement in placementMap.GetPlacements()
-                from part in placement.ship.partCoordinates
-                select placement.Coordinate + (Vector3Int)part
+                                           from part in placement.ship.partCoordinates
+                                           select placement.Coordinate + (Vector3Int)part
                 into partCoordinate
-                let shot = CellIndexToCoordinate(cellIndex, rules.areaSize.x)
-                where partCoordinate.Equals(shot)
-                select partCoordinate).Any()
+                                           let shot = CellIndexToCoordinate(cellIndex, rules.areaSize.x)
+                                           where partCoordinate.Equals(shot)
+                                           select partCoordinate).Any()
                 ? Marker.Missed
                 : Marker.Hit);
         }

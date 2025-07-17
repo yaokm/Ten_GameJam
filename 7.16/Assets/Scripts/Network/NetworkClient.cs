@@ -9,6 +9,8 @@ namespace BattleshipGame.Network
 {
     public class NetworkClient : IClient
     {
+      // 添加事件，用于通知BattleManager敌方船只信息已就绪
+        public event Action<int[][], int[]> OnOpponentInfoReceived;
         private const string RoomName = "game";
         private const string LobbyName = "lobby";
         private readonly Dictionary<string, Room> _rooms = new Dictionary<string, Room>();
@@ -27,12 +29,17 @@ namespace BattleshipGame.Network
             return _room?.SessionId;
         }
 
-        public void SendPlacement(int[] placement,int[] directions=null)
+        public void SendPlacement(int[] placement,int[] directions=null,int[][] basePositions=null)
         {
-            _room.Send(RoomMessage.Place, placement);
-            _room.Send(RoomMessage.Direction, directions);
+            var message=new Dictionary<string,object>();
+            message.Add("placement",placement);
+            message.Add("directions",directions);
+            message.Add("basePositions",basePositions);
+            _room.Send(RoomMessage.Place, message);
         }
-
+        public void SendGetOpponentInfoRequest(){
+            _room.Send(RoomMessage.OpponentInfoRequest);
+        }
         public void SendTurn(int[] targetIndexes)
         {
             _room.Send(RoomMessage.Turn, targetIndexes);
@@ -138,12 +145,39 @@ namespace BattleshipGame.Network
         private void RegisterRoomHandlers()
         {
             _room.State.OnChange += OnRoomStateChange;
-
+ // 注册接收敌方船只信息的消息处理器
+            _room.OnMessage<Dictionary<string, object>>("opponentInfo", message => 
+            {
+                try 
+                {
+                    // 解析方向数组
+                    var directionsObj = message["directions"] as object[];
+                    var directions = directionsObj?.Select(d => Convert.ToInt32(d)).ToArray() ?? new int[0];
+                    
+                    // 解析基点坐标数组（二维数组）
+                    var basePositionsObj = message["basePositions"] as object[];
+                    var basePositions = new int[basePositionsObj?.Length ?? 0][];
+                    
+                    for (int i = 0; i < basePositions.Length; i++)
+                    {
+                        var posObj = basePositionsObj[i] as object[];
+                        basePositions[i] = posObj?.Select(p => Convert.ToInt32(p)).ToArray() ?? new int[2];
+                    }
+                    
+                    // 触发事件，通知BattleManager
+                    OnOpponentInfoReceived?.Invoke(basePositions, directions);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Error parsing opponent info: {ex.Message}");
+                }
+            });
             void OnRoomStateChange(List<DataChange> changes)
             {
                 foreach (var change in changes.Where(change => change.Field == RoomState.Phase))
                     GamePhaseChanged?.Invoke((string) change.Value);
             }
+            
         }
 
         public void LeaveLobby()
