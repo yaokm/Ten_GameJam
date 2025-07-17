@@ -11,7 +11,7 @@ namespace BattleshipGame.Tiling
         [SerializeField] private GameObject maskPrefab;
         [SerializeField] private Rules rules;
         private readonly List<(int ShotTurn, Vector3Int Coordinate)> _shipParts = new List<(int, Vector3Int)>();
-
+    
         private void Start()
         {
             var spritePositions = GetComponent<GridSpriteMapper>().GetSpritePositions();
@@ -27,7 +27,12 @@ namespace BattleshipGame.Tiling
                         _shipParts.Add((NotShot, partCoordinate));
                     }
                 }
-                    
+             // 初始化为25个零向量
+            for (int i = 0; i < 25; i++)
+            {
+                ShipPartPos.Add(Vector3.zero);
+            }
+            
 
             // 新增：初始化完成后打印所有敌方船只位置
             PrintAllEnemyShipPositions();
@@ -78,25 +83,109 @@ namespace BattleshipGame.Tiling
                     result.Add(vector3Int);
             return result;
         }
+        public bool isAllShipPartShot(int rankOrder){
+            switch(rankOrder){
+                case 0://F0
+                    return isShipPartShot(0,5);
+                case 1://E0
+                    return isShipPartShot(6,10);
+                case 2://D0
+                    return isShipPartShot(11,14);
+                case 3://C0
+                    return isShipPartShot(15,17);
+                case 4://B0
+                    return isShipPartShot(18,19);
+                case 5://A0
+                    return isShipPartShot(20,20);
+                case 6://D1
+                    return isShipPartShot(21,24);
+                default:
+                    return false;
+            }
+        }
+        public int getShipRankOrder(int shipPart){
+            switch(shipPart){
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    return 0;//F0
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                    return 1;//E0
+                case 11:
+                case 12:
+                case 13:
+                case 14:
+                    return 2;//D0
+                case 15:
+                case 16:
+                case 17:
+                    return 3;//C0
+                case 18:
+                case 19:
+                    return 4;//B0   
+                case 20:
+                    return 5;//A0
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                    return 6;//D1
+                default:
+                    return -1;
+            }
+        }
+        private bool isShipPartShot(int beginIndex,int endIndex){
+            for(int i=beginIndex;i<=endIndex;i++){
+                if(_shipParts[i].ShotTurn == NotShot){
+                    return false;
+                }
+            }
+            return true;
+        }
+        public List<Vector3> ShipPartPos = new List<Vector3>();
 
-        
+        private void Awake()
+        {
+
+        }
+        private void ShipMask(int rankOrder){
+            for(int i=0;i<ShipPartPos.Count;i++){
+                if(getShipRankOrder(i)==rankOrder){
+                    Instantiate(maskPrefab, ShipPartPos[i], Quaternion.identity);
+                }
+            }
+        }
         //changedShipPart: 0-25,shotTurn:击中回合
         public void DisplayShotEnemyShipParts(int changedShipPart, int shotTurn)
         {
+            Debug.Log("ShipPartPos_size: " + ShipPartPos.Count);
             Debug.Log("DisplayShotEnemyShipParts: " + changedShipPart + " " + shotTurn);
+            
+            // 添加边界检查
+            if (changedShipPart < 0 || changedShipPart >= ShipPartPos.Count || changedShipPart >= _shipParts.Count)
+            {
+                Debug.LogError($"Invalid shipPart index: {changedShipPart}. Valid range is 0-{ShipPartPos.Count-1}");
+                return;
+            }
+            
             var part = _shipParts[changedShipPart];
             part.ShotTurn = shotTurn;
             _shipParts[changedShipPart] = part;
             var maskPositionInWorldSpace = transform.position + part.Coordinate + new Vector3(0.5f, 0.5f);
             Debug.Log("Mask position: " + maskPositionInWorldSpace);
             
-            if (true == true)
-            {
-                Instantiate(maskPrefab, maskPositionInWorldSpace, Quaternion.identity);
-            }
-            else
-            {
-                
+            ShipPartPos[changedShipPart] = maskPositionInWorldSpace;
+            int rankOrder = getShipRankOrder(changedShipPart);
+            Debug.Log("rankOrder: " + rankOrder.ToString());
+            if(isAllShipPartShot(rankOrder)){//一艘船全被击中
+                ShipMask(rankOrder);
             }
         }
     }
