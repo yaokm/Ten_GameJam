@@ -62,15 +62,14 @@ namespace BattleshipGame.Managers
             // 为每艘船设置敌方位置和方向
             for (int i = 0; i < ships.Count; i++)
             {
-                if (i < basePositions.Length && i < directions.Length)
-                {
+
                     // 设置敌方坐标和方向
                     ships[i].EnemyCoordinate = new Vector2Int(
                         basePositions[ships[i].rankOrder][0],
                         basePositions[ships[i].rankOrder][1]
                     );
                     ships[i]._enemyDirection = (Direction)directions[ships[i].rankOrder];
-                }
+                
             }
             foreach (var ship in ships){
                 Debug.Log("ship:"+ship+"EnemyCoordinate:"+ship.EnemyCoordinate+"_enemyDirection:"+ship._enemyDirection);
