@@ -73,6 +73,7 @@ namespace BattleshipGame.Managers
                 }
             }
             foreach (var ship in ships){
+                Debug.Log("ship:"+ship+"EnemyCoordinate:"+ship.EnemyCoordinate+"_enemyDirection:"+ship._enemyDirection);
                 opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
             }
         }
