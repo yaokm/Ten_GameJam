@@ -1722,6 +1722,16 @@ PrefabInstance:
       propertyPath: sceneCamera
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 445893296377875363, guid: 88ddd787738efa54ca51cccc955a634a,
+        type: 3}
+      propertyPath: m_Offset.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 445893296377875363, guid: 88ddd787738efa54ca51cccc955a634a,
+        type: 3}
+      propertyPath: m_Offset.y
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 445893296377875388, guid: 88ddd787738efa54ca51cccc955a634a,
         type: 3}
       propertyPath: axis

@@ -115,28 +115,33 @@ namespace BattleshipGame.Managers
                 continueButton.SetInteractable(false);
                 randomButton.SetInteractable(false);
                 clearButton.SetInteractable(false);
-                Debug.Log("cells.size:"+_cells.Length);
-                for (int i = 0; i < 10;++i){
-                    for (int j = 0; j < 10;++j){
-                        Debug.Log("cells["+i+","+j+"]:"+_cells[i*10+j]);
+                Debug.Log("cells.size:" + _cells.Length);
+                for (int i = 0; i < 10; ++i)
+                {
+                    for (int j = 0; j < 10; ++j)
+                    {
+                        Debug.Log("cells[" + i + "," + j + "]:" + _cells[i * 10 + j]);
                     }
                 }
-                var placements=placementMap.GetPlacements();//var myCoordinates=rules.ships.Select(ship=>ship.Coordinate).ToList();
-                var coordinates=new int[7][];
-                var directions=new int[7];
-                foreach (var placement in placements){
-                    int idx=placement.ship.rankOrder;
-                    coordinates[idx]=new int[]{placements[idx].Coordinate.x,placements[idx].Coordinate.y};
-                    directions[idx]=(int)placements[idx].ship.CurrentDirection;
-                    Debug.Log("placement.shipId:"+placement.ship.rankOrder+"placement.Coordinate:"+placement.Coordinate+"placement.ship.partCoordinates:"+placement.ship.CurrentDirection);
+                var placements = placementMap.GetPlacements();//var myCoordinates=rules.ships.Select(ship=>ship.Coordinate).ToList();
+                var coordinates = new int[7][];
+                var directions = new int[7];
+                foreach (var placement in placements)
+                {
+                    int idx = placement.ship.rankOrder;
+                    coordinates[idx] = new int[] { placements[idx].Coordinate.x, placements[idx].Coordinate.y };
+                    directions[idx] = (int)placements[idx].ship.CurrentDirection;
+                    Debug.Log("placement.shipId:" + placement.ship.rankOrder + "placement.Coordinate:" + placement.Coordinate + "placement.ship.partCoordinates:" + placement.ship.CurrentDirection);
                 }
                 //发送舰队位置和方向和cell棋盘
-                _client.SendPlacement(_cells,directions,coordinates);
+                _client.SendPlacement(_cells, directions, coordinates);
                 statusData.State = WaitingOpponentPlacement;
             }
-            int[] GetDirection(){
+            int[] GetDirection()
+            {
                 int[] dir = new int[7];
-                for (int i = 0; i < 7;++i){
+                for (int i = 0; i < 7; ++i)
+                {
                     dir[i] = (int)rules.ships[i].CurrentDirection;
                 }
                 return dir;
@@ -234,19 +239,19 @@ namespace BattleshipGame.Managers
 
             (int shipWidth, int shipHeight) = ship.GetShipSize();
             if (!IsInsideBoundaries(shipWidth, shipHeight, to, MapAreaSize)) return false;
-            
+
             // 先检查是否有重叠
             if (DoesCollideWithOtherShip(shipId, to, ship)) return false;
-            
+
             // 如果没有重叠，先清除旧位置
             ClearShipFromCells(shipId);
-            
+
             // 然后设置新位置
             clearButton.SetInteractable(true);
             planMap.SetShip(ship, to);
             RegisterShipToCells(shipId, ship, to);
             placementMap.PlaceShip(shipId, ship, to);
-            
+
             if (shouldRemoveFromPool)
             {
                 _pool.Remove(shipId);
@@ -293,9 +298,9 @@ namespace BattleshipGame.Managers
             {
                 int checkX = cellCoordinate.x + part.x;
                 int checkY = cellCoordinate.y + part.y;
-                
+
                 if (checkX < 0 || checkX >= MapAreaSize.x || checkY < 0 || checkY >= MapAreaSize.y) continue;
-                
+
                 int cellIndex = CoordinateToCellIndex(new Vector3Int(checkX, checkY, 0), MapAreaSize);
                 if (cellIndex != OutOfMap && _cells[cellIndex] != EmptyCell && _cells[cellIndex] != selfShipId)
                 {
@@ -318,6 +323,14 @@ namespace BattleshipGame.Managers
                 .Select(coordinate => CoordinateToCellIndex(coordinate, MapAreaSize)))
                 if (cellIndex != OutOfMap)
                     _cells[cellIndex] = shipId;
+            Debug.Log("cells.size:" + _cells.Length);
+            for (int i = 0; i < 10; ++i)
+            {
+                for (int j = 0; j < 10; ++j)
+                {
+                    Debug.Log("cells[" + i + "," + j + "]:" + _cells[i * 10 + j]);
+                }
+            }
         }
     }
 }

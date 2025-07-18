@@ -210,7 +210,7 @@ namespace BattleshipGame.Tiling
             _isFlashingGrids = false;
         }
 
-        private enum ScreenType
+        public enum ScreenType
         {
             User,
             Opponent

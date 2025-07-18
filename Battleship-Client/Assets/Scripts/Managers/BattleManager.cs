@@ -73,7 +73,7 @@ namespace BattleshipGame.Managers
             }
             foreach (var ship in ships){
                 Debug.Log("ship:"+ship+"EnemyCoordinate:"+ship.EnemyCoordinate+"_enemyDirection:"+ship._enemyDirection);
-                opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
+                //opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
             }
         }
         private void Start()
@@ -94,13 +94,13 @@ namespace BattleshipGame.Managers
             }
             _client.SendGetOpponentInfoRequest();
             //如果是本地对战，则直接设置敌方船只信息，如果是网络对战，则需要等待服务器返回敌方船只信息，走SetEnemyShipPositionsAndDirections的回调
-            if (_client is LocalClient)
-            {
-                foreach (var ship in rules.ships)
-                {
-                    opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));//设置敌方船只信息
-                }
-            }
+            // if (_client is LocalClient)
+            // {
+            //     foreach (var ship in rules.ships)
+            //     {
+            //         opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));//设置敌方船只信息
+            //     }
+            // }
             statusData.State = BeginBattle;
             leaveButton.AddListener(LeaveGame);
             fireButton.AddListener(FireShots);
