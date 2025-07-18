@@ -124,8 +124,8 @@ namespace BattleshipGame.Managers
                     }
                 }
                 var placements = placementMap.GetPlacements();//var myCoordinates=rules.ships.Select(ship=>ship.Coordinate).ToList();
-                var coordinates = new int[7][];
-                var directions = new int[7];
+                var coordinates = new int[8][];
+                var directions = new int[8];
                 foreach (var placement in placements)
                 {
                     int idx = placement.ship.rankOrder;
@@ -139,8 +139,8 @@ namespace BattleshipGame.Managers
             }
             int[] GetDirection()
             {
-                int[] dir = new int[7];
-                for (int i = 0; i < 7; ++i)
+                int[] dir = new int[8];
+                for (int i = 0; i < 8; ++i)
                 {
                     dir[i] = (int)rules.ships[i].CurrentDirection;
                 }

@@ -120,8 +120,8 @@ namespace BattleshipGame.AI
 
             return cells;
         }
-        private int[] _directions=new int[7];
-        private int[][] _basePositions=new int[7][];
+        private int[] _directions=new int[8];
+        private int[][] _basePositions=new int[8][];
         public int[] GetDirections()
         {
             return _directions;

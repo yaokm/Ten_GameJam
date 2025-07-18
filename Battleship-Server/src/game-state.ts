@@ -30,11 +30,11 @@ export class State extends Schema {
     phase: string = 'waiting';
 
     @type('string')
-    playerTurn: string;
+    playerTurn: string;//当前回合玩家
 
     @type('string')
     winningPlayer: string;
 
     @type('int8')
-    currentTurn: number = 1;
+    currentTurn: number = 1;//当前回合数
 }

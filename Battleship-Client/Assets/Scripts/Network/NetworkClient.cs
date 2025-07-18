@@ -9,7 +9,7 @@ namespace BattleshipGame.Network
 {
     public class NetworkClient : IClient
     {
-      // 添加事件，用于通知BattleManager敌方船只信息已就绪
+        // 添加事件，用于通知BattleManager敌方船只信息已就绪
         public event Action<int[][], int[]> OnOpponentInfoReceived;
         private const string RoomName = "game";
         private const string LobbyName = "lobby";
@@ -29,15 +29,16 @@ namespace BattleshipGame.Network
             return _room?.SessionId;
         }
 
-        public void SendPlacement(int[] placement,int[] directions=null,int[][] basePositions=null)
+        public void SendPlacement(int[] placement, int[] directions = null, int[][] basePositions = null)
         {
-            var message=new Dictionary<string,object>();
-            message.Add("placement",placement);
-            message.Add("directions",directions);
-            message.Add("basePositions",basePositions);
+            var message = new Dictionary<string, object>();
+            message.Add("placement", placement);
+            message.Add("directions", directions);
+            message.Add("basePositions", basePositions);
             _room.Send(RoomMessage.Place, message);
         }
-        public void SendGetOpponentInfoRequest(){
+        public void SendGetOpponentInfoRequest()
+        {
             _room.Send(RoomMessage.OpponentInfoRequest);
         }
         public void SendTurn(int[] targetIndexes)
@@ -48,7 +49,8 @@ namespace BattleshipGame.Network
         {
             _room.Send(RoomMessage.BasePosition, basePositions);
         }
-        public void SendDirection(int[] direction){
+        public void SendDirection(int[] direction)
+        {
             _room.Send(RoomMessage.Direction, direction);
         }
         public void SendRematch(bool isRematching)
@@ -119,7 +121,7 @@ namespace BattleshipGame.Network
             try
             {
                 _room = await _client.Create<State>(RoomName,
-                    new Dictionary<string, object> {{RoomOption.Name, name}, {RoomOption.Password, password}});
+                    new Dictionary<string, object> { { RoomOption.Name, name }, { RoomOption.Password, password } });
                 RegisterRoomHandlers();
                 success?.Invoke();
             }
@@ -133,7 +135,7 @@ namespace BattleshipGame.Network
         {
             try
             {
-                _room = await _client.JoinById<State>(roomId, new Dictionary<string, object> {{RoomOption.Password, password}});
+                _room = await _client.JoinById<State>(roomId, new Dictionary<string, object> { { RoomOption.Password, password } });
                 RegisterRoomHandlers();
             }
             catch (Exception exception)
@@ -145,54 +147,67 @@ namespace BattleshipGame.Network
         private void RegisterRoomHandlers()
         {
             _room.State.OnChange += OnRoomStateChange;
- // 注册接收敌方船只信息的消息处理器
-            _room.OnMessage<Dictionary<string, object>>("opponentInfo", message => 
+            // 注册接收敌方船只信息的消息处理器
+            _room.OnMessage<Dictionary<string, object>>("opponentInfo", message =>
             {
-                Debug.Log("opponentInfo:"+message);
-                Debug.Log("message.Length:"+message.Count);
-                foreach(var key in message.Keys){
-                    Debug.Log("key:"+key+":"+message[key]);
-                }               
-                try 
+                Debug.Log("opponentInfo:" + message);
+                Debug.Log("message.Length:" + message.Count);
+                foreach (var key in message.Keys)
                 {
-                    
+                    Debug.Log("key:" + key + ":" + message[key]);
+                }
+                try
+                {
+
                     // 解析方向数组
-                    var directionsObj = message["directions"] as List<object> ;
-                    if(directionsObj==null){
+                    var directionsObj = message["directions"] as List<object>;
+                    if (directionsObj == null)
+                    {
                         Debug.Log("directionsObj is null");
                         return;
-                    }else{
+                    }
+                    else
+                    {
                         Debug.Log("directionsObj is not null");
                     }
-                    if(directionsObj is List<object>){
-                        directionsObj.ForEach(d => Debug.Log("directionObj:"+d));
+                    if (directionsObj is List<object>)
+                    {
+                        directionsObj.ForEach(d => Debug.Log("directionObj:" + d));
                         Debug.Log("directionsObj is List<object>");
-                    }else if(directionsObj is object[]){
-                        Debug.Log("directionsObj is object[]");
-                    }else {
-                        Debug.Log("directionsObj is not List<object> or object[]");
-                    }                   
-                    var directions = directionsObj?.Select(d => Convert.ToInt32(d)).ToArray() ?? new int[0];
-                    for(int i=0;i<directions.Length;i++){
-                        Debug.Log("direction:"+i+":"+directions[i]);
                     }
-                    if(directions.Length==0){
+                    else if (directionsObj is object[])
+                    {
+                        Debug.Log("directionsObj is object[]");
+                    }
+                    else
+                    {
+                        Debug.Log("directionsObj is not List<object> or object[]");
+                    }
+                    var directions = directionsObj?.Select(d => Convert.ToInt32(d)).ToArray() ?? new int[0];
+                    for (int i = 0; i < directions.Length; i++)
+                    {
+                        Debug.Log("direction:" + i + ":" + directions[i]);
+                    }
+                    if (directions.Length == 0)
+                    {
                         Debug.Log("directions is empty");
                         return;
-                    }else{
+                    }
+                    else
+                    {
                         Debug.Log("directions is not empty");
                     }
-                    
+
                     // 解析基点坐标数组（二维数组）
                     var basePositionsObj = message["basePositions"] as List<object>;
-                    var basePositions = new int[7][];
-                    
+                    var basePositions = new int[8][];
+
                     for (int i = 0; i < basePositions.Length; i++)
                     {
                         var posObj = basePositionsObj[i] as List<object>;
                         basePositions[i] = posObj?.Select(p => Convert.ToInt32(p)).ToArray() ?? new int[2];
                     }
-                    
+
                     // 触发事件，通知BattleManager
                     OnOpponentInfoReceived?.Invoke(basePositions, directions);
                 }
@@ -204,9 +219,22 @@ namespace BattleshipGame.Network
             void OnRoomStateChange(List<DataChange> changes)
             {
                 foreach (var change in changes.Where(change => change.Field == RoomState.Phase))
-                    GamePhaseChanged?.Invoke((string) change.Value);
+                    GamePhaseChanged?.Invoke((string)change.Value);
             }
-            
+            // 修改事件注册
+            _room.OnMessage<Dictionary<string, object>>("xBombHit", message =>
+            {
+                string player = message["player"] as string;
+                string victim = message["victim"] as string;
+                OnXBombHit?.Invoke(player, victim);
+            });
+
+            _room.OnMessage<Dictionary<string, object>>("skipTurn", message =>
+            {
+                string player = message["player"] as string;
+                OnTurnSkipped?.Invoke(player);
+            });
+
         }
 
         public void LeaveLobby()
@@ -233,7 +261,8 @@ namespace BattleshipGame.Network
         public async void GetOpponentShipData(Action<int[], int[], int[]> callback)
         {
             _room.Send("getOpponentShipData");
-            _room.OnMessage<object[]>("opponentShipData", message => {
+            _room.OnMessage<object[]>("opponentShipData", message =>
+            {
                 callback?.Invoke(
                     (int[])message[0], // directions
                     (int[])message[1], // coordinates 
@@ -241,5 +270,11 @@ namespace BattleshipGame.Network
                 );
             });
         }
+
+        // 添加事件定义
+        public event Action<string, string> OnXBombHit; // 参数：击中炸弹的玩家ID，被炸弹影响的玩家ID
+        public event Action<string> OnTurnSkipped; // 参数：被跳过回合的玩家ID
+
+
     }
 }

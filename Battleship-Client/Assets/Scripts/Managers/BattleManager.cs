@@ -129,9 +129,9 @@ namespace BattleshipGame.Managers
             void RegisterToStateEvents()
             {
                 _state.OnChange += OnStateChanged;
-                _state.players[_player].shots.OnChange += OnPlayerShotsChanged;
-                _state.players[_enemy].ships.OnChange += OnEnemyShipsChanged;
-                _state.players[_enemy].shots.OnChange += OnEnemyShotsChanged;
+                _state.players[_player].shots.OnChange += OnPlayerShotsChanged;//我方被射击情况
+                _state.players[_enemy].ships.OnChange += OnEnemyShipsChanged;//敌方船只被击中情况
+                _state.players[_enemy].shots.OnChange += OnEnemyShotsChanged;//敌方被射击情况
             }
         }
 

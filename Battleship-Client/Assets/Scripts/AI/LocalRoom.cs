@@ -26,7 +26,10 @@ namespace BattleshipGame.AI
         private string _startingPlayerLastTurn;     // 上一局的先手玩家ID（用于重新匹配时交换先手）
         private bool _isRematching;                // 是否处于重新匹配状态
         private int _placementCompleteCounter;     // 已完成舰队布置的玩家计数（达到2时开始战斗）
-    
+
+        // 添加新的字段跟踪跳过回合
+        private Dictionary<string, bool> _skipNextTurn = new Dictionary<string, bool>();
+        
         public LocalRoom(string playerId, string enemyId)
         {
             State = new State {players = new MapSchema<Player>(), phase = RoomPhase.Waiting, currentTurn = 1};
@@ -40,13 +43,20 @@ namespace BattleshipGame.AI
                 {playerId, new int[ShotsSize]}, {enemyId, new int[ShotsSize]}
             };
             _directions = new Dictionary<string, int[]>{
-                {playerId, new int[7]}, {enemyId, new int[7]}
+                {playerId, new int[8]}, {enemyId, new int[8]}
             };
             _basePositions = new Dictionary<string, int[][]>
             {
-                {playerId, new int[7][]}, {enemyId, new int[7][]}
+                {playerId, new int[8][]}, {enemyId, new int[8][]}
             };
             ResetPlayers();
+
+            // 初始化跳过回合字典
+            _skipNextTurn = new Dictionary<string, bool>
+            {
+                {playerId, false},
+                {enemyId, false}
+            };
         }
 
         public void Start()
@@ -100,6 +110,7 @@ namespace BattleshipGame.AI
             int[] opponentPlacements = _placements[opponent.sessionId];
 
             bool hit = false;
+            bool isXBomb = false;
 
             if (playerShots[targetIndex] == -1)
             {
@@ -134,8 +145,12 @@ namespace BattleshipGame.AI
                         case 6: // D1
                             UpdateShips(opponentShips, 21, 25, State.currentTurn);
                             break;
-                        case 7: // Scout
-                        case 8: // Scout
+                        case 7: // X炸弹船
+                            isXBomb = true;
+                            Debug.Log("isXBomb");
+                            // 可以发送一个消息通知UI显示炸弹效果
+                            break;
+                        case 8: // S
                             break;
                     }
                 }
@@ -148,14 +163,38 @@ namespace BattleshipGame.AI
             }
             else
             {
-                if (!hit)
+                // 炸弹船处理需要特殊逻辑
+                if (isXBomb)//如果击中炸弹船
                 {
-                    State.playerTurn = opponent.sessionId;
+                    // 炸弹船：标记跳过，切换回合，增加回合数
+                    _skipNextTurn[player.sessionId] = true;
+                    // 被击中后，且回合
+                     State.playerTurn = opponent.sessionId;
                     State.currentTurn++;
+                    Debug.Log($"命中炸弹! 玩家{player.sessionId}继续, 回合数:{State.currentTurn}");
+                }
+                else if (!hit)
+                {
+                    // 未命中：检查是否需要跳过回合
+                    if (_skipNextTurn[opponent.sessionId])
+                    {
+                        // 对手需要跳过回合，保持当前玩家的回合
+                        _skipNextTurn[opponent.sessionId] = false; // 重置跳过标记
+                        State.playerTurn = player.sessionId; // 回合不变
+                        State.currentTurn++; // 回合数增加
+                        Debug.Log($"跳过玩家{opponent.sessionId}的回合! 玩家{player.sessionId}继续, 回合数:{State.currentTurn}");
+                    }
+                    else
+                    {
+                        // 正常切换回合
+                        State.playerTurn = opponent.sessionId;
+                        State.currentTurn++;
+                    }
                 }
                 else
                 {
-                    State.playerTurn = player.sessionId; // 保持自己回合方便客户端逻辑
+                    // 命中普通船：保持当前玩家回合
+                    State.playerTurn = player.sessionId;
                 }
             }
 
@@ -215,7 +254,13 @@ namespace BattleshipGame.AI
 
             _health = _health.ToDictionary(kvp => kvp.Key, kvp => StartingFleetHealth);
             _placements = _placements.ToDictionary(kvp => kvp.Key, kvp => new int[ShotsSize]);
-            _directions = _directions.ToDictionary(kvp => kvp.Key, kvp => new int[7]);
+            _directions = _directions.ToDictionary(kvp => kvp.Key, kvp => new int[8]);
+
+            // 重置跳过回合状态
+            foreach (var key in _skipNextTurn.Keys.ToList())
+            {
+                _skipNextTurn[key] = false;
+            }
         }
     }
 }

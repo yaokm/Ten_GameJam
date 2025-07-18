@@ -34,8 +34,13 @@ namespace BattleshipGame.AI
                             if (phase.Equals(RoomPhase.Result)) _isMatchFinished = true;
                             break;
                         case RoomState.PlayerTurn:
-                            if (!_isMatchFinished && EnemyId.Equals((string) change.Value))
-                                StartCoroutine(_enemy.GetShots(cells => _room.Turn(EnemyId, cells)));
+                            // 检查是否是AI回合，如果是则触发AI行动
+                            CheckAndTriggerAITurn();
+                            break;
+                        case RoomState.CurrentTurn:
+                            // 添加：当回合数变化时，也检查是否需要触发AI行动
+                            // 这样即使playerTurn没变（跳过回合的情况），也能正确触发AI
+                            CheckAndTriggerAITurn();
                             break;
                     }
             };
@@ -101,6 +106,13 @@ namespace BattleshipGame.AI
         public async void GetOpponentShipData(Action<int[], int[], int[]> callback)
         { 
             
+        }
+
+        // 新增辅助方法，检查并触发AI回合
+        private void CheckAndTriggerAITurn()
+        {
+            if (!_isMatchFinished && EnemyId.Equals(_room.State.playerTurn))
+                StartCoroutine(_enemy.GetShots(cells => _room.Turn(EnemyId, cells)));
         }
     }
 }

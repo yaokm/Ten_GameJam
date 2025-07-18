@@ -4,5 +4,6 @@
     {
         public const string Phase = "phase";
         public const string PlayerTurn = "playerTurn";
+        public const string CurrentTurn = "currentTurn";
     }
 }

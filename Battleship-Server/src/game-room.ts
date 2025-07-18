@@ -15,6 +15,7 @@ export class GameRoom extends Room<State> {
     playerCount: number = 0;
     eDirections: any={};//敌军方向
     eBasePositions: any={};//敌军基座位置
+    playerSkipNextTurn: {[key: string]: boolean} = {}; // 用于跟踪玩家是否需要跳过下一回合
     onCreate(options) {
         console.log(options);
         if (options.password) {
@@ -148,10 +149,11 @@ export class GameRoom extends Room<State> {
         const enemy = this.getNextUser();
 
         let shots = player.shots;
-        let targetShips = enemy.ships;;
+        let targetShips = enemy.ships;
         let targetedPlacement = this.placements[enemy.sessionId];
 
         let hit = false;                      // ← 记录是否命中
+        let isXBomb = false;                  // ← 新增：记录是否命中X炸弹船
 
         if (shots[targetIndex] == -1) {
             shots[targetIndex] = this.state.currentTurn;
@@ -180,7 +182,16 @@ export class GameRoom extends Room<State> {
                     case 6: // D1
                         this.updateShips(targetShips, 21, 25, this.state.currentTurn);
                         break;
-                    case 7: // S
+                    case 7: // X，是个炸弹，踩到会卡对面一回合
+                        isXBomb = true;  // 标记命中了X炸弹
+                        this.playerSkipNextTurn[player.sessionId] = true; // 修改为标记当前玩家需要跳过下一回合
+                        hit = false; // 踩到炸弹不算命中，需要结束回合
+                        // 发送一个特殊消息通知客户端，玩家被炸弹影响
+                        this.broadcast("xBombHit", {
+                            player: player.sessionId,
+                            victim: player.sessionId // 受害者是玩家自己
+                        });
+                        break;
                     case 8: // S
                         break;
                 }
@@ -191,12 +202,25 @@ export class GameRoom extends Room<State> {
             this.state.winningPlayer = player.sessionId;
             this.state.phase = 'result';
         } else {
-            // 未命中：换对手并开始下一回合；命中：保持当前玩家，不递增回合
+            // 未命中或踩到炸弹：换对手并开始下一回合；命中普通船：保持当前玩家，不递增回合
             if (!hit) {
+                // 正常切换回合
                 this.state.playerTurn = enemy.sessionId;
                 this.state.currentTurn++;
+                
+                // 检查下一回合的玩家是否需要跳过回合
+                if (this.playerSkipNextTurn[enemy.sessionId]) {
+                    // 对手需要跳过下一回合，直接切换回玩家
+                    this.playerSkipNextTurn[enemy.sessionId] = false; // 重置跳过标记
+                    this.state.playerTurn = player.sessionId; // 回合切回当前玩家
+                    this.state.currentTurn++; // 回合数再次增加
+                    // 发送通知消息
+                    this.broadcast("skipTurn", {
+                        player: enemy.sessionId
+                    });
+                }
             } else {
-                // 触发状态刷新，确保客户端收到事件
+                // 命中普通船：保持当前玩家回合
                 this.state.playerTurn = player.sessionId;
             }
         }
