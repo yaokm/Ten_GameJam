@@ -41,15 +41,15 @@ namespace BattleshipGame.Tiling
                 var sprite = tilemap.GetSprite(position);
                 var tile = tilemap.GetTile(position);
 
-                if(tile!=null)
-                Debug.Log("Tile "+tile.name+" "+(tile as Tile).sprite.GetInstanceID());
+                //if(tile!=null)
+                //Debug.Log("Tile "+tile.name+" "+(tile as Tile).sprite.GetInstanceID());
 
                 var ThisShip=ScriptableObject.CreateInstance<Ship>();
                 foreach (var ship in rules.ships){
                     foreach(var Tile in ship.Tiles){
                     if (Tile.Equals(tile)){
                         ThisShip = ship;
-                        Debug.Log("thisShip "+ThisShip.name+" "+ThisShip.tile.name);
+                        //Debug.Log("thisShip "+ThisShip.name+" "+ThisShip.tile.name);
                         break;
                         }
                     }
@@ -62,21 +62,21 @@ namespace BattleshipGame.Tiling
                     continue;
                 }
                 else{
-                    Debug.Log("Sprite at " + position + " is " + sprite.name+" "+sprite.GetInstanceID());
+                    //Debug.Log("Sprite at " + position + " is " + sprite.name+" "+sprite.GetInstanceID());
                 }
                 int spriteId = sprite.GetInstanceID();
                 if (!_sprites.ContainsKey(spriteId))
                 {
-                    Debug.Log("ThisShip.tiles.size=="+ThisShip.Tiles.Count);
+                    //Debug.Log("ThisShip.tiles.size=="+ThisShip.Tiles.Count);
                     foreach(var Tile in ThisShip.Tiles){
-                        Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
+                       // Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
                         _sprites.Add(Tile.sprite.GetInstanceID(), Tile.sprite);
                     }
                     //_sprites.Add(spriteId, sprite);
                 }
                 else
                 {
-                    Debug.Log("Sprite already exists with ID " + spriteId);
+                    //Debug.Log("Sprite already exists with ID " + spriteId);
                     _sprites[spriteId] = sprite;
                 }
                    
@@ -84,7 +84,7 @@ namespace BattleshipGame.Tiling
                 if (!_spritePositionsOnTileMap.ContainsKey(spriteId))
                 {
                     foreach(var Tile in ThisShip.Tiles){
-                        Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
+                        //Debug.Log("Tile "+Tile.name+" "+Tile.sprite.GetInstanceID());
                         _spritePositionsOnTileMap.Add(Tile.sprite.GetInstanceID(), new List<Vector3Int> { position });
                     }
                     //Debug.Log("No sprite positions on tile map for " + spriteId);
@@ -93,7 +93,7 @@ namespace BattleshipGame.Tiling
                 else
                     _spritePositionsOnTileMap[spriteId].Add(position);
             }
-            Debug.Log("_spritePositionsOnTileMap.size=="+_spritePositionsOnTileMap.Count);
+            //Debug.Log("_spritePositionsOnTileMap.size=="+_spritePositionsOnTileMap.Count);
         }
 
         public void ClearSpritePositions()

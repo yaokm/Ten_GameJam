@@ -169,10 +169,24 @@ namespace BattleshipGame.Managers
                 _shotsInCurrentTurn.Remove(cellIndex);
                 opponentMap.ClearMarker(cell);
             }
-            else if (_shotsInCurrentTurn.Count < rules.shotsPerTurn &&
-                     opponentMap.SetMarker(cellIndex, Marker.MarkedTarget))
+            else if (_shotsInCurrentTurn.Count < rules.shotsPerTurn)
             {
-                _shotsInCurrentTurn.Add(cellIndex);
+                if (opponentMap.SetMarker(cellIndex, Marker.MarkedTarget))
+                {
+                    _shotsInCurrentTurn.Add(cellIndex);
+                }
+            }
+            else
+            {
+                // 如果已达到最大射击次数，移除第一个目标并添加新目标
+                Vector3Int oldCell = CellIndexToCoordinate(_shotsInCurrentTurn[0], rules.areaSize.x);
+                _shotsInCurrentTurn.RemoveAt(0);
+                opponentMap.ClearMarker(oldCell);
+                
+                if (opponentMap.SetMarker(cellIndex, Marker.MarkedTarget))
+                {
+                    _shotsInCurrentTurn.Add(cellIndex);
+                }
             }
 
             fireButton.SetInteractable(_shotsInCurrentTurn.Count == rules.shotsPerTurn);

@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using static BattleshipGame.Core.StatusData.Status;
 using static BattleshipGame.Core.GridUtils;
+using System.IO;
 
 namespace BattleshipGame.Managers
 {
@@ -33,6 +34,29 @@ namespace BattleshipGame.Managers
         private SortedDictionary<int, Ship> _pool;
         private List<int> _shipsNotDragged = new List<int>();
         private Vector2Int MapAreaSize => rules.areaSize;
+        
+        // 用于跟踪每艘船的状态
+        private Dictionary<int, ShipState> _shipStates = new Dictionary<int, ShipState>();
+        
+        // 船只状态类
+        private class ShipState
+        {
+            public int ShipId;
+            public int RankOrder;
+            public Vector3Int Position;
+            public Direction Direction;
+            public bool IsValid;
+            public bool IsOutOfBounds;
+            public bool HasCollision;
+            public List<int> CollidingWithShips = new List<int>();
+            
+            public ShipState(int shipId, int rankOrder)
+            {
+                ShipId = shipId;
+                RankOrder = rankOrder;
+                IsValid = true;
+            }
+        }
 
         private void Awake()
         {
@@ -50,7 +74,10 @@ namespace BattleshipGame.Managers
         private void Start()
         {
             planMap.SetPlaceListener(this);
-
+            foreach (var ship in rules.ships)
+            {
+                ship.Reset();
+            }
             _cellCount = MapAreaSize.x * MapAreaSize.y;
             leaveButton.AddListener(LeaveGame);
             clearButton.AddListener(OnClearButtonPressed);
@@ -67,11 +94,12 @@ namespace BattleshipGame.Managers
 
             void PlaceShipsRandomly()
             {
+                Debug.Log("开始随机放置船只");
                 ResetPlacementMap();
 
                 if (_shipsNotDragged.Count == 0) _shipsNotDragged = _pool.Keys.ToList();
 
-                // Avoid ships that the player dragged into the map.
+                // 避免放置玩家已拖拽的船只
                 foreach (var placement in _placements.Where(placement => !_shipsNotDragged.Contains(placement.shipId)))
                 {
                     planMap.SetShip(placement.ship, placement.Coordinate);
@@ -79,7 +107,8 @@ namespace BattleshipGame.Managers
                     placementMap.PlaceShip(placement.shipId, placement.ship, placement.Coordinate);
                 }
 
-                // Place the remaining ships randomly
+                // 随机放置剩余船只
+                List<int> placedShipIds = new List<int>();
                 foreach (int shipId in _shipsNotDragged)
                 {
                     var uncheckedCells = new List<int>();
@@ -91,8 +120,14 @@ namespace BattleshipGame.Managers
 
                         int cell = uncheckedCells[Random.Range(0, uncheckedCells.Count)];
                         uncheckedCells.Remove(cell);
-                        isPlaced = PlaceShip(_pool[shipId], default, CellIndexToCoordinate(cell, MapAreaSize.x), false,
+                        isPlaced = PlaceShip(_pool[shipId], default, CellIndexToCoordinate(cell, MapAreaSize.x), false, false,
                             shipId);
+                        
+                        if (isPlaced)
+                        {
+                            placedShipIds.Add(shipId);
+                            Debug.Log($"成功随机放置船只 {shipId} (rankOrder={_pool[shipId].rankOrder})");
+                        }
                     }
 
                     if (!isPlaced)
@@ -100,14 +135,41 @@ namespace BattleshipGame.Managers
                         statusData.State = PlacementImpossible;
                         clearButton.SetInteractable(true);
                         randomButton.SetInteractable(false);
+                        Debug.LogError($"无法随机放置船只 {shipId}");
                         return;
                     }
                 }
 
+                // 从池中移除所有已放置的船只
+                foreach (int shipId in placedShipIds)
+                {
+                    _pool.Remove(shipId);
+                }
+                _shipsNotDragged.Clear();
+                
+                // 确保_placements是最新的
+                _placements = placementMap.GetPlacements();
+                
+                Debug.Log($"随机放置完成，已放置 {_placements.Count} 艘船，池中剩余 {_pool.Count} 艘船");
+
                 gridSpriteMapper.CacheSpritePositions();
                 poolGridSpriteMapper.CacheSpritePositions();
-                continueButton.SetInteractable(true);
+                
+                // 更新所有船只状态
+                UpdateAllShipStates();
+                
+                // 更新Continue按钮状态
+                UpdateContinueButtonState();
+                
                 statusData.State = PlacementReady;
+                
+                // 如果所有船只都已放置且有效，则启用Continue按钮
+                if (_pool.Count == 0)
+                {
+                    randomButton.SetInteractable(false);
+                    continueButton.SetInteractable(true);
+                    Debug.Log("所有船只已成功放置，Continue按钮已启用");
+                }
             }
 
             void CompletePlacement()
@@ -115,15 +177,8 @@ namespace BattleshipGame.Managers
                 continueButton.SetInteractable(false);
                 randomButton.SetInteractable(false);
                 clearButton.SetInteractable(false);
-                Debug.Log("cells.size:" + _cells.Length);
-                for (int i = 0; i < 10; ++i)
-                {
-                    for (int j = 0; j < 10; ++j)
-                    {
-                        Debug.Log("cells[" + i + "," + j + "]:" + _cells[i * 10 + j]);
-                    }
-                }
-                var placements = placementMap.GetPlacements();//var myCoordinates=rules.ships.Select(ship=>ship.Coordinate).ToList();
+                
+                var placements = placementMap.GetPlacements();
                 var coordinates = new int[8][];
                 var directions = new int[8];
                 foreach (var placement in placements)
@@ -131,21 +186,14 @@ namespace BattleshipGame.Managers
                     int idx = placement.ship.rankOrder;
                     coordinates[idx] = new int[] { placements[idx].Coordinate.x, placements[idx].Coordinate.y };
                     directions[idx] = (int)placements[idx].ship.CurrentDirection;
-                    Debug.Log("placement.shipId:" + placement.ship.rankOrder + "placement.Coordinate:" + placement.Coordinate + "placement.ship.partCoordinates:" + placement.ship.CurrentDirection);
+                    Debug.Log($"Placement: rankOrder={placement.ship.rankOrder}, position={placement.Coordinate}, direction={placement.ship.CurrentDirection}");
                 }
-                //发送舰队位置和方向和cell棋盘
+                
+                // 发送舰队位置、方向和单元格数据
                 _client.SendPlacement(_cells, directions, coordinates);
                 statusData.State = WaitingOpponentPlacement;
             }
-            int[] GetDirection()
-            {
-                int[] dir = new int[8];
-                for (int i = 0; i < 8; ++i)
-                {
-                    dir[i] = (int)rules.ships[i].CurrentDirection;
-                }
-                return dir;
-            }
+
             void ResetPlacementMap()
             {
                 BeginShipPlacement();
@@ -165,6 +213,8 @@ namespace BattleshipGame.Managers
                 placementMap.Clear();
                 _cells = new int[_cellCount];
                 for (var i = 0; i < _cellCount; i++) _cells[i] = EmptyCell;
+                _shipStates.Clear();
+                _placements.Clear();
                 PopulateShipPool();
 
                 void PopulateShipPool()
@@ -175,8 +225,12 @@ namespace BattleshipGame.Managers
                         for (var i = 0; i < ship.amount; i++)
                         {
                             _pool.Add(shipId, ship);
+                            // 初始化船只状态
+                            _shipStates[shipId] = new ShipState(shipId, ship.rankOrder);
                             shipId++;
                         }
+                    
+                    Debug.Log($"初始化船只池，共 {_pool.Count} 艘船");
                 }
             }
         }
@@ -192,9 +246,19 @@ namespace BattleshipGame.Managers
             _client.GamePhaseChanged -= OnGamePhaseChanged;
         }
 
-        public bool OnShipMoved(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn)
+        public bool OnShipMoved(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn, bool isRotation = false)
         {
-            return PlaceShip(ship, from, to, isMovedIn);
+            bool result = PlaceShip(ship, from, to, isMovedIn, isRotation);
+            
+            // 每次移动船只后，更新所有船只的状态
+            if (result || isRotation)
+            {
+                // 确保_placements是最新的
+                _placements = placementMap.GetPlacements();
+                UpdateAllShipStates();
+            }
+            
+            return result;
         }
 
         private void LeaveGame()
@@ -227,8 +291,181 @@ namespace BattleshipGame.Managers
                     break;
             }
         }
-
-        private bool PlaceShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn, int shipId = EmptyCell)
+        
+        // 更新所有船只的状态
+        private void UpdateAllShipStates()
+        {
+            Debug.Log("开始更新所有船只状态");
+            
+            // 先重置所有船只的碰撞状态
+            foreach (var state in _shipStates.Values)
+            {
+                state.HasCollision = false;
+                state.CollidingWithShips.Clear();
+            }
+            
+            // 确保_placements是最新的
+            _placements = placementMap.GetPlacements();
+            Debug.Log($"已放置的船只数量: {_placements.Count}");
+            
+            // 检查每艘船的边界和碰撞状态
+            foreach (var placement in _placements)
+            {
+                int shipId = placement.shipId;
+                Ship ship = placement.ship;
+                Vector3Int position = placement.Coordinate;
+                
+                // 确保船只状态存在
+                if (!_shipStates.ContainsKey(shipId))
+                {
+                    Debug.LogWarning($"船只 {shipId} 的状态不存在，创建新状态");
+                    _shipStates[shipId] = new ShipState(shipId, ship.rankOrder);
+                }
+                
+                // 更新船只位置和方向
+                _shipStates[shipId].Position = position;
+                _shipStates[shipId].Direction = ship.CurrentDirection;
+                
+                // 检查是否超出边界
+                (int shipWidth, int shipHeight) = ship.GetShipSize();
+                bool isInsideBoundaries = IsInsideBoundaries(shipWidth, shipHeight, position, MapAreaSize, ship.CurrentDirection);
+                _shipStates[shipId].IsOutOfBounds = !isInsideBoundaries;
+                
+                if (!isInsideBoundaries)
+                {
+                    Debug.LogWarning($"船只 {shipId} (rankOrder={ship.rankOrder}) 超出边界: 位置={position}, 尺寸={shipWidth}x{shipHeight}, 方向={ship.CurrentDirection}");
+                }
+                
+                // 检查是否与其他船只重叠
+                foreach (var otherPlacement in _placements)
+                {
+                    // 跳过自己
+                    if (otherPlacement.shipId == shipId) continue;
+                    
+                    // 检查碰撞
+                    if (DoShipsCollide(ship, position, otherPlacement.ship, otherPlacement.Coordinate))
+                    {
+                        _shipStates[shipId].HasCollision = true;
+                        _shipStates[shipId].CollidingWithShips.Add(otherPlacement.shipId);
+                        Debug.LogWarning($"船只 {shipId} (rankOrder={ship.rankOrder}) 与船只 {otherPlacement.shipId} (rankOrder={otherPlacement.ship.rankOrder}) 重叠");
+                    }
+                }
+                
+                // 更新有效性
+                _shipStates[shipId].IsValid = !_shipStates[shipId].IsOutOfBounds && !_shipStates[shipId].HasCollision;
+                
+                Debug.Log($"更新船只 {shipId} (rankOrder={ship.rankOrder}): 位置={position}, 有效={_shipStates[shipId].IsValid}, 超出边界={_shipStates[shipId].IsOutOfBounds}, 有碰撞={_shipStates[shipId].HasCollision}");
+            }
+            
+            // 更新继续按钮状态
+            UpdateContinueButtonState();
+        }
+        
+        // 检查两艘船是否碰撞
+        private bool DoShipsCollide(Ship ship1, Vector3Int pos1, Ship ship2, Vector3Int pos2)
+        {
+            // 获取船只1的所有部件位置
+            var parts1 = new List<Vector3Int>();
+            foreach (var part in ship1.partCoordinates)
+            {
+                parts1.Add(new Vector3Int(pos1.x + part.x, pos1.y + part.y, 0));
+            }
+            
+            // 获取船只2的所有部件位置
+            var parts2 = new List<Vector3Int>();
+            foreach (var part in ship2.partCoordinates)
+            {
+                parts2.Add(new Vector3Int(pos2.x + part.x, pos2.y + part.y, 0));
+            }
+            
+            // 检查是否有任何部件重叠
+            foreach (var part1 in parts1)
+            {
+                foreach (var part2 in parts2)
+                {
+                    if (part1.x == part2.x && part1.y == part2.y)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // 更新继续按钮状态
+        private void UpdateContinueButtonState()
+        {
+            Debug.Log("更新Continue按钮状态");
+            
+            // 检查是否所有船只都已放置且有效
+            bool allShipsValid = true;
+            bool allShipsPlaced = true;
+            
+            // 检查是否所有必要的船只都已放置
+            var placedRankOrders = new HashSet<int>();
+            foreach (var placement in _placements)
+            {
+                placedRankOrders.Add(placement.ship.rankOrder);
+            }
+            
+            Debug.Log($"已放置的船只rankOrder: {string.Join(", ", placedRankOrders)}");
+            
+            // 检查是否所有必要的船只类型都已放置
+            foreach (var ship in rules.ships)
+            {
+                if (!placedRankOrders.Contains(ship.rankOrder))
+                {
+                    allShipsPlaced = false;
+                    Debug.LogWarning($"缺少rankOrder={ship.rankOrder}的船只");
+                    break;
+                }
+            }
+            
+            // 检查所有已放置船只的有效性
+            foreach (var state in _shipStates.Values)
+            {
+                // 只检查已放置的船只
+                if (placedRankOrders.Contains(state.RankOrder))
+                {
+                    if (!state.IsValid)
+                    {
+                        allShipsValid = false;
+                        Debug.LogWarning($"船只 {state.ShipId} (rankOrder={state.RankOrder}) 无效: 超出边界={state.IsOutOfBounds}, 有碰撞={state.HasCollision}");
+                        break;
+                    }
+                }
+            }
+            
+            // 检查池中是否还有船只
+            bool poolEmpty = _pool.Count == 0;
+            if (!poolEmpty)
+            {
+                Debug.LogWarning($"池中还有 {_pool.Count} 艘船未放置");
+            }
+            
+            // 只有当所有必要的船只都已放置且有效时，才启用Continue按钮
+            bool shouldEnableContinue = allShipsPlaced && allShipsValid && poolEmpty;
+            continueButton.SetInteractable(shouldEnableContinue);
+            
+            Debug.Log($"Continue按钮状态: {(shouldEnableContinue ? "启用" : "禁用")}, allShipsPlaced={allShipsPlaced}, allShipsValid={allShipsValid}, poolEmpty={poolEmpty}");
+            
+            // 更新游戏状态
+            if (allShipsPlaced && allShipsValid && poolEmpty)
+            {
+                statusData.State = PlacementReady;
+            }
+            else if (!allShipsPlaced || !poolEmpty)
+            {
+                statusData.State = BeginPlacement;
+            }
+            else
+            {
+                statusData.State = PlacementImpossible;
+            }
+        }
+        
+        private bool PlaceShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn, bool isRotation = false, int shipId = EmptyCell)
         {
             var shouldRemoveFromPool = false;
             if (shipId == EmptyCell)
@@ -236,46 +473,128 @@ namespace BattleshipGame.Managers
                 shipId = GetShipId(from, ship, isMovedIn);
                 shouldRemoveFromPool = true;
             }
+            
+            Debug.Log($"尝试放置船只 {shipId} (rankOrder={ship.rankOrder}): 从 {from} 到 {to}, isMovedIn={isMovedIn}, isRotation={isRotation}, shouldRemoveFromPool={shouldRemoveFromPool}");
+            
+            // 确保船只状态存在
+            if (!_shipStates.ContainsKey(shipId))
+            {
+                _shipStates[shipId] = new ShipState(shipId, ship.rankOrder);
+            }
 
             (int shipWidth, int shipHeight) = ship.GetShipSize();
-            if (!IsInsideBoundaries(shipWidth, shipHeight, to, MapAreaSize)) return false;
-
-            // 先检查是否有重叠
-            if (DoesCollideWithOtherShip(shipId, to, ship)) return false;
-
-            // 如果没有重叠，先清除旧位置
+            bool isInsideBoundaries = IsInsideBoundaries(shipWidth, shipHeight, to, MapAreaSize, ship.CurrentDirection);
+            
+            // 如果是旋转操作，即使超出边界或有重叠，也允许显示，但标记为无效
+            if (isRotation)
+            {
+                Debug.Log($"旋转操作: 船只 {shipId} 在 {to}, 是否在边界内: {isInsideBoundaries}");
+                
+                // 无论是否有效，都先清除旧的单元格数据
+                ClearShipFromCells(shipId);
+                
+                // 在地图上显示旋转后的船只
+                planMap.SetShip(ship, to);
+                
+                // 更新PlacementMap
+                placementMap.PlaceShip(shipId, ship, to);
+                
+                // 只在基点位置设置单元格，其他部分不设置
+                int baseCellIndex = CoordinateToCellIndex(to, MapAreaSize);
+                if (baseCellIndex != OutOfMap)
+                {
+                    _cells[baseCellIndex] = shipId;
+                }
+                
+                // 更新船只状态
+                _shipStates[shipId].Position = to;
+                _shipStates[shipId].Direction = ship.CurrentDirection;
+                
+                // 确保_placements是最新的
+                _placements = placementMap.GetPlacements();
+                
+                // 返回true表示旋转操作成功（即使船只位置无效）
+                return true;
+            }
+            
+            // 如果是拖拽操作，检查是否有效
+            if (!isInsideBoundaries)
+            {
+                Debug.Log($"无效放置: 船只 {shipId} 在 {to} 超出边界");
+                return false;
+            }
+            
+            // 检查是否与其他船只重叠
+            bool hasCollision = false;
+            foreach (var placement in _placements)
+            {
+                // 跳过自己
+                if (placement.shipId == shipId) continue;
+                
+                // 检查碰撞
+                if (DoShipsCollide(ship, to, placement.ship, placement.Coordinate))
+                {
+                    hasCollision = true;
+                    Debug.Log($"无效放置: 船只 {shipId} 在 {to} 与船只 {placement.shipId} 重叠");
+                    break;
+                }
+            }
+            
+            if (hasCollision)
+            {
+                return false;
+            }
+            
+            // 如果是有效的拖拽操作，清除旧位置
             ClearShipFromCells(shipId);
-
-            // 然后设置新位置
+            
+            // 设置新位置
             clearButton.SetInteractable(true);
             planMap.SetShip(ship, to);
             RegisterShipToCells(shipId, ship, to);
             placementMap.PlaceShip(shipId, ship, to);
-
-            if (shouldRemoveFromPool)
+            
+            // 更新船只状态
+            _shipStates[shipId].Position = to;
+            _shipStates[shipId].Direction = ship.CurrentDirection;
+            _shipStates[shipId].IsValid = true;
+            _shipStates[shipId].IsOutOfBounds = false;
+            _shipStates[shipId].HasCollision = false;
+            _shipStates[shipId].CollidingWithShips.Clear();
+            
+            // 注意：这里不立即从池中移除船只，而是在随机放置完成后统一移除
+            if (shouldRemoveFromPool && !isMovedIn)
             {
                 _pool.Remove(shipId);
                 _shipsNotDragged = _pool.Keys.ToList();
-                _placements = placementMap.GetPlacements();
+                Debug.Log($"从池中移除船只 {shipId}，池中剩余 {_pool.Count} 艘船");
             }
-
-            if (_pool.Count != 0) return true;
-            randomButton.SetInteractable(false);
-            continueButton.SetInteractable(true);
-            statusData.State = PlacementReady;
+            
+            // 确保_placements是最新的
+            _placements = placementMap.GetPlacements();
+            
+            if (_pool.Count == 0)
+            {
+                randomButton.SetInteractable(false);
+                Debug.Log("所有船只已放置，禁用Random按钮");
+            }
+            
             return true;
         }
 
         private void ClearShipFromCells(int shipId)
         {
             // 清除指定船只的所有格子
+            int clearedCount = 0;
             for (var i = 0; i < _cellCount; i++)
             {
                 if (_cells[i] == shipId)
                 {
                     _cells[i] = EmptyCell;
+                    clearedCount++;
                 }
             }
+            Debug.Log($"清除了船只 {shipId} 的 {clearedCount} 个单元格");
         }
 
         private int GetShipId(Vector3Int grabbedFrom, Ship ship, bool isMovedIn)
@@ -283,7 +602,10 @@ namespace BattleshipGame.Managers
             if (!isMovedIn)
             {
                 int cellIndex = CoordinateToCellIndex(grabbedFrom, MapAreaSize);
-                if (_cells[cellIndex] != EmptyCell) return _cells[cellIndex];
+                if (cellIndex != OutOfMap && _cells[cellIndex] != EmptyCell)
+                {
+                    return _cells[cellIndex];
+                }
             }
 
             foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) return kvp.Key;
@@ -299,6 +621,7 @@ namespace BattleshipGame.Managers
                 int checkX = cellCoordinate.x + part.x;
                 int checkY = cellCoordinate.y + part.y;
 
+                // 如果超出边界，跳过这部分的碰撞检测
                 if (checkX < 0 || checkX >= MapAreaSize.x || checkY < 0 || checkY >= MapAreaSize.y) continue;
 
                 int cellIndex = CoordinateToCellIndex(new Vector3Int(checkX, checkY, 0), MapAreaSize);
@@ -312,25 +635,29 @@ namespace BattleshipGame.Managers
 
         private void RegisterShipToCells(int shipId, Ship ship, Vector3Int pivot)
         {
-            // Clear the previous placement of this ship
-            for (var i = 0; i < _cellCount; i++)
-                if (_cells[i] == shipId)
-                    _cells[i] = EmptyCell;
+            // 清除这个船只之前占用的所有单元格
+            ClearShipFromCells(shipId);
 
-            // Find each cell the ship covers and register the ship on them
-            foreach (int cellIndex in ship.partCoordinates
-                .Select(part => new Vector3Int(pivot.x + part.x, pivot.y + part.y, 0))
-                .Select(coordinate => CoordinateToCellIndex(coordinate, MapAreaSize)))
-                if (cellIndex != OutOfMap)
-                    _cells[cellIndex] = shipId;
-            Debug.Log("cells.size:" + _cells.Length);
-            for (int i = 0; i < 10; ++i)
+            // 为船只的每个部件设置单元格
+            int registeredCount = 0;
+            foreach (var part in ship.partCoordinates)
             {
-                for (int j = 0; j < 10; ++j)
+                int checkX = pivot.x + part.x;
+                int checkY = pivot.y + part.y;
+                
+                // 只注册在地图边界内的部分
+                if (checkX >= 0 && checkX < MapAreaSize.x && checkY >= 0 && checkY < MapAreaSize.y)
                 {
-                    Debug.Log("cells[" + i + "," + j + "]:" + _cells[i * 10 + j]);
+                    int cellIndex = CoordinateToCellIndex(new Vector3Int(checkX, checkY, 0), MapAreaSize);
+                    if (cellIndex != OutOfMap)
+                    {
+                        _cells[cellIndex] = shipId;
+                        registeredCount++;
+                    }
                 }
             }
+            
+            Debug.Log($"注册了船只 {shipId} 在 {pivot} 方向 {ship.CurrentDirection}，共 {registeredCount} 个单元格");
         }
     }
 }

@@ -63,9 +63,9 @@ namespace BattleshipGame.Tiling
             
         }
 
-        public override bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn)
+        public override bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn,bool isRotation=false)
         {
-            return _listener.OnShipMoved(ship, from, to, isMovedIn);
+            return _listener.OnShipMoved(ship, from, to, isMovedIn,isRotation);
         }
 
         public override void ClearAllShips()

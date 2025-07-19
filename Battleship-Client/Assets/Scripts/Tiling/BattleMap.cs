@@ -135,7 +135,7 @@ namespace BattleshipGame.Tiling
              fleetLayer.SetTransformMatrix(coordinate, tileTransform);
         }
 
-        public override bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn)
+        public override bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn,bool isRotation=false)
         {
             SetShip(ship, to);
             return true;

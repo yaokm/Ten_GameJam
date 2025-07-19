@@ -996,6 +996,8 @@ MonoBehaviour:
   sourceTileMap: {fileID: 1081005661}
   removeFromSource: 1
   removeIfDraggedOut: 0
+  isCanRotate: 0
+  placementMap: {fileID: 0}
 --- !u!61 &1093841620
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2807,6 +2809,11 @@ PrefabInstance:
       propertyPath: targetMap
       value: 
       objectReference: {fileID: 445893296533894839}
+    - target: {fileID: 2649060168375701185, guid: 88ddd787738efa54ca51cccc955a634a,
+        type: 3}
+      propertyPath: isCanRotate
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2649060168375701185, guid: 88ddd787738efa54ca51cccc955a634a,
         type: 3}
       propertyPath: sceneCamera

@@ -105,7 +105,13 @@ namespace BattleshipGame.Core
         {
             _currentDirection = (Direction)(((int)_currentDirection + 1) % 4);
         }
-
+        //reset
+        public void Reset()
+        {
+            _currentDirection = Direction.Right;
+            _enemyDirection = Direction.Right;
+            EnemyCoordinate = Vector2Int.zero;
+        }
         // 根据方向返回船只尺寸（修复尺寸计算逻辑）
         public (int width, int height) GetShipSize(bool isEnemy=false)
         {

@@ -7,7 +7,7 @@ namespace BattleshipGame.Tiling
     {
         public abstract void SetShip(Ship ship, Vector3Int coordinate);
 
-        public abstract bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn);
+        public abstract bool MoveShip(Ship ship, Vector3Int from, Vector3Int to, bool isMovedIn,bool isRotation=false);
         
         public abstract void ClearAllShips();
     }
