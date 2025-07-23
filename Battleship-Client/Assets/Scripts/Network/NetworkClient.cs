@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Colyseus;
@@ -56,6 +57,12 @@ namespace BattleshipGame.Network
         public void SendRematch(bool isRematching)
         {
             _room.Send(RoomMessage.Rematch, isRematching);
+        }
+        public void SendUseSkill(int skillType, object param = null)
+        {
+            var msg = new Dictionary<string, object> { { "skillType", skillType } };
+            if (param != null) msg.Add("params", param);
+            _room.Send(RoomMessage.UseSkill, msg);
         }
 
         public void LeaveRoom()
@@ -235,6 +242,35 @@ namespace BattleshipGame.Network
                 OnTurnSkipped?.Invoke(player);
             });
 
+            // 注册技能广播消息
+            _room.OnMessage<Dictionary<string, object>>(RoomMessage.SkillUsed, message =>
+            {
+                int skillType = Convert.ToInt32(message["skillType"]);
+                string player = message["player"] as string;
+                object param = message.ContainsKey("params") ? message["params"] : null;
+                Debug.Log("param type: " + param.GetType());
+                if (param is Dictionary<string, object>)
+                {
+                    Debug.Log("param is Dictionary<string, object>");
+                }
+                else if (param is Hashtable)
+                {
+                    Debug.Log("param is Hashtable");
+                }
+                else if (param is string)
+                {
+                    Debug.Log("param is string");
+                }
+                else if (param is List<object>)
+                {
+                    Debug.Log("param is List<object>");
+                }
+                else
+                {
+                    Debug.Log("param is " + param.GetType());
+                }
+                OnSkillUsed?.Invoke(player, skillType, param);
+            });
         }
 
         public void LeaveLobby()
@@ -274,6 +310,7 @@ namespace BattleshipGame.Network
         // 添加事件定义
         public event Action<string, string> OnXBombHit; // 参数：击中炸弹的玩家ID，被炸弹影响的玩家ID
         public event Action<string> OnTurnSkipped; // 参数：被跳过回合的玩家ID
+        public event Action<string, int, object> OnSkillUsed; // 参数：玩家ID，技能类型，附加参数
 
 
     }

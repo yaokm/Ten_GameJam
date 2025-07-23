@@ -45,6 +45,10 @@ namespace BattleshipGame.AI
                     }
             };
             _room.State.players[PlayerId].ships.OnChange += (turn, part) => _enemy.UpdatePlayerShips(part, turn);
+            _room.OnSkillUsed += (player, skillType, param) =>
+            {
+                if (OnSkillUsed != null) OnSkillUsed(player, skillType, param);
+            };
         }
 
         private void OnDisable()
@@ -54,6 +58,7 @@ namespace BattleshipGame.AI
         }
 
         public event Action<string> GamePhaseChanged;
+        public event Action<string, int, object> OnSkillUsed;
 
         public State GetRoomState()
         {
@@ -113,6 +118,10 @@ namespace BattleshipGame.AI
         {
             if (!_isMatchFinished && EnemyId.Equals(_room.State.playerTurn))
                 StartCoroutine(_enemy.GetShots(cells => _room.Turn(EnemyId, cells)));
+        }
+        public void SendUseSkill(int skillType, object param = null)
+        {
+            _room.UseSkill(PlayerId, skillType, param);
         }
     }
 }

@@ -10,5 +10,7 @@ namespace BattleshipGame.Network
         public const string OpponentInfoRequest="opponentInfoRequest";
         public const string BasePosition="basepostion";
         public const string Direction="direction";
+        public const string UseSkill = "useSkill";
+        public const string SkillUsed = "skillUsed";
     }
 }

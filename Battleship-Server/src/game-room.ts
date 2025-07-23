@@ -16,6 +16,7 @@ export class GameRoom extends Room<State> {
     eDirections: any={};//敌军方向
     eBasePositions: any={};//敌军基座位置
     playerSkipNextTurn: {[key: string]: boolean} = {}; // 用于跟踪玩家是否需要跳过下一回合
+    multiShotDirections: { [key: string]: string } = {};
     onCreate(options) {
         console.log(options);
         if (options.password) {
@@ -31,6 +32,8 @@ export class GameRoom extends Room<State> {
         this.onMessage("direction", (client, message) => this.playerDirection(client, message));
         // 添加对opponentInfoRequest消息的处理
         this.onMessage("opponentInfoRequest", (client, message) => this.handleOpponentInfoRequest(client));
+        // 注册useSkill消息
+        this.onMessage("useSkill", (client, message) => this.handleUseSkill(client, message));
     }
     // 添加新方法处理对手信息请求
     handleOpponentInfoRequest(client: Client) {
@@ -155,45 +158,64 @@ export class GameRoom extends Room<State> {
         let hit = false;                      // ← 记录是否命中
         let isXBomb = false;                  // ← 新增：记录是否命中X炸弹船
 
-        if (shots[targetIndex] == -1) {
-            shots[targetIndex] = this.state.currentTurn;
-            if (targetedPlacement[targetIndex] >= 0) {
-                hit = true;
-                this.playerHealth[enemy.sessionId]--;
-                switch (targetedPlacement[targetIndex]) {
-                    case 0: // F0
-                        this.updateShips(targetShips, 0, 6, this.state.currentTurn);
-                        break;
-                    case 1: // E0
-                        this.updateShips(targetShips, 6, 11, this.state.currentTurn);
-                        break;
-                    case 2: // D0
-                        this.updateShips(targetShips, 11, 15, this.state.currentTurn);
-                        break;
-                    case 3: // C0
-                        this.updateShips(targetShips, 15, 18, this.state.currentTurn);
-                        break;
-                    case 4: // B0
-                        this.updateShips(targetShips, 18, 20, this.state.currentTurn);
-                        break;
-                    case 5: // A0
-                        this.updateShips(targetShips, 20, 21, this.state.currentTurn);
-                        break;
-                    case 6: // D1
-                        this.updateShips(targetShips, 21, 25, this.state.currentTurn);
-                        break;
-                    case 7: // X，是个炸弹，踩到会卡对面一回合
-                        isXBomb = true;  // 标记命中了X炸弹
-                        this.playerSkipNextTurn[player.sessionId] = true; // 修改为标记当前玩家需要跳过下一回合
-                        hit = false; // 踩到炸弹不算命中，需要结束回合
-                        // 发送一个特殊消息通知客户端，玩家被炸弹影响
-                        this.broadcast("xBombHit", {
-                            player: player.sessionId,
-                            victim: player.sessionId // 受害者是玩家自己
-                        });
-                        break;
-                    case 8: // S
-                        break;
+        // 多方向开火处理
+        let multiShotDir = this.multiShotDirections && this.multiShotDirections[player.sessionId];
+        if (multiShotDir && message.length === 2) {
+            // message为两个格子索引
+            for (let i = 0; i < 2; i++) {
+                const idx = message[i];
+                if (shots[idx] == -1) {
+                    shots[idx] = this.state.currentTurn;
+                    if (targetedPlacement[idx] >= 0) {
+                        hit = true;
+                        this.playerHealth[enemy.sessionId]--;
+                        // 这里只处理一次updateShips，实际可根据需求调整
+                    }
+                }
+            }
+            // 用完后清除
+            delete this.multiShotDirections[player.sessionId];
+        } else {
+            if (shots[targetIndex] == -1) {
+                shots[targetIndex] = this.state.currentTurn;
+                if (targetedPlacement[targetIndex] >= 0) {
+                    hit = true;
+                    this.playerHealth[enemy.sessionId]--;
+                    switch (targetedPlacement[targetIndex]) {
+                        case 0: // F0
+                            this.updateShips(targetShips, 0, 6, this.state.currentTurn);
+                            break;
+                        case 1: // E0
+                            this.updateShips(targetShips, 6, 11, this.state.currentTurn);
+                            break;
+                        case 2: // D0
+                            this.updateShips(targetShips, 11, 15, this.state.currentTurn);
+                            break;
+                        case 3: // C0
+                            this.updateShips(targetShips, 15, 18, this.state.currentTurn);
+                            break;
+                        case 4: // B0
+                            this.updateShips(targetShips, 18, 20, this.state.currentTurn);
+                            break;
+                        case 5: // A0
+                            this.updateShips(targetShips, 20, 21, this.state.currentTurn);
+                            break;
+                        case 6: // D1
+                            this.updateShips(targetShips, 21, 25, this.state.currentTurn);
+                            break;
+                        case 7: // X，是个炸弹，踩到会卡对面一回合
+                            isXBomb = true;  // 标记命中了X炸弹
+                            this.playerSkipNextTurn[player.sessionId] = true; // 修改为标记当前玩家需要跳过下一回合
+                            hit = false; // 踩到炸弹不算命中，需要结束回合
+                            // 发送一个特殊消息通知客户端，玩家被炸弹影响
+                            this.broadcast("xBombHit", {
+                                player: player.sessionId,
+                                victim: player.sessionId // 受害者是玩家自己
+                            });
+                            break;
+                        case 8: // S
+                            break;
+                    }
                 }
             }
         }
@@ -275,5 +297,90 @@ export class GameRoom extends Room<State> {
                 break;
             }
         }
+    }
+
+    // 处理技能使用
+    handleUseSkill(client: Client, message: any) {
+        const player: Player = this.state.players[client.sessionId];
+        const skillType = message.skillType;
+        if (typeof skillType !== 'number' || skillType < 1 || skillType > 4) return;
+        // 只允许自己回合用技能
+        if (this.state.playerTurn !== player.sessionId) return;
+        // 每种技能每局只能用一次
+        if (player.usedSkills[skillType - 1] === 1) return;
+        player.usedSkills[skillType - 1] = 1;
+        const enemyId = Object.keys(this.state.players).find(id => id !== client.sessionId);
+        const enemy = this.state.players[enemyId];
+        let params = null;
+        if (skillType === 1) {
+            // ①令对面一个回合不能行动
+            this.playerSkipNextTurn[enemyId] = true;
+            params = { effect: 'stun', target: enemyId };
+        } else if (skillType === 2) {
+            // ②随机照明2*3未被点击区域，显示有几种船的部位存在
+            // 获取所有未被点击的格子
+            const shots = player.shots;
+            const areaSize = this.gridSize;
+            let found = false;
+            let tryCount = 0;
+            let region = null;
+            let shipTypes = new Set();
+            const placement = this.placements[enemyId];
+            while (!found && tryCount < 100) {
+                // 随机左上角
+                const x = Math.floor(Math.random() * (areaSize - 2));
+                const y = Math.floor(Math.random() * (areaSize - 3));
+                let allUnshot = true;
+                let localTypes = new Set();
+                for (let dx = 0; dx < 2; dx++) {
+                    for (let dy = 0; dy < 3; dy++) {
+                        const idx = (y + dy) * areaSize + (x + dx);
+                        if (shots[idx] !== -1) {
+                            allUnshot = false;
+                            break;
+                        }
+                        if (placement[idx] >= 0) {
+                            localTypes.add(placement[idx]);
+                        }
+                    }
+                    if (!allUnshot) break;
+                }
+                if (allUnshot) {
+                    found = true;
+                    region = { x, y };
+                    shipTypes = localTypes;
+                }
+                tryCount++;
+            }
+            params = { effect: 'scan', region, shipTypeCount: shipTypes.size };
+        } else if (skillType === 3) {
+            // ③随机爆出对面一个未被找过的船的点位
+            const shots = player.shots;
+            const placement = this.placements[enemyId];
+            const unshotShipCells = [];
+            for (let i = 0; i < placement.length; i++) {
+                if (placement[i] >= 0 && shots[i] === -1) {
+                    unshotShipCells.push(i);
+                }
+            }
+            let revealIdx = null;
+            if (unshotShipCells.length > 0) {
+                revealIdx = unshotShipCells[Math.floor(Math.random() * unshotShipCells.length)];
+            }
+            params = { effect: 'reveal', cellIndex: revealIdx };
+        } else if (skillType === 4) {
+            // ④开火时可选择上下左右任意一个位置一起开火
+            // 只记录本回合生效，实际射击时在playerTurn处理
+            params = { effect: 'multishot', direction: message.params && message.params.direction };
+            // 记录到GameRoom的multiShotDirections，供playerTurn读取
+            this.multiShotDirections[player.sessionId] = message.params && message.params.direction;
+        }
+        // 广播技能使用和效果
+        console.log("skillUsed params:", JSON.stringify(params));
+        this.broadcast("skillUsed", {
+            player: player.sessionId,
+            skillType: skillType,
+            params: params
+        });
     }
 }

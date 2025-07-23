@@ -15,5 +15,6 @@ namespace BattleshipGame.Network
         void SendGetOpponentInfoRequest();
         void LeaveRoom();
         public void GetOpponentShipData(Action<int[], int[], int[]> callback);
+        void SendUseSkill(int skillType, object param = null);
     }
 }

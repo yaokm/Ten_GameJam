@@ -12,6 +12,8 @@ using UnityEngine.SceneManagement;
 using static BattleshipGame.Core.StatusData.Status;
 using static BattleshipGame.Core.GridUtils;
 using UnityEngine.Tilemaps;
+using System;
+using TMPro;
 
 namespace BattleshipGame.Managers
 {
@@ -27,12 +29,16 @@ namespace BattleshipGame.Managers
         [SerializeField] private TurnHighlighter opponentStatusMapTurnHighlighter;
         [SerializeField] private ButtonController fireButton;
         [SerializeField] private ButtonController leaveButton;
+        [SerializeField] private ButtonController useSkillButton;
         [SerializeField] private MessageDialog leaveMessageDialog;
         [SerializeField] private MessageDialog leaveNotRematchMessageDialog;
         [SerializeField] private OptionDialog winnerOptionDialog;
         [SerializeField] private OptionDialog loserOptionDialog;
         [SerializeField] private OptionDialog leaveConfirmationDialog;
         [SerializeField] private StatusData statusData;
+        [SerializeField] private int mSkillType;
+        [SerializeField]
+        private TextMeshProUGUI debugTip;
         private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
         private readonly List<int> _shotsInCurrentTurn = new List<int>();
         private IClient _client;
@@ -40,7 +46,10 @@ namespace BattleshipGame.Managers
         private bool _leavePopUpIsOn;
         private string _player;
         private State _state;
-
+        private Skill mSkill;
+        private bool _isMultiShotActive = false;
+        private string _multiShotDirection = null;
+        private Vector3Int? _firstMultiShotCell = null;
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -106,6 +115,13 @@ namespace BattleshipGame.Managers
             fireButton.AddListener(FireShots);
             fireButton.SetInteractable(false);
 
+            // 技能按钮绑定
+            useSkillButton.AddListener(OnUseSkillButtonClicked);
+            if (_client is NetworkClient netClient)
+            {
+                netClient.OnSkillUsed += OnSkillUsed;
+            }
+
             _state = _client.GetRoomState();
             _player = _state.players[_client.GetSessionId()].sessionId;
 
@@ -132,6 +148,11 @@ namespace BattleshipGame.Managers
                 _state.players[_player].shots.OnChange += OnPlayerShotsChanged;//我方被射击情况
                 _state.players[_enemy].ships.OnChange += OnEnemyShipsChanged;//敌方船只被击中情况
                 _state.players[_enemy].shots.OnChange += OnEnemyShotsChanged;//敌方被射击情况
+            }
+            if (GameManager.TryGetInstance(out var gameManager))
+            {
+                mSkillType = gameManager.SelectedHeroId;
+                Debug.Log("BattleManager 读取到武将编号：" + mSkillType);
             }
         }
 
@@ -164,6 +185,34 @@ namespace BattleshipGame.Managers
         {
             if (_state.playerTurn != _client.GetSessionId()) return;
             int cellIndex = CoordinateToCellIndex(cell, rules.areaSize);
+            if (_isMultiShotActive)
+            {
+                if (_firstMultiShotCell == null)
+                {
+                    _firstMultiShotCell = cell;
+                    Debug.Log("请选择方向：up/down/left/right（此处用up演示）");
+                    _multiShotDirection = "up"; // TODO: UI选择
+                    // 计算第二个格子
+                    Vector3Int secondCell = cell;
+                    if (_multiShotDirection == "up") secondCell += Vector3Int.up;
+                    else if (_multiShotDirection == "down") secondCell += Vector3Int.down;
+                    else if (_multiShotDirection == "left") secondCell += Vector3Int.left;
+                    else if (_multiShotDirection == "right") secondCell += Vector3Int.right;
+                    int secondIndex = CoordinateToCellIndex(secondCell, rules.areaSize);
+                    // 标记两个格子
+                    _shotsInCurrentTurn.Clear();
+                    _shotsInCurrentTurn.Add(cellIndex);
+                    if (secondIndex >= 0 && secondIndex < rules.areaSize.x * rules.areaSize.y)
+                    {
+                        _shotsInCurrentTurn.Add(secondIndex);
+                        opponentMap.SetMarker(secondIndex, Marker.MarkedTarget);
+                    }
+                    opponentMap.SetMarker(cellIndex, Marker.MarkedTarget);
+                    fireButton.SetInteractable(true);
+                    opponentMap.IsMarkingTargets = false;
+                }
+                return;
+            }
             if (_shotsInCurrentTurn.Contains(cellIndex))
             {
                 _shotsInCurrentTurn.Remove(cellIndex);
@@ -263,10 +312,20 @@ namespace BattleshipGame.Managers
         private void FireShots()
         {
             fireButton.SetInteractable(false);
-            if (_shotsInCurrentTurn.Count == rules.shotsPerTurn)
+            if (_isMultiShotActive && _shotsInCurrentTurn.Count == 2)
+            {
                 _client.SendTurn(_shotsInCurrentTurn.ToArray());
+                _client.SendUseSkill(4, new { direction = _multiShotDirection }); // 补发方向参数
+                Debug.Log($"多方向开火：格子{_shotsInCurrentTurn[0]}和{_shotsInCurrentTurn[1]}，方向{_multiShotDirection}");
+                _isMultiShotActive = false;
+                _multiShotDirection = null;
+                _firstMultiShotCell = null;
+            }
+            else if (_shotsInCurrentTurn.Count == rules.shotsPerTurn)
+            {
+                _client.SendTurn(_shotsInCurrentTurn.ToArray());
+            }
             _shotsInCurrentTurn.Clear();
-            // 若服务器仍然保持本方回合（命中），继续允许标记
             opponentMap.IsMarkingTargets = true;
         }
 
@@ -379,5 +438,76 @@ namespace BattleshipGame.Managers
         {
             opponentStatus.DisplayShotEnemyShipParts(part, turn);
         }
+
+        // 技能按钮点击回调
+        private void OnUseSkillButtonClicked()
+        {
+            Debug.Log("请选择技能：1-眩晕对手，2-照明2*3区域，3-爆出对方船点，4-多方向开火");
+            // 这里实际应弹窗选择，暂用4号技能演示
+            int skillType = this.mSkillType; // TODO: 替换为UI选择
+            if (skillType == 4)
+            {
+                _isMultiShotActive = true;
+                _multiShotDirection = null;
+                _firstMultiShotCell = null;
+                Debug.Log("多方向开火技能已激活，请点击第一个目标格子");
+                _client.SendUseSkill(4, new { direction = "up" }); // 先发技能激活，方向后续再发
+            }
+            else
+            {
+                _client.SendUseSkill(skillType);
+                Debug.Log($"已请求使用技能{skillType}");
+            }
+        }
+        // 技能广播回调
+        private void OnSkillUsed(string player, int skillType, object param)
+        {
+            Debug.Log($"玩家{player}使用了技能{skillType}，原始参数：{param}");
+
+               
+            var paramDict = param as GameDevWare.Serialization.IndexedDictionary<string, object>;
+            string effect = paramDict["effect"] as string;
+            switch (effect)
+            {
+                case "stun":
+                    string target = paramDict["target"] as string;
+                    Debug.Log($"玩家{player}使用了眩晕技能，目标：{target}");
+                    debugTip.text = $"玩家{player}使用了眩晕技能，目标：{target}";
+                    break;
+                case "scan":
+                    var region = paramDict["region"] as GameDevWare.Serialization.IndexedDictionary<string, object>;
+                    int shipTypeCount = Convert.ToInt32(paramDict["shipTypeCount"]);
+                    int x = Convert.ToInt32(region["x"]);
+                    int y = Convert.ToInt32(region["y"]);
+                    Debug.Log($"玩家{player}使用了照明技能，区域：{x},{y}，船只类型数量：{shipTypeCount}");
+                    debugTip.text = $"玩家{player}使用了照明技能，区域：{x},{y}，船只类型数量：{shipTypeCount}";
+                    break;
+                case "reveal":
+                    int cellIndex = Convert.ToInt32(paramDict["cellIndex"]);
+                    Debug.Log($"玩家{player}使用了揭示技能，目标：{cellIndex}");
+                    debugTip.text = $"玩家{player}使用了揭示技能，目标：{cellIndex}";
+                    break;
+                case "multishot":
+                    string direction = paramDict["direction"] as string;
+                    Debug.Log($"玩家{player}使用了多方向开火技能，方向：{direction}");
+                    debugTip.text = $"玩家{player}使用了多方向开火技能，方向：{direction}";
+                    break;
+            }
+            if (skillType == 4 && player == _client.GetSessionId())
+            {
+                Debug.Log("你已使用多方向开火技能，本局不能再用");
+                useSkillButton?.SetInteractable(false);
+            }
+            Invoke(nameof(ClearDebugTip), 3f);
+        }
+
+        private void ClearDebugTip()
+        {
+            debugTip.text = "";
+        }       
     }
+      
+
+        
+    
 }

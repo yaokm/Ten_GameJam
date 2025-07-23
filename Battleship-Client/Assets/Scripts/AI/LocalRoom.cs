@@ -3,6 +3,7 @@ using System.Linq;
 using BattleshipGame.Network;
 using Colyseus.Schema;
 using UnityEngine;
+using System;
 
 namespace BattleshipGame.AI
 {
@@ -29,12 +30,17 @@ namespace BattleshipGame.AI
 
         // 添加新的字段跟踪跳过回合
         private Dictionary<string, bool> _skipNextTurn = new Dictionary<string, bool>();
+        private Dictionary<string, int[]> _usedSkills = new Dictionary<string, int[]>(); // 记录每个玩家的技能使用情况
+        private Dictionary<string, string> _multiShotDirections = new Dictionary<string, string>(); // 多方向参数
+        public event Action<string, int, object> OnSkillUsed; // (playerId, skillType, param)
         
         public LocalRoom(string playerId, string enemyId)
         {
             State = new State {players = new MapSchema<Player>(), phase = RoomPhase.Waiting, currentTurn = 1};
-            var player = new Player {sessionId = playerId};
-            var enemy = new Player {sessionId = enemyId};
+            var player = new Player();// {sessionId = playerId};
+            var enemy = new Player();// {sessionId = enemyId};
+            player.sessionId = playerId;
+            enemy.sessionId = enemyId;
             State.players.Add(playerId, player);
             State.players.Add(enemyId, enemy);
             _health = new Dictionary<string, int> {{playerId, StartingFleetHealth}, {enemyId, StartingFleetHealth}};
@@ -56,6 +62,16 @@ namespace BattleshipGame.AI
             {
                 {playerId, false},
                 {enemyId, false}
+            };
+            _usedSkills = new Dictionary<string, int[]>
+            {
+                {playerId, new int[4]},
+                {enemyId, new int[4]}
+            };
+            _multiShotDirections = new Dictionary<string, string>
+            {
+                {playerId, null},
+                {enemyId, null}
             };
         }
 
@@ -84,7 +100,7 @@ namespace BattleshipGame.AI
             {
                 var keys = new string[State.players.Keys.Count];
                 State.players.Keys.CopyTo(keys, 0);
-                string startingPlayer = keys[Random.Range(0, keys.Length)];
+                string startingPlayer = keys[UnityEngine.Random.Range(0, keys.Length)];
                 if (_isRematching)
                 {
                     _isRematching = false;
@@ -97,61 +113,123 @@ namespace BattleshipGame.AI
             }
         }
 
+        public void UseSkill(string clientId, int skillType, object param = null)
+        {
+            if (skillType < 1 || skillType > 4) return;
+            if (_usedSkills[clientId][skillType - 1] == 1) return;
+            _usedSkills[clientId][skillType - 1] = 1;
+            string opponentId = null;
+            foreach (var id in State.players.Keys)
+            {
+                if (id != clientId)
+                {
+                    opponentId = id.ToString();
+                    break;
+                }
+            }
+            object skillParam = null;
+            if (skillType == 1) // 眩晕
+            {
+                _skipNextTurn[opponentId] = true;
+                skillParam = new { effect = "stun", target = opponentId };
+            }
+            else if (skillType == 2) // 照明
+            {
+                var shots = State.players[clientId].shots;
+                int areaSize = GridSize;
+                bool found = false;
+                int tryCount = 0;
+                int regionX = 0, regionY = 0;
+                var shipTypes = new HashSet<int>();
+                var placement = _placements[opponentId];
+                while (!found && tryCount < 100)
+                {
+                    int x = UnityEngine.Random.Range(0, areaSize - 2);
+                    int y = UnityEngine.Random.Range(0, areaSize - 3);
+                    bool allUnshot = true;
+                    var localTypes = new HashSet<int>();
+                    for (int dx = 0; dx < 2; dx++)
+                    {
+                        for (int dy = 0; dy < 3; dy++)
+                        {
+                            int idx = (y + dy) * areaSize + (x + dx);
+                            if (shots[idx] != -1) { allUnshot = false; break; }
+                            if (placement[idx] >= 0) localTypes.Add(placement[idx]);
+                        }
+                        if (!allUnshot) break;
+                    }
+                    if (allUnshot)
+                    {
+                        found = true;
+                        regionX = x; regionY = y;
+                        shipTypes = localTypes;
+                    }
+                    tryCount++;
+                }
+                skillParam = new { effect = "scan", region = new { x = regionX, y = regionY }, shipTypeCount = shipTypes.Count };
+            }
+            else if (skillType == 3) // 爆点
+            {
+                var shots = State.players[clientId].shots;
+                var placement = _placements[opponentId];
+                var unshotShipCells = new List<int>();
+                for (int i = 0; i < placement.Length; i++)
+                    if (placement[i] >= 0 && shots[i] == -1) unshotShipCells.Add(i);
+                int? revealIdx = null;
+                if (unshotShipCells.Count > 0)
+                    revealIdx = unshotShipCells[UnityEngine.Random.Range(0, unshotShipCells.Count)];
+                skillParam = new { effect = "reveal", cellIndex = revealIdx };
+            }
+            else if (skillType == 4) // 多方向
+            {
+                string dir = param != null ? (string)param.GetType().GetProperty("direction")?.GetValue(param, null) : null;
+                _multiShotDirections[clientId] = dir;
+                skillParam = new { effect = "multishot", direction = dir };
+            }
+            OnSkillUsed?.Invoke(clientId, skillType, skillParam);
+        }
+
         public void Turn(string clientId, int[] targetIndexes)
         {
             if (!State.playerTurn.Equals(clientId)) return;
-            if (targetIndexes == null || targetIndexes.Length != 1) return;
-
-            int targetIndex = targetIndexes[0];
+            if (targetIndexes == null || (targetIndexes.Length != 1 && targetIndexes.Length != 2)) return;
             var player = State.players[clientId];
             var opponent = GetOpponent(player);
             var playerShots = player.shots;
             var opponentShips = opponent.ships;
             int[] opponentPlacements = _placements[opponent.sessionId];
-
             bool hit = false;
             bool isXBomb = false;
-
-            if (playerShots[targetIndex] == -1)
+            // 多方向开火
+            if (_multiShotDirections[clientId] != null && targetIndexes.Length == 2)
             {
-                playerShots[targetIndex] = State.currentTurn;
-                State.players[clientId].shots.InvokeOnChange(State.currentTurn, targetIndex);
-
-                if (opponentPlacements[targetIndex] >= 0)
+                for (int i = 0; i < 2; i++)
                 {
-                    hit = true;
-                    _health[opponent.sessionId]--;
-
-                    switch (opponentPlacements[targetIndex])
+                    int idx = targetIndexes[i];
+                    if (playerShots[idx] == -1)
                     {
-                        case 0: // F0
-                            UpdateShips(opponentShips, 0, 6, State.currentTurn);
-                            break;
-                        case 1: // E0
-                            UpdateShips(opponentShips, 6,11, State.currentTurn);
-                            break;
-                        case 2: // D0
-                            UpdateShips(opponentShips, 11, 15, State.currentTurn);
-                            break;
-                        case 3: // C0
-                            UpdateShips(opponentShips, 15, 18, State.currentTurn);
-                            break;
-                        case 4: // B0
-                            UpdateShips(opponentShips, 18, 20, State.currentTurn);
-                            break;
-                        case 5: // A0
-                            UpdateShips(opponentShips, 20, 21, State.currentTurn);
-                            break;
-                        case 6: // D1
-                            UpdateShips(opponentShips, 21, 25, State.currentTurn);
-                            break;
-                        case 7: // X炸弹船
-                            isXBomb = true;
-                            Debug.Log("isXBomb");
-                            // 可以发送一个消息通知UI显示炸弹效果
-                            break;
-                        case 8: // S
-                            break;
+                        playerShots[idx] = State.currentTurn;
+                        State.players[clientId].shots.InvokeOnChange(State.currentTurn, idx);
+                        if (opponentPlacements[idx] >= 0)
+                        {
+                            hit = true;
+                            _health[opponent.sessionId]--;
+                        }
+                    }
+                }
+                _multiShotDirections[clientId] = null;
+            }
+            else if (targetIndexes.Length == 1)
+            {
+                int targetIndex = targetIndexes[0];
+                if (playerShots[targetIndex] == -1)
+                {
+                    playerShots[targetIndex] = State.currentTurn;
+                    State.players[clientId].shots.InvokeOnChange(State.currentTurn, targetIndex);
+                    if (opponentPlacements[targetIndex] >= 0)
+                    {
+                        hit = true;
+                        _health[opponent.sessionId]--;
                     }
                 }
             }

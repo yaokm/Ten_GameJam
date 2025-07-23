@@ -7,14 +7,17 @@
 
 using Colyseus.Schema;
 
-namespace BattleshipGame.Network
-{
-    public class Player : Schema
-    {
-        [Type(0, "string")] public string sessionId = "";
+public class Player : Schema {
+	[Type(0, "string")]
+	public string sessionId = "";
 
-        [Type(1, "array", "int8")] public ArraySchema<int> shots = new ArraySchema<int>();
+	[Type(1, "array", "int8")]
+	public ArraySchema<int> shots = new ArraySchema<int>();
 
-        [Type(2, "array", "int8")] public ArraySchema<int> ships = new ArraySchema<int>();
-    }
+	[Type(2, "array", "int8")]
+	public ArraySchema<int> ships = new ArraySchema<int>();
+
+	[Type(3, "array", "int8")]
+	public ArraySchema<int> usedSkills = new ArraySchema<int>();
 }
+

@@ -12,6 +12,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private NetworkOptions networkOptions;
         [SerializeField] private StatusData statusData;
         public IClient Client { get; private set; }
+        public int SelectedHeroId { get; set; } = 1;
 
         protected override void Awake()
         {

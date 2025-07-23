@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using BattleshipGame.Core;
 using BattleshipGame.Network;
@@ -10,6 +10,8 @@ using UnityEngine.SceneManagement;
 using static BattleshipGame.Core.StatusData.Status;
 using static BattleshipGame.Core.GridUtils;
 using System.IO;
+using UnityEngine.UI;
+using TMPro;
 
 namespace BattleshipGame.Managers
 {
@@ -27,6 +29,10 @@ namespace BattleshipGame.Managers
         [SerializeField] private Rules rules;
         [SerializeField] private PlacementMap placementMap;
         [SerializeField] private StatusData statusData;
+        [SerializeField] private Button btnHero;
+        [SerializeField] private TextMeshProUGUI txtHero;
+        // 新增：保存选择的武将编号
+        private int selectedHeroId = 1;
         private int _cellCount;
         private int[] _cells;
         private IClient _client;
@@ -83,6 +89,7 @@ namespace BattleshipGame.Managers
             clearButton.AddListener(OnClearButtonPressed);
             randomButton.AddListener(PlaceShipsRandomly);
             continueButton.AddListener(CompletePlacement);
+            btnHero.onClick.AddListener(OnHeroButtonClicked);
 
             BeginShipPlacement();
 
@@ -658,6 +665,45 @@ namespace BattleshipGame.Managers
             }
             
             Debug.Log($"注册了船只 {shipId} 在 {pivot} 方向 {ship.CurrentDirection}，共 {registeredCount} 个单元格");
+        }
+
+        // 新增：武将选择弹窗逻辑
+        private void OnHeroButtonClicked()
+        {
+            // 这里只用最简单的方式实现弹窗选择（实际项目可用自定义UI或第三方弹窗）
+            // 这里用Unity的原生弹窗API（Editor下可用），运行时可用自定义UI
+#if UNITY_EDITOR
+            string[] options = { "1", "2", "3", "4" };
+            int choice = UnityEditor.EditorUtility.DisplayDialogComplex("选择武将", "请选择一个武将编号：", "1", "2", "3");
+            if (choice == 0) selectedHeroId = 1;
+            else if (choice == 1) selectedHeroId = 2;
+            else if (choice == 2) selectedHeroId = 3;
+            else selectedHeroId = 4;
+            Debug.Log($"已选择武将：{selectedHeroId}");
+#else
+            // 运行时环境下建议用自定义UI，这里简单循环切换
+            selectedHeroId = selectedHeroId % 4 + 1;
+            Debug.Log($"已选择武将：{selectedHeroId}");
+            switch (selectedHeroId)
+            {
+                case 1:
+                    txtHero.text = "陷阱";
+                    break;
+                case 2:
+                    txtHero.text = "照明";
+                    break;
+                case 3:
+                    txtHero.text = "揭示";
+                    break;
+                case 4:
+                    txtHero.text = "多方向开火";
+                    break;
+            }
+#endif
+            if (GameManager.TryGetInstance(out var gameManager))
+            {
+                gameManager.SelectedHeroId = selectedHeroId;
+            }
         }
     }
 }
