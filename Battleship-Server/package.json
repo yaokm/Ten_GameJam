@@ -14,9 +14,11 @@
   "license": "ISC",
   "dependencies": {
     "@colyseus/monitor": "^0.12.1",
+    "axios": "^1.11.0",
     "colyseus": "^0.13.9",
     "cors": "^2.8.5",
     "express": "^4.14.0",
+    "openai": "^5.10.2",
     "serve-index": "^1.8.0",
     "superagent": "^3.8.1"
   },

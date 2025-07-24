@@ -128,7 +128,7 @@ namespace BattleshipGame.Network
             try
             {
                 _room = await _client.Create<State>(RoomName,
-                    new Dictionary<string, object> { { RoomOption.Name, name }, { RoomOption.Password, password } });
+                    new Dictionary<string, object> { { RoomOption.Name, name }, { RoomOption.Password, password }, { "aiMode", true } });
                 RegisterRoomHandlers();
                 success?.Invoke();
             }

@@ -1,6 +1,9 @@
 import { Room, Client } from "colyseus";
 
 import { State, Player } from './game-state';
+import axios from "axios";
+import * as fs from "fs";
+const config = JSON.parse(fs.readFileSync(require("path").resolve(__dirname, "./config.json"), "utf-8"));
 const paodanCount: number = 1;
 export class GameRoom extends Room<State> {
     rematchCount: any = {};
@@ -17,6 +20,11 @@ export class GameRoom extends Room<State> {
     eBasePositions: any={};//敌军基座位置
     playerSkipNextTurn: {[key: string]: boolean} = {}; // 用于跟踪玩家是否需要跳过下一回合
     multiShotDirections: { [key: string]: string } = {};
+    isAIMode: boolean = false;
+    aiSessionId: string = "AI";
+    aiPlaced: boolean = false;
+    aiPromptHistory: any[] = [];
+    aiRound: number = 1;
     onCreate(options) {
         console.log(options);
         if (options.password) {
@@ -24,6 +32,7 @@ export class GameRoom extends Room<State> {
             this.name = options.name;
             // this.setPrivate();
         }
+        this.isAIMode = !!options.aiMode;
         this.reset();
         this.setMetadata({ name: options.name || this.roomId, requiresPassword: !!this.password });
         this.onMessage("place", (client, message) => this.playerPlace(client, message));
@@ -58,6 +67,18 @@ export class GameRoom extends Room<State> {
         let player: Player = new Player(client.sessionId, this.gridSize * this.gridSize, this.startingFleetHealth);
         this.state.players[client.sessionId] = player;
         this.playerCount++;
+
+        if (this.isAIMode && this.playerCount === 1) {
+            // 自动加入AI
+            let aiPlayer = new Player(this.aiSessionId, this.gridSize * this.gridSize, this.startingFleetHealth);
+            this.state.players[this.aiSessionId] = aiPlayer;
+            this.playerCount++;
+            // AI自动布阵
+            this.aiPlaceFleet();
+            this.aiPlaced = true;
+            this.state.phase = 'place';
+            this.lock();
+        }
 
         if (this.playerCount == 2) {
             this.state.phase = 'place';
@@ -103,6 +124,11 @@ export class GameRoom extends Room<State> {
         this.eBasePositions[player.sessionId] = message.basePositions;
         
         this.playersPlaced++;
+
+        if (this.isAIMode && !this.aiPlaced && this.playersPlaced === 1) {
+            this.aiPlaceFleet();
+            this.aiPlaced = true;
+        }
 
         if (this.playersPlaced == 2) {
             Object.keys(this.state.players).forEach(key => {
@@ -246,6 +272,11 @@ export class GameRoom extends Room<State> {
                 this.state.playerTurn = player.sessionId;
             }
         }
+
+        // AI对战：如果轮到AI，自动触发AI回合
+        if (this.isAIMode && this.state.playerTurn === this.aiSessionId && this.state.phase === 'battle') {
+            this.triggerAITurn();
+        }
     }
 
     onDispose() { }
@@ -382,5 +413,120 @@ export class GameRoom extends Room<State> {
             skillType: skillType,
             params: params
         });
+    }
+
+    aiPlaceFleet() {
+        // 简单随机布阵（可扩展为API生成）
+        // 这里只做最基础的直线布阵，实际可更复杂
+        const size = this.gridSize * this.gridSize;
+        const placement = new Array(size).fill(-1);
+        // 以config.json的ship_types顺序依次放置
+        let shipTypes = config.game_settings.ship_types;
+        let pos = 0;
+        for (let i = 0; i < shipTypes.length; i++) {
+            let ship = shipTypes[i];
+            for (let j = 0; j < ship.size; j++) {
+                if (pos < size) placement[pos++] = i;
+            }
+        }
+        this.placements[this.aiSessionId] = placement;
+        this.eDirections[this.aiSessionId] = [0,0,0,0,0,0,0]; // 默认方向
+        this.eBasePositions[this.aiSessionId] = [0,0,0,0,0,0,0]; // 默认基点
+        this.playersPlaced++;
+    }
+
+    async triggerAITurn() {
+        // 1. 组织棋盘状态
+        const playerId = Object.keys(this.state.players).find(id => id !== this.aiSessionId);
+        const player = this.state.players[playerId];
+        const ai = this.state.players[this.aiSessionId];
+        // 构造10x10棋盘，-1未探索，0空地，1击中，A0~F0为击沉
+        const shots = ai.shots;
+        const placement = this.placements[playerId];
+        let board = [];
+        for (let i = 0; i < this.gridSize; i++) {
+            let row = [];
+            for (let j = 0; j < this.gridSize; j++) {
+                let idx = i * this.gridSize + j;
+                if (shots[idx] === -1) {
+                    row.push("-1");
+                } else if (placement[idx] === -1) {
+                    row.push("0");
+                } else if (shots[idx] !== -1 && placement[idx] >= 0) {
+                    // 判断是否击沉
+                    // 这里只做简单处理，实际可更细致
+                    row.push("1");
+                } else {
+                    row.push("0");
+                }
+            }
+            board.push(row);
+        }
+        // 格式化棋盘
+        let board_state = "   " + Array.from({length:10}, (_,i)=>String.fromCharCode(65+i)).join(" ") + "\n";
+        for (let i = 0; i < 10; i++) {
+            board_state += `${i+1}`.padStart(2, ' ') + ": " + board[i].map(cell=>cell.padStart(2,' ')).join(" ") + "\n";
+        }
+        // 2. 组织prompt
+        const round_number = this.aiRound;
+        const user_prompt = config.prompts.user_prompt_template.replace("{round_number}", round_number).replace("{board_state}", board_state);
+        const messages = [
+            { role: "system", content: config.prompts.system_prompt },
+            ...this.aiPromptHistory,
+            { role: "user", content: user_prompt }
+        ];
+        // 3. 调用deepseek API
+        try {
+            const resp = await axios.post(
+                config.api.base_url + "/v1/chat/completions",
+                {
+                    model: config.api.model,
+                    messages: messages,
+                    stream: false,
+                    response_format: { type: "json_object" }
+                },
+                {
+                    headers: {
+                        "Authorization": `Bearer ${config.api.key}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+            let content = resp.data.choices[0].message.content;
+            let json = {};
+            try {
+                json = JSON.parse(content);
+            } catch {
+                // 尝试提取JSON
+                const match = content.match(/\{[\s\S]*\}/);
+                if (match) {
+                    json = JSON.parse(match[0]);
+                } else {
+                    json = { position: "A1", response: "AI解析失败，随机攻击！" };
+                }
+            }
+            // 4. 解析坐标
+            let pos = (json as any).position || "A1";
+            let idx = this.aiPosToIndex(pos);
+            if (idx < 0 || idx >= this.gridSize * this.gridSize) idx = 0;
+            // 5. 记录对话历史
+            this.aiPromptHistory.push({ role: "user", content: user_prompt });
+            this.aiPromptHistory.push({ role: "assistant", content: content });
+            this.aiRound++;
+            // 6. 以AI身份执行playerTurn
+            this.playerTurn({ sessionId: this.aiSessionId } as any, [idx]);
+        } catch (e) {
+            console.error("AI deepseek API调用失败", e);
+            // 失败时随机攻击
+            let idx = 0;
+            this.playerTurn({ sessionId: this.aiSessionId } as any, [idx]);
+        }
+    }
+    aiPosToIndex(pos: string): number {
+        // A1~J10转为0~99
+        if (!/^[A-J](10|[1-9])$/.test(pos)) return 0;
+        let col = pos.charCodeAt(0) - 65;
+        let row = parseInt(pos.slice(1)) - 1;
+        return row * this.gridSize + col;
     }
 }
