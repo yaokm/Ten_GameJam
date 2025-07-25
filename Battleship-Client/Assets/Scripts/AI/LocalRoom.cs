@@ -10,7 +10,7 @@ namespace BattleshipGame.AI
     public class LocalRoom
     {
         // 游戏常量定义
-        private const int StartingFleetHealth = 25; // 初始舰队总生命值（所有船只部件总和）
+        private const int StartingFleetHealth = 24; // 初始舰队总生命值（所有船只部件总和）
         private const int GridSize = 10;           // 棋盘网格尺寸（10x10）
         private const int ShotsSize = GridSize * GridSize; // 总射击位置数量（100个）
     
@@ -49,11 +49,11 @@ namespace BattleshipGame.AI
                 {playerId, new int[ShotsSize]}, {enemyId, new int[ShotsSize]}
             };
             _directions = new Dictionary<string, int[]>{
-                {playerId, new int[8]}, {enemyId, new int[8]}
+                {playerId, new int[7]}, {enemyId, new int[7]}
             };
             _basePositions = new Dictionary<string, int[][]>
             {
-                {playerId, new int[8][]}, {enemyId, new int[8][]}
+                {playerId, new int[7][]}, {enemyId, new int[7][]}
             };
             ResetPlayers();
 
@@ -332,7 +332,7 @@ namespace BattleshipGame.AI
 
             _health = _health.ToDictionary(kvp => kvp.Key, kvp => StartingFleetHealth);
             _placements = _placements.ToDictionary(kvp => kvp.Key, kvp => new int[ShotsSize]);
-            _directions = _directions.ToDictionary(kvp => kvp.Key, kvp => new int[8]);
+            _directions = _directions.ToDictionary(kvp => kvp.Key, kvp => new int[7]);
 
             // 重置跳过回合状态
             foreach (var key in _skipNextTurn.Keys.ToList())

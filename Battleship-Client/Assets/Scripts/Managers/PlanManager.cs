@@ -186,8 +186,8 @@ namespace BattleshipGame.Managers
                 clearButton.SetInteractable(false);
                 
                 var placements = placementMap.GetPlacements();
-                var coordinates = new int[8][];
-                var directions = new int[8];
+                var coordinates = new int[7][];
+                var directions = new int[7];
                 foreach (var placement in placements)
                 {
                     int idx = placement.ship.rankOrder;

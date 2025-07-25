@@ -30,8 +30,8 @@ namespace BattleshipGame.Tiling
                         _shipParts.Add((NotShot, partCoordinate));
                     }
                 }
-            // 初始化为25个零向量
-            for (int i = 0; i < 25; i++)
+            // 初始化为24个零向量
+            for (int i = 0; i < 24; i++)
             {
                 ShipPartPos.Add(Vector3.zero);
             }
@@ -100,10 +100,10 @@ namespace BattleshipGame.Tiling
                     return isShipPartShot(15, 17);
                 case 4://B0
                     return isShipPartShot(18, 19);
-                case 5://A0
-                    return isShipPartShot(20, 20);
-                case 6://D1
-                    return isShipPartShot(21, 24);
+                // case 5://A0
+                //     return isShipPartShot(20, 20);
+                case 5://D1
+                    return isShipPartShot(20, 23);
                 default:
                     return false;
             }
@@ -137,13 +137,13 @@ namespace BattleshipGame.Tiling
                 case 18:
                 case 19:
                     return 4;//B0   
+                // case 20:
+                //     return 5;//A0  // A0船已移除
                 case 20:
-                    return 5;//A0
                 case 21:
                 case 22:
                 case 23:
-                case 24:
-                    return 6;//D1
+                    return 5;//D1
                 default:
                     return -1;
             }
@@ -197,7 +197,7 @@ namespace BattleshipGame.Tiling
             // // 3. 更新 Tilemap 中该位置的瓷砖变换
             OpponentMap.SetTransformMatrix(coordinate, tileTransform);
         }
-        //changedShipPart: 0-25,shotTurn:击中回合
+        //changedShipPart: 0-24,shotTurn:击中回合
         public void DisplayShotEnemyShipParts(int changedShipPart, int shotTurn)
         {
             Debug.Log("ShipPartPos_size: " + ShipPartPos.Count);

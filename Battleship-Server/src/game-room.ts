@@ -11,7 +11,7 @@ export class GameRoom extends Room<State> {
     password: string;
     name: string;
     gridSize: number = 10;
-    startingFleetHealth: number = 25;
+    startingFleetHealth: number = 24;
     placements: any={};
     playerHealth: any={};
     playersPlaced: number = 0;
@@ -223,11 +223,11 @@ export class GameRoom extends Room<State> {
                         case 4: // B0
                             this.updateShips(targetShips, 18, 20, this.state.currentTurn);
                             break;
-                        case 5: // A0
-                            this.updateShips(targetShips, 20, 21, this.state.currentTurn);
-                            break;
+                        // case 5: // A0
+                        //     this.updateShips(targetShips, 20, 21, this.state.currentTurn);
+                        //     break;
                         case 6: // D1
-                            this.updateShips(targetShips, 21, 25, this.state.currentTurn);
+                            this.updateShips(targetShips, 20, 24, this.state.currentTurn);
                             break;
                         case 7: // X，是个炸弹，踩到会卡对面一回合
                             isXBomb = true;  // 标记命中了X炸弹
