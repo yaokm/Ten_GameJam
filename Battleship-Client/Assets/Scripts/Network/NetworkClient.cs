@@ -207,7 +207,7 @@ namespace BattleshipGame.Network
 
                     // 解析基点坐标数组（二维数组）
                     var basePositionsObj = message["basePositions"] as List<object>;
-                    var basePositions = new int[8][];
+                    var basePositions = new int[7][];
 
                     for (int i = 0; i < basePositions.Length; i++)
                     {
