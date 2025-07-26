@@ -585,16 +585,22 @@ export class GameRoom extends Room<State> {
             ...this.aiPromptHistory,
             { role: "user", content: user_prompt }
         ];
+        // 调试输出prompt内容
+        console.log("[AI DEBUG] user_prompt:", user_prompt);
+        console.log("[AI DEBUG] messages:", JSON.stringify(messages, null, 2));
         // 3. 调用deepseek API
         try {
+            const requestBody = {
+                model: config.api.model,
+                messages: messages,
+                stream: false,
+                response_format: config.api.response_format,
+                max_tokens: config.api.max_tokens
+            };
+            console.log("[AI DEBUG] API Request Body:", JSON.stringify(requestBody, null, 2));
             const resp = await axios.post(
                 config.api.base_url + "/v1/chat/completions",
-                {
-                    model: config.api.model,
-                    messages: messages,
-                    stream: false,
-                    response_format: { type: "json_object" }
-                },
+                requestBody,
                 {
                     headers: {
                         "Authorization": `Bearer ${config.api.key}`,
@@ -603,6 +609,7 @@ export class GameRoom extends Room<State> {
                 }
             );
             let content = resp.data.choices[0].message.content;
+            console.log("[AI DEBUG] API Raw Response:", content);
             let json = {};
             try {
                 json = JSON.parse(content);
@@ -615,9 +622,11 @@ export class GameRoom extends Room<State> {
                     json = { position: "A1", response: "AI解析失败，随机攻击！" };
                 }
             }
+            console.log("[AI DEBUG] Parsed JSON:", JSON.stringify(json));
             // 4. 解析坐标
             let pos = (json as any).position || "A1";
             let idx = this.aiPosToIndex(pos);
+            console.log("[AI DEBUG] AI Chosen Position:", pos, "Index:", idx);
             if (idx < 0 || idx >= this.gridSize * this.gridSize) idx = 0;
             // 5. 记录对话历史
             this.aiPromptHistory.push({ role: "user", content: user_prompt });
@@ -626,7 +635,7 @@ export class GameRoom extends Room<State> {
             // 6. 以AI身份执行playerTurn
             this.playerTurn({ sessionId: this.aiSessionId } as any, [idx]);
         } catch (e) {
-            console.error("AI deepseek API调用失败", e);
+            console.error("[AI DEBUG] AI deepseek API调用失败", e);
             // 失败时随机攻击
             let idx = 0;
             this.playerTurn({ sessionId: this.aiSessionId } as any, [idx]);
