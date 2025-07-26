@@ -78,6 +78,7 @@ namespace BattleshipGame.Network
             try
             {
                 _lobby = await _client.JoinOrCreate<LobbyState>(LobbyName);
+                
                 success?.Invoke();
                 RegisterLobbyHandlers();
             }

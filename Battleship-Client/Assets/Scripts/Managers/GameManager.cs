@@ -45,11 +45,16 @@ namespace BattleshipGame.Managers
             };
             var networkClient = (NetworkClient) Client;
             statusData.State = Connecting;
+            
+            // 添加调试信息
+            Debug.Log($"尝试连接到服务器: {networkOptions.EndPoint}");
+            
             networkClient.Connect(networkOptions.EndPoint,
                 () =>
                 {
                     if (Client is NetworkClient)
                     {
+                        Debug.Log("连接成功");
                         onSuccess?.Invoke();
                     }
                 },
@@ -57,6 +62,7 @@ namespace BattleshipGame.Managers
                 {
                     if (Client is NetworkClient)
                     {
+                        Debug.Log("连接失败");
                         onError?.Invoke();
                         Client = null;
                     }
