@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa8ae29f04f64277be88d39ab167eb90, type: 3}
   m_Name: NetworkOptions
   m_EditorClassIdentifier: 
-  localEndpoint: ws://localhost:2567
-  onlineEndpoint: ws://
+  localEndpoint: ws://192.168.137.1:2567
+  onlineEndpoint: ws://192.168.137.1:2567
   serverType: 0
