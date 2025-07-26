@@ -417,19 +417,128 @@ export class GameRoom extends Room<State> {
     }
 
     aiPlaceFleet() {
-        // 简单随机布阵（可扩展为API生成）
-        // 这里只做最基础的直线布阵，实际可更复杂
+        // 使用更智能的随机布阵，参考Python代码思路
         const size = this.gridSize * this.gridSize;
         const placement = new Array(size).fill(-1);
-        // 以config.json的ship_types顺序依次放置
-        let shipTypes = config.game_settings.ship_types;
-        let pos = 0;
-        for (let i = 0; i < shipTypes.length; i++) {
-            let ship = shipTypes[i];
-            for (let j = 0; j < ship.size; j++) {
-                if (pos < size) placement[pos++] = i;
+        const occupied = new Array(size).fill(0); // 占用矩阵
+        
+        // 船只配置 [ship_id, shape, ship_index]
+        const ships = [
+            { id: "A0", shape: [[1,0]], shipIndex: 0 },                    // 1格
+            { id: "B0", shape: [[1,0],[1,0]], shipIndex: 1 },              // 2格直线
+            { id: "C0", shape: [[1,0],[1,0],[1,0]], shipIndex: 2 },     // 3格直线
+            { id: "D0", shape: [[1,0],[1,1],[1,0]], shipIndex: 3 },     // T型4格
+            { id: "D1", shape: [[1,0],[1,0],[1,0],[1,0]], shipIndex: 4 }, // 4格直线
+            { id: "E0", shape: [[1,0],[1,0],[1,0],[1,0],[1,0]], shipIndex: 5 }, // 5格直线
+            { id: "F0", shape: [[1,0],[1,1],[1,1],[0,1]], shipIndex: 6 }, // Z型6格
+        ];
+
+        // 将shape格式转换为坐标位置列表
+        const shapeToPositions = (shape: number[][]): [number, number][] => {
+            const positions: [number, number][] = [];
+            for (let row = 0; row < shape.length; row++) {
+                const [left, right] = shape[row];
+                if (left === 1) {
+                    positions.push([row, 0]); // 左边有舰船
+                }
+                if (right === 1) {
+                    positions.push([row, 1]); // 右边有舰船
+                }
+            }
+            return positions;
+        };
+
+        // 旋转位置坐标 - 90度顺时针旋转
+        const rotatePositions = (positions: [number, number][], times: number): [number, number][] => {
+            let result = [...positions];
+            for (let i = 0; i < times % 4; i++) {
+                // 90度顺时针旋转: (row,col) -> (col, -row)
+                result = result.map(([row, col]) => [col, -row]);
+            }
+            return result;
+        };
+
+        // 标准化位置，使最小坐标为(0,0)
+        const normalizePositions = (positions: [number, number][]): [number, number][] => {
+            if (positions.length === 0) return positions;
+            const minRow = Math.min(...positions.map(pos => pos[0]));
+            const minCol = Math.min(...positions.map(pos => pos[1]));
+            return positions.map(([row, col]) => [row - minRow, col - minCol]);
+        };
+
+        // 检查是否可以放置舰船
+        const canPlaceShip = (occupied: number[], positions: [number, number][], startRow: number, startCol: number): boolean => {
+            const tempOccupied = [...occupied];
+            for (const [rowOffset, colOffset] of positions) {
+                const row = startRow + rowOffset;
+                const col = startCol + colOffset;
+                // 检查边界
+                if (row < 0 || row >= this.gridSize || col < 0 || col >= this.gridSize) {
+                    return false;
+                }
+                // 检查是否会产生重叠
+                const idx = row * this.gridSize + col;
+                tempOccupied[idx]++;
+                if (tempOccupied[idx] > 1) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        // 放置舰船
+        const placeShip = (placement: number[], occupied: number[], shipIndex: number, positions: [number, number][], startRow: number, startCol: number) => {
+            for (const [rowOffset, colOffset] of positions) {
+                const row = startRow + rowOffset;
+                const col = startCol + colOffset;
+                const idx = row * this.gridSize + col;
+                placement[idx] = shipIndex;
+                occupied[idx] = 1;
+            }
+        };
+
+        // 获取位置边界
+        const getBounds = (positions: [number, number][]): [number, number] => {
+            if (positions.length === 0) return [0, 0];
+            const maxRow = Math.max(...positions.map(pos => pos[0]));
+            const maxCol = Math.max(...positions.map(pos => pos[1]));
+            return [maxRow, maxCol];
+        };
+
+        // 随机放置每个舰船
+        for (const ship of ships) {
+            let placed = false;
+            let attempts = 0;
+            
+            while (!placed && attempts < 1000) {
+                // 将shape转换为位置
+                const basePositions = shapeToPositions(ship.shape);
+                // 随机旋转
+                const rotation = Math.floor(Math.random() * 4);
+                const rotatedPositions = rotatePositions(basePositions, rotation);
+                const normalizedPositions = normalizePositions(rotatedPositions);
+                // 获取边界
+                const [maxRow, maxCol] = getBounds(normalizedPositions);
+                
+                // 随机选择起始位置
+                if (maxRow < this.gridSize && maxCol < this.gridSize) {
+                    const startRow = Math.floor(Math.random() * (this.gridSize - maxRow));
+                    const startCol = Math.floor(Math.random() * (this.gridSize - maxCol));
+                    
+                    // 检查是否可以放置（不会产生重叠）
+                    if (canPlaceShip(occupied, normalizedPositions, startRow, startCol)) {
+                        placeShip(placement, occupied, ship.shipIndex, normalizedPositions, startRow, startCol);
+                        placed = true;
+                    }
+                }
+                attempts++;
+            }
+            
+            if (!placed) {
+                console.warn(`警告: 无法放置 ${ship.id}`);
             }
         }
+
         this.placements[this.aiSessionId] = placement;
         this.eDirections[this.aiSessionId] = [0,0,0,0,0,0,0]; // 默认方向
         this.eBasePositions[this.aiSessionId] = [0,0,0,0,0,0,0]; // 默认基点
