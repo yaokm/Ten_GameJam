@@ -215,7 +215,7 @@ namespace BattleshipGame.Tiling
             _shipParts[changedShipPart] = part;
             var maskPositionInWorldSpace = transform.position + part.Coordinate + new Vector3(0.5f, 0.5f);
             Debug.Log("Mask position: " + maskPositionInWorldSpace);
-
+            
             ShipPartPos[changedShipPart] = maskPositionInWorldSpace;
             int rankOrder = getShipRankOrder(changedShipPart);
             Debug.Log("rankOrder: " + rankOrder.ToString());
@@ -224,9 +224,10 @@ namespace BattleshipGame.Tiling
                 ShipMask(rankOrder);
                 foreach (var ship in rules.ships)
                 {
-                    Debug.Log("ship:" + ship + "EnemyCoordinate:" + ship.EnemyCoordinate + "_enemyDirection:" + ship._enemyDirection);
+                    
                     if (ship.rankOrder == rankOrder)
                     {
+                        Debug.Log("ship:" + ship + "EnemyCoordinate:" + ship.EnemyCoordinate + "_enemyDirection:" + ship._enemyDirection);
                         SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
                         break;
                     }

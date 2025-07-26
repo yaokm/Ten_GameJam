@@ -17,10 +17,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 62d5885cec8b5b543b2a4a1b5a6af63b, type: 2}
   - {fileID: 11400000, guid: 219bdb24e1abcfa46b3f4e525f264560, type: 2}
   - {fileID: 11400000, guid: b21df14291b7feb4dbfc4ad5ef8602f7, type: 2}
-  rankOrder: 7
+  rankOrder: 6
   amount: 1
   PartCoordinates:
   - {x: 0, y: 0}
   _currentDirection: 0
-  _enemyDirection: 2
-  EnemyCoordinate: {x: 5, y: 6}
+  _enemyDirection: 0
+  EnemyCoordinate: {x: 8, y: 0}

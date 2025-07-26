@@ -226,13 +226,14 @@ export class GameRoom extends Room<State> {
                         // case 5: // A0
                         //     this.updateShips(targetShips, 20, 21, this.state.currentTurn);
                         //     break;
-                        case 6: // D1
+                        case 5: // D1
                             this.updateShips(targetShips, 20, 24, this.state.currentTurn);
                             break;
-                        case 7: // X，是个炸弹，踩到会卡对面一回合
+                        case 6: // X，是个炸弹，踩到会卡对面一回合
                             isXBomb = true;  // 标记命中了X炸弹
                             this.playerSkipNextTurn[player.sessionId] = true; // 修改为标记当前玩家需要跳过下一回合
                             hit = false; // 踩到炸弹不算命中，需要结束回合
+                            console.log("踩中炸弹了")
                             // 发送一个特殊消息通知客户端，玩家被炸弹影响
                             this.broadcast("xBombHit", {
                                 player: player.sessionId,
