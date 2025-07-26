@@ -44,6 +44,9 @@ namespace BattleshipGame.Managers
         // 用于跟踪每艘船的状态
         private Dictionary<int, ShipState> _shipStates = new Dictionary<int, ShipState>();
         
+        // 添加标志来跟踪是否正在随机放置
+        private bool _isRandomPlacing = false;
+        
         // 船只状态类
         private class ShipState
         {
@@ -102,6 +105,7 @@ namespace BattleshipGame.Managers
             void PlaceShipsRandomly()
             {
                 Debug.Log("开始随机放置船只");
+                _isRandomPlacing = true; // 标记开始随机放置
                 ResetPlacementMap();
 
                 if (_shipsNotDragged.Count == 0) _shipsNotDragged = _pool.Keys.ToList();
@@ -139,6 +143,7 @@ namespace BattleshipGame.Managers
 
                     if (!isPlaced)
                     {
+                        _isRandomPlacing = false; // 重置标志
                         statusData.State = PlacementImpossible;
                         clearButton.SetInteractable(true);
                         randomButton.SetInteractable(false);
@@ -151,8 +156,11 @@ namespace BattleshipGame.Managers
                 foreach (int shipId in placedShipIds)
                 {
                     _pool.Remove(shipId);
+                    Debug.Log($"移除船只 {shipId} 从池中");
                 }
                 _shipsNotDragged.Clear();
+                
+                _isRandomPlacing = false; // 标记随机放置结束
                 
                 // 确保_placements是最新的
                 _placements = placementMap.GetPlacements();
@@ -569,8 +577,8 @@ namespace BattleshipGame.Managers
             _shipStates[shipId].HasCollision = false;
             _shipStates[shipId].CollidingWithShips.Clear();
             
-            // 注意：这里不立即从池中移除船只，而是在随机放置完成后统一移除
-            if (shouldRemoveFromPool && !isMovedIn)
+            // 从池中移除船只（只有在非随机放置模式下才移除）
+            if (!_isRandomPlacing && _pool.ContainsKey(shipId))
             {
                 _pool.Remove(shipId);
                 _shipsNotDragged = _pool.Keys.ToList();

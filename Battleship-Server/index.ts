@@ -26,6 +26,7 @@ gameServer.onShutdown(function(){
   console.log(`game server is going down.`);
 });
 
-gameServer.listen(port);
+// 修改：绑定到 0.0.0.0 而不是 localhost，这样能接受来自任何 IP 的连接
+gameServer.listen(port, "0.0.0.0");
 
-console.log(`Listening on http://localhost:${ port }`);
+console.log(`Listening on http://0.0.0.0:${ port }`);
