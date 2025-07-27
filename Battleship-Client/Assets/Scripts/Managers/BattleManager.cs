@@ -37,6 +37,11 @@ namespace BattleshipGame.Managers
         [SerializeField] private OptionDialog leaveConfirmationDialog;
         [SerializeField] private StatusData statusData;
         [SerializeField] private int mSkillType;
+        [SerializeField] private GameObject myTurn;
+        [SerializeField] private GameObject oppoTurn;
+        [SerializeField] private ButtonController HeroButton;
+        [SerializeField] private GameObject maskBox;//二次确认框
+        [SerializeField] private ButtonController closeMaskBoxButton;
         [SerializeField]
         private TextMeshProUGUI debugTip;
         private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
@@ -121,6 +126,36 @@ namespace BattleshipGame.Managers
             {
                 netClient.OnSkillUsed += OnSkillUsed;
             }
+            
+            // 英雄按钮和关闭按钮绑定
+            if (HeroButton != null)
+            {
+                HeroButton.AddListener(OnHeroButtonClicked);
+                HeroButton.SetInteractable(true);
+            }
+            else
+            {
+                Debug.LogWarning("HeroButton 未在Inspector中赋值！");
+            }
+            
+            if (closeMaskBoxButton != null)
+            {
+                closeMaskBoxButton.AddListener(OnCloseMaskBoxButtonClicked);
+            }
+            else
+            {
+                Debug.LogWarning("closeMaskBoxButton 未在Inspector中赋值！");
+            }
+            
+            // 初始化maskBox为隐藏状态
+            if (maskBox != null)
+            {
+                maskBox.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning("maskBox 未在Inspector中赋值！");
+            }
 
             _state = _client.GetRoomState();
             _player = _state.players[_client.GetSessionId()].sessionId;
@@ -141,6 +176,18 @@ namespace BattleshipGame.Managers
 
             RegisterToStateEvents();
             OnGamePhaseChanged(_state.phase);
+            
+            // 初始化回合UI状态
+            if (_state.playerTurn == _client.GetSessionId())
+            {
+                myTurn.SetActive(true);
+                oppoTurn.SetActive(false);
+            }
+            else
+            {
+                myTurn.SetActive(false);
+                oppoTurn.SetActive(true);
+            }
 
             void RegisterToStateEvents()
             {
@@ -358,6 +405,10 @@ namespace BattleshipGame.Managers
                 opponentMap.IsMarkingTargets = true;
                 statusData.State = PlayerTurn;
                 opponentMap.FlashGrids();
+                
+                // 显示我方回合UI
+                myTurn.SetActive(true);
+                oppoTurn.SetActive(false);
 
 #if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
                 if (options.vibration && _client is NetworkClient _)
@@ -370,6 +421,10 @@ namespace BattleshipGame.Managers
             void TurnToEnemy()
             {
                 statusData.State = OpponentTurn;
+                
+                // 显示对方回合UI
+                myTurn.SetActive(false);
+                oppoTurn.SetActive(true);
             }
         }
 
@@ -515,7 +570,21 @@ namespace BattleshipGame.Managers
         private void ClearDebugTip()
         {
             debugTip.text = "";
-        }       
+        }
+        
+        // 英雄按钮点击回调
+        private void OnHeroButtonClicked()
+        {
+            Debug.Log("英雄按钮被点击，显示maskBox");
+            maskBox.SetActive(true);
+        }
+        
+        // 关闭maskBox按钮点击回调
+        private void OnCloseMaskBoxButtonClicked()
+        {
+            Debug.Log("关闭按钮被点击，隐藏maskBox");
+            maskBox.SetActive(false);
+        }
     }
       
 

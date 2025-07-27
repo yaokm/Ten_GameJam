@@ -71,20 +71,20 @@ namespace BattleshipGame.Network
             _room = null;
         }
 
-        public async void Connect(string endPoint, Action success, Action error)
+        public async void Connect(string endPoint, Action success, Action<Exception> error)
         {
             if (_lobby != null && _lobby.Connection.IsOpen) return;
             _client = new Client(endPoint);
             try
             {
                 _lobby = await _client.JoinOrCreate<LobbyState>(LobbyName);
-                
                 success?.Invoke();
                 RegisterLobbyHandlers();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                error?.Invoke();
+                Debug.LogError($"[NetworkClient] Connect Exception: {ex}");
+                error?.Invoke(ex);
             }
         }
 

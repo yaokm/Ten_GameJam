@@ -31,6 +31,15 @@ namespace BattleshipGame.Managers
         [SerializeField] private StatusData statusData;
         [SerializeField] private Button btnHero;
         [SerializeField] private TextMeshProUGUI txtHero;
+
+        [SerializeField] private GameObject HeroBox;
+        [SerializeField] private ButtonController okHeroButton;
+        [SerializeField] private ButtonController Hero0Button;
+        [SerializeField] private ButtonController Hero1Button;
+        [SerializeField] private ButtonController Hero2Button;
+        [SerializeField] private ButtonController Hero3Button;
+        [SerializeField] private Image HeroName;
+        [SerializeField] private Image skillContent;
         // 新增：保存选择的武将编号
         private int selectedHeroId = 1;
         private int _cellCount;
@@ -93,6 +102,26 @@ namespace BattleshipGame.Managers
             randomButton.AddListener(PlaceShipsRandomly);
             continueButton.AddListener(CompletePlacement);
             btnHero.onClick.AddListener(OnHeroButtonClicked);
+            
+            // 绑定okHeroButton点击事件
+            if (okHeroButton != null)
+            {
+                okHeroButton.AddListener(OnOkHeroButtonClicked);
+            }
+            else
+            {
+                Debug.LogWarning("okHeroButton 未在Inspector中赋值！");
+            }
+            
+            // 初始化HeroBox为打开状态
+            if (HeroBox != null)
+            {
+                HeroBox.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning("HeroBox 未在Inspector中赋值！");
+            }
 
             BeginShipPlacement();
 
@@ -678,39 +707,37 @@ namespace BattleshipGame.Managers
         // 新增：武将选择弹窗逻辑
         private void OnHeroButtonClicked()
         {
-            // 这里只用最简单的方式实现弹窗选择（实际项目可用自定义UI或第三方弹窗）
-            // 这里用Unity的原生弹窗API（Editor下可用），运行时可用自定义UI
-#if UNITY_EDITOR
-            string[] options = { "1", "2", "3", "4" };
-            int choice = UnityEditor.EditorUtility.DisplayDialogComplex("选择武将", "请选择一个武将编号：", "1", "2", "3");
-            if (choice == 0) selectedHeroId = 1;
-            else if (choice == 1) selectedHeroId = 2;
-            else if (choice == 2) selectedHeroId = 3;
-            else selectedHeroId = 4;
-            Debug.Log($"已选择武将：{selectedHeroId}");
-#else
-            // 运行时环境下建议用自定义UI，这里简单循环切换
-            selectedHeroId = selectedHeroId % 4 + 1;
-            Debug.Log($"已选择武将：{selectedHeroId}");
-            switch (selectedHeroId)
+            // 显示HeroBox
+            if (HeroBox != null)
             {
-                case 1:
-                    txtHero.text = "陷阱";
-                    break;
-                case 2:
-                    txtHero.text = "照明";
-                    break;
-                case 3:
-                    txtHero.text = "揭示";
-                    break;
-                case 4:
-                    txtHero.text = "多方向开火";
-                    break;
+                HeroBox.SetActive(true);
+                Debug.Log("显示HeroBox");
             }
-#endif
+            else
+            {
+                Debug.LogWarning("HeroBox 未在Inspector中赋值！");
+            }
+        }
+        
+        // 新增：确认武将选择按钮点击回调
+        private void OnOkHeroButtonClicked()
+        {
+            // 隐藏HeroBox
+            if (HeroBox != null)
+            {
+                HeroBox.SetActive(false);
+                Debug.Log("隐藏HeroBox，确认武将选择");
+            }
+            else
+            {
+                Debug.LogWarning("HeroBox 为 null，无法隐藏！");
+            }
+            
+            // 这里可以添加确认选择后的逻辑
             if (GameManager.TryGetInstance(out var gameManager))
             {
                 gameManager.SelectedHeroId = selectedHeroId;
+                Debug.Log($"确认选择武将：{selectedHeroId}");
             }
         }
     }

@@ -58,11 +58,11 @@ namespace BattleshipGame.Managers
                         onSuccess?.Invoke();
                     }
                 },
-                () =>
+                (ex) =>
                 {
                     if (Client is NetworkClient)
                     {
-                        Debug.Log("连接失败");
+                        Debug.LogError($"连接失败: {ex}");
                         onError?.Invoke();
                         Client = null;
                     }
