@@ -113,6 +113,43 @@ namespace BattleshipGame.Managers
                 Debug.LogWarning("okHeroButton 未在Inspector中赋值！");
             }
             
+            // 绑定武将按钮点击事件
+            if (Hero0Button != null)
+            {
+                Hero0Button.AddListener(() => OnHeroSelected(1));
+            }
+            else
+            {
+                Debug.LogWarning("Hero0Button 未在Inspector中赋值！");
+            }
+            
+            if (Hero1Button != null)
+            {
+                Hero1Button.AddListener(() => OnHeroSelected(2));
+            }
+            else
+            {
+                Debug.LogWarning("Hero1Button 未在Inspector中赋值！");
+            }
+            
+            if (Hero2Button != null)
+            {
+                Hero2Button.AddListener(() => OnHeroSelected(3));
+            }
+            else
+            {
+                Debug.LogWarning("Hero2Button 未在Inspector中赋值！");
+            }
+            
+            if (Hero3Button != null)
+            {
+                Hero3Button.AddListener(() => OnHeroSelected(4));
+            }
+            else
+            {
+                Debug.LogWarning("Hero3Button 未在Inspector中赋值！");
+            }
+            
             // 初始化HeroBox为打开状态
             if (HeroBox != null)
             {
@@ -122,6 +159,9 @@ namespace BattleshipGame.Managers
             {
                 Debug.LogWarning("HeroBox 未在Inspector中赋值！");
             }
+            
+            // 初始化默认武将显示
+            UpdateHeroDisplay(selectedHeroId);
 
             BeginShipPlacement();
 
@@ -717,6 +757,51 @@ namespace BattleshipGame.Managers
             {
                 Debug.LogWarning("HeroBox 未在Inspector中赋值！");
             }
+        }
+        
+        // 新增：武将选择回调
+        private void OnHeroSelected(int heroId)
+        {
+            selectedHeroId = heroId;
+            Debug.Log($"选择了武将：{heroId}");
+            
+            // 更新UI显示
+            UpdateHeroDisplay(heroId);
+        }
+        
+        // 新增：更新武将显示
+        private void UpdateHeroDisplay(int heroId)
+        {
+            // 更新武将名称显示
+            if (txtHero != null)
+            {
+                switch (heroId)
+                {
+                    case 1:
+                        txtHero.text = "陷阱";
+                        break;
+                    case 2:
+                        txtHero.text = "照明";
+                        break;
+                    case 3:
+                        txtHero.text = "揭示";
+                        break;
+                    case 4:
+                        txtHero.text = "多方向开火";
+                        break;
+                    default:
+                        txtHero.text = "未知武将";
+                        break;
+                }
+            }
+            
+            // 这里可以添加更新技能内容显示的逻辑
+            // if (skillContent != null)
+            // {
+            //     // 根据武将ID更新技能内容图片
+            // }
+            
+            Debug.Log($"更新武将显示：{heroId}");
         }
         
         // 新增：确认武将选择按钮点击回调

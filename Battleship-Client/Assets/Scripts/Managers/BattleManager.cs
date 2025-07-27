@@ -55,6 +55,7 @@ namespace BattleshipGame.Managers
         private bool _isMultiShotActive = false;
         private string _multiShotDirection = null;
         private Vector3Int? _firstMultiShotCell = null;
+        private List<Vector3Int> _validSecondCells = new List<Vector3Int>(); // 第二个格子的有效选择范围
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -234,30 +235,7 @@ namespace BattleshipGame.Managers
             int cellIndex = CoordinateToCellIndex(cell, rules.areaSize);
             if (_isMultiShotActive)
             {
-                if (_firstMultiShotCell == null)
-                {
-                    _firstMultiShotCell = cell;
-                    Debug.Log("请选择方向：up/down/left/right（此处用up演示）");
-                    _multiShotDirection = "up"; // TODO: UI选择
-                    // 计算第二个格子
-                    Vector3Int secondCell = cell;
-                    if (_multiShotDirection == "up") secondCell += Vector3Int.up;
-                    else if (_multiShotDirection == "down") secondCell += Vector3Int.down;
-                    else if (_multiShotDirection == "left") secondCell += Vector3Int.left;
-                    else if (_multiShotDirection == "right") secondCell += Vector3Int.right;
-                    int secondIndex = CoordinateToCellIndex(secondCell, rules.areaSize);
-                    // 标记两个格子
-                    _shotsInCurrentTurn.Clear();
-                    _shotsInCurrentTurn.Add(cellIndex);
-                    if (secondIndex >= 0 && secondIndex < rules.areaSize.x * rules.areaSize.y)
-                    {
-                        _shotsInCurrentTurn.Add(secondIndex);
-                        opponentMap.SetMarker(secondIndex, Marker.MarkedTarget);
-                    }
-                    opponentMap.SetMarker(cellIndex, Marker.MarkedTarget);
-                    fireButton.SetInteractable(true);
-                    opponentMap.IsMarkingTargets = false;
-                }
+                HandleMultiShotClick(cell, cellIndex);
                 return;
             }
             if (_shotsInCurrentTurn.Contains(cellIndex))
@@ -362,17 +340,37 @@ namespace BattleshipGame.Managers
             if (_isMultiShotActive && _shotsInCurrentTurn.Count == 2)
             {
                 _client.SendTurn(_shotsInCurrentTurn.ToArray());
-                _client.SendUseSkill(4, new { direction = _multiShotDirection }); // 补发方向参数
-                Debug.Log($"多方向开火：格子{_shotsInCurrentTurn[0]}和{_shotsInCurrentTurn[1]}，方向{_multiShotDirection}");
+                // 计算方向（从第一个格子到第二个格子的方向）
+                Vector3Int firstCell = CellIndexToCoordinate(_shotsInCurrentTurn[0], rules.areaSize.x);
+                Vector3Int secondCell = CellIndexToCoordinate(_shotsInCurrentTurn[1], rules.areaSize.x);
+                Vector3Int direction = secondCell - firstCell;
+                string directionStr = "";
+                if (direction == Vector3Int.up) directionStr = "up";
+                else if (direction == Vector3Int.down) directionStr = "down";
+                else if (direction == Vector3Int.left) directionStr = "left";
+                else if (direction == Vector3Int.right) directionStr = "right";
+                
+                _client.SendUseSkill(4, new { direction = directionStr });
+                Debug.Log($"多方向开火：格子{_shotsInCurrentTurn[0]}和{_shotsInCurrentTurn[1]}，方向{directionStr}");
+                
+                // 清理多方向开火状态
                 _isMultiShotActive = false;
                 _multiShotDirection = null;
                 _firstMultiShotCell = null;
+                _validSecondCells.Clear();
+                
+                // 清除瞄准标记
+                ClearAllMarkers();
             }
             else if (_shotsInCurrentTurn.Count == rules.shotsPerTurn)
             {
                 _client.SendTurn(_shotsInCurrentTurn.ToArray());
+                _shotsInCurrentTurn.Clear();
             }
-            _shotsInCurrentTurn.Clear();
+            else
+            {
+                _shotsInCurrentTurn.Clear();
+            }
             opponentMap.IsMarkingTargets = true;
         }
 
@@ -513,11 +511,46 @@ namespace BattleshipGame.Managers
             int skillType = this.mSkillType; // TODO: 替换为UI选择
             if (skillType == 4)
             {
-                _isMultiShotActive = true;
-                _multiShotDirection = null;
-                _firstMultiShotCell = null;
-                Debug.Log("多方向开火技能已激活，请点击第一个目标格子");
-                _client.SendUseSkill(4, new { direction = "up" }); // 先发技能激活，方向后续再发
+                // 检查是否有普通瞄准的目标
+                if (_shotsInCurrentTurn.Count > 0)
+                {
+                    // 使用第一个普通瞄准目标作为多方向开火的第一个目标
+                    int firstTargetIndex = _shotsInCurrentTurn[0];
+                    Vector3Int firstTargetCell = CellIndexToCoordinate(firstTargetIndex, rules.areaSize.x);
+                    
+                    _firstMultiShotCell = firstTargetCell;
+                    _shotsInCurrentTurn.Clear();
+                    _shotsInCurrentTurn.Add(firstTargetIndex);
+                    
+                    // 计算第二个格子的有效选择范围（上下左右）
+                    _validSecondCells.Clear();
+                    Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+                    foreach (var direction in directions)
+                    {
+                        Vector3Int secondCell = firstTargetCell + direction;
+                        int secondIndex = CoordinateToCellIndex(secondCell, rules.areaSize);
+                        if (secondIndex >= 0 && secondIndex < rules.areaSize.x * rules.areaSize.y)
+                        {
+                            _validSecondCells.Add(secondCell);
+                        }
+                    }
+                    
+                    _isMultiShotActive = true;
+                    _multiShotDirection = null;
+                    
+                    Debug.Log($"多方向开火技能已激活，使用普通瞄准目标 {firstTargetCell} 作为第一个目标，第二个格子可选范围：{string.Join(", ", _validSecondCells)}");
+                    _client.SendUseSkill(4, new { direction = "up" }); // 先发技能激活，方向后续再发
+                }
+                else
+                {
+                    // 没有普通瞄准目标，正常进入多方向开火模式
+                    _isMultiShotActive = true;
+                    _multiShotDirection = null;
+                    _firstMultiShotCell = null;
+                    _validSecondCells.Clear();
+                    Debug.Log("多方向开火技能已激活，请点击第一个目标格子");
+                    _client.SendUseSkill(4, new { direction = "up" }); // 先发技能激活，方向后续再发
+                }
             }
             else
             {
@@ -570,6 +603,150 @@ namespace BattleshipGame.Managers
         private void ClearDebugTip()
         {
             debugTip.text = "";
+        }
+        
+        // 清除所有瞄准标记
+        private void ClearAllMarkers()
+        {
+            // 清除当前回合的所有瞄准标记
+            foreach (int shotIndex in _shotsInCurrentTurn)
+            {
+                Vector3Int shotCell = CellIndexToCoordinate(shotIndex, rules.areaSize.x);
+                opponentMap.ClearMarker(shotCell);
+            }
+            
+            // 重置按钮状态
+            fireButton.SetInteractable(false);
+            opponentMap.IsMarkingTargets = true;
+            
+            Debug.Log("已清除所有瞄准标记");
+        }
+        
+
+        
+        // 处理多方向开火的点击逻辑
+        private void HandleMultiShotClick(Vector3Int cell, int cellIndex)
+        {
+            // 检查格子是否在地图范围内
+            if (cellIndex < 0 || cellIndex >= rules.areaSize.x * rules.areaSize.y)
+            {
+                Debug.Log("点击的格子超出地图范围");
+                return;
+            }
+            
+            if (_firstMultiShotCell == null)
+            {
+                // 第一次点击，选择第一个格子
+                _firstMultiShotCell = cell;
+                _shotsInCurrentTurn.Clear();
+                _shotsInCurrentTurn.Add(cellIndex);
+                opponentMap.SetMarker(cellIndex, Marker.MarkedTarget);
+                
+                // 计算第二个格子的有效选择范围（上下左右）
+                _validSecondCells.Clear();
+                Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+                foreach (var direction in directions)
+                {
+                    Vector3Int secondCell = cell + direction;
+                    int secondIndex = CoordinateToCellIndex(secondCell, rules.areaSize);
+                    if (secondIndex >= 0 && secondIndex < rules.areaSize.x * rules.areaSize.y)
+                    {
+                        _validSecondCells.Add(secondCell);
+                    }
+                }
+                
+                Debug.Log($"已选择第一个格子 {cell}，第二个格子可选范围：{string.Join(", ", _validSecondCells)}");
+                fireButton.SetInteractable(false);
+                opponentMap.IsMarkingTargets = true;
+            }
+            else
+            {
+                // 已经选择了第一个格子，现在处理第二个格子的选择
+                if (_validSecondCells.Contains(cell))
+                {
+                    // 点击的是有效范围内的格子，切换第二个格子的选择
+                    
+                    // 清除之前第二个格子的标记（如果存在）
+                    if (_shotsInCurrentTurn.Count > 1)
+                    {
+                        int oldSecondIndex = _shotsInCurrentTurn[1];
+                        Vector3Int oldSecondCell = CellIndexToCoordinate(oldSecondIndex, rules.areaSize.x);
+                        opponentMap.ClearMarker(oldSecondCell);
+                    }
+                    
+                    // 更新射击列表
+                    _shotsInCurrentTurn.Clear();
+                    _shotsInCurrentTurn.Add(CoordinateToCellIndex(_firstMultiShotCell.Value, rules.areaSize));
+                    _shotsInCurrentTurn.Add(cellIndex);
+                    
+                    // 设置新的标记
+                    opponentMap.SetMarker(CoordinateToCellIndex(_firstMultiShotCell.Value, rules.areaSize), Marker.MarkedTarget);
+                    opponentMap.SetMarker(cellIndex, Marker.MarkedTarget);
+                    
+                    Debug.Log($"已选择第二个格子 {cell}，准备开火");
+                    fireButton.SetInteractable(true);
+                    opponentMap.IsMarkingTargets = false;
+                }
+                else if (cell == _firstMultiShotCell.Value)
+                {
+                    // 点击的是第一个格子，取消当前选择但保持技能状态
+                    Debug.Log($"取消当前多方向开火选择，但保持技能激活状态");
+                    
+                    // 清除第一个格子的标记
+                    opponentMap.ClearMarker(cell);
+                    
+                    // 清除第二个格子的标记（如果存在）
+                    if (_shotsInCurrentTurn.Count > 1)
+                    {
+                        int secondIndex = _shotsInCurrentTurn[1];
+                        Vector3Int secondCell = CellIndexToCoordinate(secondIndex, rules.areaSize.x);
+                        opponentMap.ClearMarker(secondCell);
+                    }
+                    
+                    // 重置选择状态但保持技能激活
+                    _firstMultiShotCell = null;
+                    _shotsInCurrentTurn.Clear();
+                    _validSecondCells.Clear();
+                    // 注意：不设置 _isMultiShotActive = false，保持技能状态
+                    fireButton.SetInteractable(false);
+                    opponentMap.IsMarkingTargets = true;
+                }
+                else
+                {
+                    // 点击的是无效范围的格子，重新开始选择
+                    Debug.Log($"点击了无效范围格子 {cell}，重新开始选择");
+                    
+                    // 清除所有标记
+                    foreach (int shotIndex in _shotsInCurrentTurn)
+                    {
+                        Vector3Int shotCell = CellIndexToCoordinate(shotIndex, rules.areaSize.x);
+                        opponentMap.ClearMarker(shotCell);
+                    }
+                    
+                    // 重新开始选择
+                    _firstMultiShotCell = cell;
+                    _shotsInCurrentTurn.Clear();
+                    _shotsInCurrentTurn.Add(cellIndex);
+                    opponentMap.SetMarker(cellIndex, Marker.MarkedTarget);
+                    
+                    // 重新计算有效范围
+                    _validSecondCells.Clear();
+                    Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+                    foreach (var direction in directions)
+                    {
+                        Vector3Int secondCell = cell + direction;
+                        int secondIndex = CoordinateToCellIndex(secondCell, rules.areaSize);
+                        if (secondIndex >= 0 && secondIndex < rules.areaSize.x * rules.areaSize.y)
+                        {
+                            _validSecondCells.Add(secondCell);
+                        }
+                    }
+                    
+                    Debug.Log($"重新选择第一个格子 {cell}，第二个格子可选范围：{string.Join(", ", _validSecondCells)}");
+                    fireButton.SetInteractable(false);
+                    opponentMap.IsMarkingTargets = true;
+                }
+            }
         }
         
         // 英雄按钮点击回调
