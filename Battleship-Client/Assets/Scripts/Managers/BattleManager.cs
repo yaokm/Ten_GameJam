@@ -44,7 +44,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private ButtonController closeMaskBoxButton;
         [SerializeField]
         private TextMeshProUGUI debugTip;
-        private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
+ private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
         private readonly List<int> _shotsInCurrentTurn = new List<int>();
         private IClient _client;
         private string _enemy;
