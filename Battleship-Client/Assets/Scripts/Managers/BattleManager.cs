@@ -48,6 +48,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private Sprite[] heroSprites; // 武将图片数组，索引对应武将编号-1
         [SerializeField]
         private TextMeshProUGUI debugTip;
+        [SerializeField] private UnityEngine.UI.Image EnemyHero;
  private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
         private readonly List<int> _shotsInCurrentTurn = new List<int>();
         private IClient _client;
@@ -60,7 +61,6 @@ namespace BattleshipGame.Managers
         private string _multiShotDirection = null;
         private Vector3Int? _firstMultiShotCell = null;
         private List<Vector3Int> _validSecondCells = new List<Vector3Int>(); // 第二个格子的有效选择范围
-        private bool _resultShown = false; // 防止重复显示结果
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -75,7 +75,7 @@ namespace BattleshipGame.Managers
             }
         }
         // 添加处理敌方船只信息的方法
-        private void SetEnemyShipPositionsAndDirections(int[][] basePositions, int[] directions)
+        private void SetEnemyShipPositionsAndDirections(int[][] basePositions, int[] directions, int enemyHeroType)
         {
             // 获取所有船只
             var ships = rules.ships;
@@ -95,6 +95,9 @@ namespace BattleshipGame.Managers
                 Debug.Log("ship:"+ship+"EnemyCoordinate:"+ship.EnemyCoordinate+"_enemyDirection:"+ship._enemyDirection);
                 //opponentMap.SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
             }
+            
+            // 更新敌方武将图片
+            UpdateEnemyHeroImage(enemyHeroType);
         }
         private void Start()
         {
@@ -318,67 +321,26 @@ namespace BattleshipGame.Managers
             {
                 GameSceneManager.Instance.GoToLobby();
             }
-        }
 
-        private void ShowResult()
-        {
-            Debug.Log($"ShowResult called. Current state: {_state?.phase}, winningPlayer: {_state?.winningPlayer}, resultShown: {_resultShown}");
-            
-            if (_resultShown)
+            void ShowResult()
             {
-                Debug.LogWarning("ShowResult called multiple times. Ignoring.");
-                return;
-            }
-            
-            // 检查游戏是否真的结束了
-            if (_state == null || string.IsNullOrEmpty(_state.winningPlayer) || _state.phase != RoomPhase.Result)
-            {
-                Debug.LogWarning($"ShowResult called but game is not finished yet. State: {_state?.phase}, winningPlayer: {_state?.winningPlayer}. Ignoring.");
-                return;
-            }
-            
-            _resultShown = true;
-            statusData.State = BattleResult;
-            
-            // 暂停BGM，为音效腾出空间
-            if (BGMManager.Instance != null)
-            {
-                BGMManager.Instance.PauseBGM();
-                Debug.Log("已暂停BGM，为胜负音效腾出空间");
-            }
-            
-            // 播放胜利或失败音效
-            if (SoundEffectManager.Instance != null)
-            {
+                statusData.State = BattleResult;
                 if (_state.winningPlayer == _client.GetSessionId())
-                {
-                    // 播放胜利音效
-                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Victory);
-                    Debug.Log("播放胜利音效");
-                }
+                    winnerOptionDialog.Show(Rematch, Leave);
                 else
+                    loserOptionDialog.Show(Rematch, Leave);
+
+                void Rematch()
                 {
-                    // 播放失败音效
-                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Defeat);
-                    Debug.Log("播放失败音效");
+                    _client.SendRematch(true);
+                    statusData.State = WaitingOpponentRematchDecision;
                 }
-            }
-            
-            if (_state.winningPlayer == _client.GetSessionId())
-                winnerOptionDialog.Show(Rematch, Leave);
-            else
-                loserOptionDialog.Show(Rematch, Leave);
 
-            void Rematch()
-            {
-                _client.SendRematch(true);
-                statusData.State = WaitingOpponentRematchDecision;
-            }
-
-            void Leave()
-            {
-                _client.SendRematch(false);
-                LeaveGame();
+                void Leave()
+                {
+                    _client.SendRematch(false);
+                    LeaveGame();
+                }
             }
         }
 
@@ -441,12 +403,6 @@ namespace BattleshipGame.Managers
 
         private void SwitchTurns()
         {
-            // 播放回合切换音效
-            if (SoundEffectManager.Instance != null)
-            {
-                SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.TurnSwitch);
-            }
-            
             if (_state.playerTurn == _client.GetSessionId())
                 TurnToPlayer();
             else
@@ -482,24 +438,8 @@ namespace BattleshipGame.Managers
 
         private void OnStateChanged(List<DataChange> changes)
         {
-            foreach (var change in changes)
-            {
-                Debug.Log($"State change detected: {change.Field} = {change.Value}");
-                
-                if (change.Field == RoomState.PlayerTurn)
-                {
-                    SwitchTurns();
-                }
-                else if (change.Field == "winningPlayer")
-                {
-                    Debug.Log($"Game finished! Winning player: {change.Value}");
-                    // 只有当winningPlayer不为空且游戏阶段为Result时才显示结果
-                    if (!string.IsNullOrEmpty(change.Value?.ToString()))
-                    {
-                        ShowResult();
-                    }
-                }
-            }
+            foreach (var _ in changes.Where(change => change.Field == RoomState.PlayerTurn))
+                SwitchTurns();
         }
 
         private void OnPlayerShotsChanged(int turn, int cellIndex)
@@ -528,23 +468,10 @@ namespace BattleshipGame.Managers
                 opponentMap.SetMarker(cellIndex, Marker.ShotFleet);
                 // 播放命中特效
                 PlayShotEffectOnOpponentMap(cellIndex);
-                // 播放击中音效
-                if (SoundEffectManager.Instance != null)
-                {
-                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Hit);
-                }
-                
-                // 检查是否击沉船只
-                CheckShipSunk(cellIndex);
             }
             else
             {
                 opponentMap.SetMarker(cellIndex, Marker.ShotTarget);
-                // 播放未击中音效
-                if (SoundEffectManager.Instance != null)
-                {
-                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Miss);
-                }
             }
             // 记录回合与射击位置（用于后续回合高亮）
             if (_shots.ContainsKey(turn))
@@ -567,12 +494,6 @@ namespace BattleshipGame.Managers
             effect.Play(true);
             Debug.Log($"Instantiate shotEffect at {worldPos}, shotEffect null? {shotEffect == null}");
             //Destroy(effect.gameObject, effect.main.duration);
-            
-            // 播放射击音效
-            if (SoundEffectManager.Instance != null)
-            {
-                SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Fire);
-            }
         }
 
         private void OnEnemyShotsChanged(int turn, int cellIndex)
@@ -594,56 +515,20 @@ namespace BattleshipGame.Managers
                 return;
             }
 
-            bool isHit = !(from placement in placementMap.GetPlacements()
+            userMap.SetMarker(cellIndex, !(from placement in placementMap.GetPlacements()
                                            from part in placement.ship.partCoordinates
                                            select placement.Coordinate + (Vector3Int)part
                 into partCoordinate
                                            let shot = CellIndexToCoordinate(cellIndex, rules.areaSize.x)
                                            where partCoordinate.Equals(shot)
-                           select partCoordinate).Any();
-
-            userMap.SetMarker(cellIndex, isHit ? Marker.Missed : Marker.Hit);
-            
-            // 播放敌方射击音效（修复逻辑：isHit为true时播放Miss音效，为false时播放Hit音效）
-            if (SoundEffectManager.Instance != null)
-            {
-                if (isHit)
-                {
-                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Miss);
-                }
-                else
-                {
-                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Hit);
-                }
-            }
+                                           select partCoordinate).Any()
+                ? Marker.Missed
+                : Marker.Hit);
         }
 
         private void OnEnemyShipsChanged(int turn, int part)
         {
-            // 检查是否击沉船只
-            int rankOrder = opponentStatus.getShipRankOrder(part);
-            bool wasShipSunk = opponentStatus.isAllShipPartShot(rankOrder);
-            
-            // 显示敌方船只被击中情况
             opponentStatus.DisplayShotEnemyShipParts(part, turn);
-            
-            // 如果船只被击沉，播放击沉音效
-            if (wasShipSunk && SoundEffectManager.Instance != null)
-            {
-                SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ShipSunk);
-                Debug.Log($"播放击沉音效：船只 {rankOrder} 被击沉");
-            }
-        }
-
-        /// <summary>
-        /// 检查是否击沉船只
-        /// </summary>
-        private void CheckShipSunk(int cellIndex)
-        {
-            // 由于击沉检测比较复杂，这里暂时不实现具体的击沉检测逻辑
-            // 击沉音效的播放应该在OnEnemyShipsChanged方法中处理
-            // 当船只被击沉时，会触发OnEnemyShipsChanged事件
-            Debug.Log($"检查击沉：格子 {cellIndex}");
         }
 
         // 技能按钮点击回调
@@ -657,14 +542,6 @@ namespace BattleshipGame.Managers
             Debug.Log("请选择技能：1-眩晕对手，2-照明2*3区域，3-爆出对方船点，4-多方向开火");
             // 这里实际应弹窗选择，暂用4号技能演示
             int skillType = this.mSkillType; // TODO: 替换为UI选择
-            
-            // 播放武将特定的技能音效
-            if (SoundEffectManager.Instance != null)
-            {
-                // 使用当前武将ID播放对应的技能音效
-                SoundEffectManager.Instance.PlayHeroSkillSoundById(mSkillType);
-            }
-            
             if (skillType == 4)
             {
                 // 检查是否有普通瞄准的目标
@@ -944,6 +821,41 @@ namespace BattleshipGame.Managers
             else
             {
                 Debug.LogWarning($"未找到武将 {heroId} 的图片资源：{imagePath}");
+            }
+        }
+        
+        // 新增：更新敌方武将图片
+        private void UpdateEnemyHeroImage(int enemyHeroId)
+        {
+            if (EnemyHero == null)
+            {
+                Debug.LogWarning("EnemyHero 未在Inspector中赋值！");
+                return;
+            }
+            
+            // 优先使用Inspector中设置的图片数组
+            if (heroSprites != null && heroSprites.Length > 0)
+            {
+                int spriteIndex = enemyHeroId - 1; // 武将编号1对应数组索引0
+                if (spriteIndex >= 0 && spriteIndex < heroSprites.Length && heroSprites[spriteIndex] != null)
+                {
+                    EnemyHero.sprite = heroSprites[spriteIndex];
+                    Debug.Log($"成功更换敌方武将 {enemyHeroId} 的图片（使用Inspector设置）");
+                    return;
+                }
+            }
+            // 如果Inspector中没有设置，则尝试从Resources加载
+            string imagePath = $"Heroes/hero_{enemyHeroId}"; // 假设图片路径格式为 "Heroes/hero_1", "Heroes/hero_2" 等
+            Sprite heroSprite = Resources.Load<Sprite>(imagePath);
+            
+            if (heroSprite != null)
+            {
+                EnemyHero.sprite = heroSprite;
+                Debug.Log($"成功更换敌方武将 {enemyHeroId} 的图片（使用Resources加载）");
+            }
+            else
+            {
+                Debug.LogWarning($"未找到敌方武将 {enemyHeroId} 的图片资源：{imagePath}");
             }
         }
 

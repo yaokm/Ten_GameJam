@@ -11,7 +11,7 @@ namespace BattleshipGame.Network
     public class NetworkClient : IClient
     {
         // 添加事件，用于通知BattleManager敌方船只信息已就绪
-        public event Action<int[][], int[]> OnOpponentInfoReceived;
+        public event Action<int[][], int[], int> OnOpponentInfoReceived;
         private const string RoomName = "game";
         private const string LobbyName = "lobby";
         private readonly Dictionary<string, Room> _rooms = new Dictionary<string, Room>();
@@ -216,9 +216,10 @@ namespace BattleshipGame.Network
                         var posObj = basePositionsObj[i] as List<object>;
                         basePositions[i] = posObj?.Select(p => Convert.ToInt32(p)).ToArray() ?? new int[2];
                     }
-
+                    var heroType = Convert.ToInt32(message.ContainsKey("heroType") ? message["heroType"] : 1);
+                    Debug.Log($"接收到敌方武将类型：{heroType}");
                     // 触发事件，通知BattleManager
-                    OnOpponentInfoReceived?.Invoke(basePositions, directions);
+                    OnOpponentInfoReceived?.Invoke(basePositions, directions, heroType);
                 }
                 catch (Exception ex)
                 {

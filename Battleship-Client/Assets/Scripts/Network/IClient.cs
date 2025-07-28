@@ -5,6 +5,7 @@ namespace BattleshipGame.Network
     public interface IClient
     {
         event Action<string> GamePhaseChanged;
+        event Action<int[][], int[], int> OnOpponentInfoReceived;
         State GetRoomState();
         string GetSessionId();
         void Connect(string endPoint = null, Action success = null, Action<Exception> error = null);

@@ -302,6 +302,21 @@ namespace BattleshipGame.Managers
                 int heroType = 1;
                 if (GameManager.TryGetInstance(out var gameManager))
                     heroType = gameManager.SelectedHeroId;
+                //_cells是100个空单元格，初始化_cells
+                for (int i = 0; i < _cellCount; i++) _cells[i] = EmptyCell;
+                for(int i=0;i<_placements.Count;i++){
+                    // 基点
+                    int baseIndex = CoordinateToCellIndex(_placements[i].Coordinate, MapAreaSize);
+                    _cells[baseIndex] = _placements[i].shipId;
+                    
+                    // 船只的每个部件
+                    foreach(var part in _placements[i].ship.partCoordinates){
+                        Vector3Int partPos = new Vector3Int(_placements[i].Coordinate.x + part.x, _placements[i].Coordinate.y + part.y, 0);
+                        int partIndex = CoordinateToCellIndex(partPos, MapAreaSize);
+                        _cells[partIndex] = _placements[i].shipId;
+                    }
+                }
+
                 _client.SendPlacement(_cells, directions, coordinates, heroType);
                 statusData.State = WaitingOpponentPlacement;
             }
@@ -611,40 +626,19 @@ namespace BattleshipGame.Managers
                 // 更新PlacementMap
                 placementMap.PlaceShip(shipId, ship, to);
                 
-                // 修复：旋转时也要完整注册船只到单元格，确保数据一致性
-                RegisterShipToCells(shipId, ship, to);
+                // 只在基点位置设置单元格，其他部分不设置
+                int baseCellIndex = CoordinateToCellIndex(to, MapAreaSize);
+                if (baseCellIndex != OutOfMap)
+                {
+                    _cells[baseCellIndex] = shipId;
+                }
                 
                 // 更新船只状态
                 _shipStates[shipId].Position = to;
                 _shipStates[shipId].Direction = ship.CurrentDirection;
                 
-                // 修复：更新船只的有效性状态
-                _shipStates[shipId].IsOutOfBounds = !isInsideBoundaries;
-                
-                // 检查旋转后是否与其他船只重叠
-                bool hasCollisionAfterRotation = false;
-                foreach (var placement in _placements)
-                {
-                    // 跳过自己
-                    if (placement.shipId == shipId) continue;
-                    
-                    // 检查碰撞
-                    if (DoShipsCollide(ship, to, placement.ship, placement.Coordinate))
-                    {
-                        hasCollisionAfterRotation = true;
-                        Debug.Log($"旋转后船只 {shipId} 在 {to} 与船只 {placement.shipId} 重叠");
-                        break;
-                    }
-                }
-                
-                _shipStates[shipId].HasCollision = hasCollisionAfterRotation;
-                _shipStates[shipId].IsValid = isInsideBoundaries && !hasCollisionAfterRotation;
-                
                 // 确保_placements是最新的
                 _placements = placementMap.GetPlacements();
-                
-                // 修复：旋转后更新Continue按钮状态
-                UpdateContinueButtonState();
                 
                 // 返回true表示旋转操作成功（即使船只位置无效）
                 return true;
@@ -734,31 +728,14 @@ namespace BattleshipGame.Managers
         {
             if (!isMovedIn)
             {
-                // 首先尝试从指定坐标获取shipId
                 int cellIndex = CoordinateToCellIndex(grabbedFrom, MapAreaSize);
                 if (cellIndex != OutOfMap && _cells[cellIndex] != EmptyCell)
                 {
                     return _cells[cellIndex];
                 }
-                
-                // 如果指定坐标没有找到，尝试在整个地图中查找匹配的船只
-                // 这对于旋转操作特别重要，因为旋转时可能从船只的任何部分开始
-                for (int i = 0; i < _cellCount; i++)
-                {
-                    if (_cells[i] != EmptyCell)
-                    {
-                        // 检查这个shipId对应的船只是否匹配当前船只的rankOrder
-                        if (_shipStates.ContainsKey(_cells[i]) && _shipStates[_cells[i]].RankOrder == ship.rankOrder)
-                        {
-                            return _cells[i];
-                        }
-                    }
-                }
             }
 
-            // 如果从地图中找不到，从池中查找
-            foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) 
-                return kvp.Key;
+            foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) return kvp.Key;
 
             return EmptyCell;
         }
