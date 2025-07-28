@@ -506,42 +506,42 @@ export class GameRoom extends Room<State> {
         };
 
         // 随机放置每个舰船
+        // 新增：记录每艘船的基点和方向
+        const basePositionsArr: [number, number][] = [];
+        const directionsArr: number[] = [];
         for (const ship of ships) {
             let placed = false;
             let attempts = 0;
-            
+            let finalRow = 0, finalCol = 0, finalRotation = 0;
             while (!placed && attempts < 1000) {
-                // 将shape转换为位置
                 const basePositions = shapeToPositions(ship.shape);
-                // 随机旋转
                 const rotation = Math.floor(Math.random() * 4);
                 const rotatedPositions = rotatePositions(basePositions, rotation);
                 const normalizedPositions = normalizePositions(rotatedPositions);
-                // 获取边界
                 const [maxRow, maxCol] = getBounds(normalizedPositions);
-                
-                // 随机选择起始位置
                 if (maxRow < this.gridSize && maxCol < this.gridSize) {
                     const startRow = Math.floor(Math.random() * (this.gridSize - maxRow));
                     const startCol = Math.floor(Math.random() * (this.gridSize - maxCol));
-                    
-                    // 检查是否可以放置（不会产生重叠）
                     if (canPlaceShip(occupied, normalizedPositions, startRow, startCol)) {
                         placeShip(placement, occupied, ship.shipIndex, normalizedPositions, startRow, startCol);
                         placed = true;
+                        finalRow = startRow;
+                        finalCol = startCol;
+                        finalRotation = rotation;
                     }
                 }
                 attempts++;
             }
-            
             if (!placed) {
                 console.warn(`警告: 无法放置 ${ship.id}`);
             }
+            // 记录基点和方向
+            basePositionsArr.push([finalRow, finalCol]);
+            directionsArr.push(finalRotation); // rotation 0=上,1=右,2=下,3=左
         }
-
         this.placements[this.aiSessionId] = placement;
-        this.eDirections[this.aiSessionId] = [0,0,0,0,0,0,0]; // 默认方向
-        this.eBasePositions[this.aiSessionId] = [0,0,0,0,0,0,0]; // 默认基点
+        this.eDirections[this.aiSessionId] = directionsArr;
+        this.eBasePositions[this.aiSessionId] = basePositionsArr;
         this.playersPlaced++;
     }
 

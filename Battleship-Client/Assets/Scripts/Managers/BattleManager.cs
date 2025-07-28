@@ -506,6 +506,11 @@ namespace BattleshipGame.Managers
         // 技能按钮点击回调
         private void OnUseSkillButtonClicked()
         {
+            // 使用技能时自动关闭二次确认框
+            if (maskBox != null)
+            {
+                maskBox.SetActive(false);
+            }
             Debug.Log("请选择技能：1-眩晕对手，2-照明2*3区域，3-爆出对方船点，4-多方向开火");
             // 这里实际应弹窗选择，暂用4号技能演示
             int skillType = this.mSkillType; // TODO: 替换为UI选择
