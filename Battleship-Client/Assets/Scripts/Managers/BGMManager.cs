@@ -67,4 +67,20 @@ public class BGMManager : MonoBehaviour
     {
         audioSource.volume = Mathf.Clamp01(volume);
     }
+
+    /// <summary>
+    /// 暂停BGM（用于游戏胜负时给音效腾出空间）
+    /// </summary>
+    public void PauseBGM()
+    {
+        audioSource.Pause();
+    }
+
+    /// <summary>
+    /// 恢复BGM播放
+    /// </summary>
+    public void ResumeBGM()
+    {
+        audioSource.UnPause();
+    }
 } 
