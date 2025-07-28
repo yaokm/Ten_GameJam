@@ -20,7 +20,7 @@ namespace BattleshipGame.Tiling
         // @formatter:off
         [Header("Layers")]
         [SerializeField] private Tilemap cursorLayer;
-        [SerializeField] private Tilemap markerLayer;
+        [SerializeField] public Tilemap markerLayer;
         [SerializeField] private Tilemap fleetLayer;
         [SerializeField] private Tilemap gridsLayer;
         [Space] 

@@ -483,11 +483,12 @@ namespace BattleshipGame.Managers
             // 获取格子中心的世界坐标
             Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
             // 需要opponentMap暴露Tilemap引用
-            var tilemap = opponentMap.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+            var tilemap = opponentMap.markerLayer;//GetComponent<UnityEngine.Tilemaps.Tilemap>();
             if (tilemap == null) return;
             Vector3 worldPos = tilemap.GetCellCenterWorld(cell);
             var effect = Instantiate(shotEffect, worldPos, Quaternion.identity);
-            effect.Play();
+            effect.Play(true);
+            Debug.Log($"Instantiate shotEffect at {worldPos}, shotEffect null? {shotEffect == null}");
             //Destroy(effect.gameObject, effect.main.duration);
         }
 
