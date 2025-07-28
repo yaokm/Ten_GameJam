@@ -14,6 +14,7 @@ using static BattleshipGame.Core.GridUtils;
 using UnityEngine.Tilemaps;
 using System;
 using TMPro;
+using Microsoft.Unity.VisualStudio.Editor;
 
 namespace BattleshipGame.Managers
 {
@@ -42,6 +43,8 @@ namespace BattleshipGame.Managers
         [SerializeField] private ButtonController HeroButton;
         [SerializeField] private GameObject maskBox;//二次确认框
         [SerializeField] private ButtonController closeMaskBoxButton;
+        [SerializeField] private UnityEngine.UI.Image HeroImage;
+        [SerializeField] private Sprite[] heroSprites; // 武将图片数组，索引对应武将编号-1
         [SerializeField]
         private TextMeshProUGUI debugTip;
  private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
@@ -201,6 +204,9 @@ namespace BattleshipGame.Managers
             {
                 mSkillType = gameManager.SelectedHeroId;
                 Debug.Log("BattleManager 读取到武将编号：" + mSkillType);
+                
+                // 根据武将编号更换英雄图片
+                UpdateHeroImage(mSkillType);
             }
         }
 
@@ -766,6 +772,41 @@ namespace BattleshipGame.Managers
         {
             Debug.Log("关闭按钮被点击，隐藏maskBox");
             maskBox.SetActive(false);
+        }
+        
+        // 根据武将编号更新英雄图片
+        private void UpdateHeroImage(int heroId)
+        {
+            if (HeroImage == null)
+            {
+                Debug.LogWarning("HeroImage 未在Inspector中赋值！");
+                return;
+            }
+            
+            // 优先使用Inspector中设置的图片数组
+            if (heroSprites != null && heroSprites.Length > 0)
+            {
+                int spriteIndex = heroId - 1; // 武将编号1对应数组索引0
+                if (spriteIndex >= 0 && spriteIndex < heroSprites.Length && heroSprites[spriteIndex] != null)
+                {
+                    HeroImage.sprite = heroSprites[spriteIndex];
+                    Debug.Log($"成功更换武将 {heroId} 的图片（使用Inspector设置）");
+                    return;
+                }
+            }
+            // 如果Inspector中没有设置，则尝试从Resources加载
+            string imagePath = $"Heroes/hero_{heroId}"; // 假设图片路径格式为 "Heroes/hero_1", "Heroes/hero_2" 等
+            Sprite heroSprite = Resources.Load<Sprite>(imagePath);
+            
+            if (heroSprite != null)
+            {
+                HeroImage.sprite = heroSprite;
+                Debug.Log($"成功更换武将 {heroId} 的图片（使用Resources加载）");
+            }
+            else
+            {
+                Debug.LogWarning($"未找到武将 {heroId} 的图片资源：{imagePath}");
+            }
         }
     }
       

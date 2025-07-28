@@ -7326,6 +7326,12 @@ MonoBehaviour:
   HeroButton: {fileID: 1920093430}
   maskBox: {fileID: 1495052909}
   closeMaskBoxButton: {fileID: 68695163}
+  HeroImage: {fileID: 1920093428}
+  heroSprites:
+  - {fileID: -6146700129834819302, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
+  - {fileID: 2632276121321243838, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
+  - {fileID: 9138555137054584332, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
+  - {fileID: 2805043176163793281, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   debugTip: {fileID: 1898171687}
 --- !u!1 &1832477925
 GameObject:

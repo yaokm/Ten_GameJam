@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &32847576
 RectTransform:
   m_ObjectHideFlags: 0
@@ -432,7 +432,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1a733ed44eac4584785be9562b598fe7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f476eca244e015f43ba7d40eb5cb26f5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -507,7 +507,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1a733ed44eac4584785be9562b598fe7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f5452d55c7b3ca94e9d9f356f8b271ba, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1089,7 +1089,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7c4faa01bb83c874bb1bf5310b10871d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2d797b1d8f119574db97e12caec987f8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1346,7 +1346,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &739631649
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2750,7 +2750,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7c4faa01bb83c874bb1bf5310b10871d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c32926d609c8a3e438c80d33164f4e19, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2783,7 +2783,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1368229454
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3172,7 +3172,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1a733ed44eac4584785be9562b598fe7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5b0b7d94b34deee41b6c7f34243d0cad, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3596,8 +3596,16 @@ MonoBehaviour:
   Hero1Button: {fileID: 1428140499}
   Hero2Button: {fileID: 441836253}
   Hero3Button: {fileID: 1774347764}
-  HeroName: {fileID: 0}
-  skillContent: {fileID: 0}
+  HeroName:
+  - {fileID: 1762047194}
+  - {fileID: 730165384}
+  - {fileID: 398432778}
+  - {fileID: 444145910}
+  skillContent:
+  - {fileID: 1154195180}
+  - {fileID: 32847575}
+  - {fileID: 1368229453}
+  - {fileID: 739631648}
 --- !u!1 &1842639402
 GameObject:
   m_ObjectHideFlags: 0

@@ -38,8 +38,8 @@ namespace BattleshipGame.Managers
         [SerializeField] private ButtonController Hero1Button;
         [SerializeField] private ButtonController Hero2Button;
         [SerializeField] private ButtonController Hero3Button;
-        [SerializeField] private Image HeroName;
-        [SerializeField] private Image skillContent;
+        [SerializeField] private List<Image> HeroName;
+        [SerializeField] private List<GameObject> skillContent;
         // 新增：保存选择的武将编号
         private int selectedHeroId = 1;
         private int _cellCount;
@@ -162,6 +162,31 @@ namespace BattleshipGame.Managers
             
             // 初始化默认武将显示
             UpdateHeroDisplay(selectedHeroId);
+            
+            // 确保初始状态下只显示默认武将的名字和技能内容
+            if (HeroName != null && HeroName.Count > 0)
+            {
+                for (int i = 0; i < HeroName.Count; i++)
+                {
+                    if (HeroName[i] != null)
+                    {
+                        bool shouldShow = (i == selectedHeroId - 1);
+                        HeroName[i].gameObject.SetActive(shouldShow);
+                    }
+                }
+            }
+            
+            if (skillContent != null && skillContent.Count > 0)
+            {
+                for (int i = 0; i < skillContent.Count; i++)
+                {
+                    if (skillContent[i] != null)
+                    {
+                        bool shouldShow = (i == selectedHeroId - 1);
+                        skillContent[i].SetActive(shouldShow);
+                    }
+                }
+            }
 
             BeginShipPlacement();
 
@@ -795,11 +820,35 @@ namespace BattleshipGame.Managers
                 }
             }
             
-            // 这里可以添加更新技能内容显示的逻辑
-            // if (skillContent != null)
-            // {
-            //     // 根据武将ID更新技能内容图片
-            // }
+            // 更新武将名字显示：显示对应编号的，隐藏其他的
+            if (HeroName != null && HeroName.Count > 0)
+            {
+                for (int i = 0; i < HeroName.Count; i++)
+                {
+                    if (HeroName[i] != null)
+                    {
+                        // 显示对应编号的（heroId-1因为数组索引从0开始）
+                        bool shouldShow = (i == heroId - 1);
+                        HeroName[i].gameObject.SetActive(shouldShow);
+                        Debug.Log($"武将名字 {i}: {(shouldShow ? "显示" : "隐藏")}");
+                    }
+                }
+            }
+            
+            // 更新技能内容显示：显示对应编号的，隐藏其他的
+            if (skillContent != null && skillContent.Count > 0)
+            {
+                for (int i = 0; i < skillContent.Count; i++)
+                {
+                    if (skillContent[i] != null)
+                    {
+                        // 显示对应编号的（heroId-1因为数组索引从0开始）
+                        bool shouldShow = (i == heroId - 1);
+                        skillContent[i].SetActive(shouldShow);
+                        Debug.Log($"技能内容 {i}: {(shouldShow ? "显示" : "隐藏")}");
+                    }
+                }
+            }
             
             Debug.Log($"更新武将显示：{heroId}");
         }
