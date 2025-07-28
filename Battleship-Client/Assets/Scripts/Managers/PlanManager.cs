@@ -40,6 +40,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private ButtonController Hero3Button;
         [SerializeField] private List<Image> HeroName;
         [SerializeField] private List<GameObject> skillContent;
+        [SerializeField] private List<GameObject> Heros;
         // 新增：保存选择的武将编号
         private int selectedHeroId = 1;
         private int _cellCount;
@@ -610,19 +611,40 @@ namespace BattleshipGame.Managers
                 // 更新PlacementMap
                 placementMap.PlaceShip(shipId, ship, to);
                 
-                // 只在基点位置设置单元格，其他部分不设置
-                int baseCellIndex = CoordinateToCellIndex(to, MapAreaSize);
-                if (baseCellIndex != OutOfMap)
-                {
-                    _cells[baseCellIndex] = shipId;
-                }
+                // 修复：旋转时也要完整注册船只到单元格，确保数据一致性
+                RegisterShipToCells(shipId, ship, to);
                 
                 // 更新船只状态
                 _shipStates[shipId].Position = to;
                 _shipStates[shipId].Direction = ship.CurrentDirection;
                 
+                // 修复：更新船只的有效性状态
+                _shipStates[shipId].IsOutOfBounds = !isInsideBoundaries;
+                
+                // 检查旋转后是否与其他船只重叠
+                bool hasCollisionAfterRotation = false;
+                foreach (var placement in _placements)
+                {
+                    // 跳过自己
+                    if (placement.shipId == shipId) continue;
+                    
+                    // 检查碰撞
+                    if (DoShipsCollide(ship, to, placement.ship, placement.Coordinate))
+                    {
+                        hasCollisionAfterRotation = true;
+                        Debug.Log($"旋转后船只 {shipId} 在 {to} 与船只 {placement.shipId} 重叠");
+                        break;
+                    }
+                }
+                
+                _shipStates[shipId].HasCollision = hasCollisionAfterRotation;
+                _shipStates[shipId].IsValid = isInsideBoundaries && !hasCollisionAfterRotation;
+                
                 // 确保_placements是最新的
                 _placements = placementMap.GetPlacements();
+                
+                // 修复：旋转后更新Continue按钮状态
+                UpdateContinueButtonState();
                 
                 // 返回true表示旋转操作成功（即使船只位置无效）
                 return true;
@@ -712,14 +734,31 @@ namespace BattleshipGame.Managers
         {
             if (!isMovedIn)
             {
+                // 首先尝试从指定坐标获取shipId
                 int cellIndex = CoordinateToCellIndex(grabbedFrom, MapAreaSize);
                 if (cellIndex != OutOfMap && _cells[cellIndex] != EmptyCell)
                 {
                     return _cells[cellIndex];
                 }
+                
+                // 如果指定坐标没有找到，尝试在整个地图中查找匹配的船只
+                // 这对于旋转操作特别重要，因为旋转时可能从船只的任何部分开始
+                for (int i = 0; i < _cellCount; i++)
+                {
+                    if (_cells[i] != EmptyCell)
+                    {
+                        // 检查这个shipId对应的船只是否匹配当前船只的rankOrder
+                        if (_shipStates.ContainsKey(_cells[i]) && _shipStates[_cells[i]].RankOrder == ship.rankOrder)
+                        {
+                            return _cells[i];
+                        }
+                    }
+                }
             }
 
-            foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) return kvp.Key;
+            // 如果从地图中找不到，从池中查找
+            foreach (var kvp in _pool.Where(kvp => kvp.Value.rankOrder == ship.rankOrder)) 
+                return kvp.Key;
 
             return EmptyCell;
         }
@@ -819,6 +858,21 @@ namespace BattleshipGame.Managers
                     default:
                         txtHero.text = "未知武将";
                         break;
+                }
+            }
+            
+            // 更新武将模型显示：显示对应编号的，隐藏其他的
+            if (Heros != null && Heros.Count > 0)
+            {
+                for (int i = 0; i < Heros.Count; i++)
+                {
+                    if (Heros[i] != null)
+                    {
+                        // 显示对应编号的（heroId-1因为数组索引从0开始）
+                        bool shouldShow = (i == heroId - 1);
+                        Heros[i].SetActive(shouldShow);
+                        Debug.Log($"武将模型 {i}: {(shouldShow ? "显示" : "隐藏")}");
+                    }
                 }
             }
             
