@@ -7,13 +7,13 @@ TextureImporter:
     second: shipfinal_B0R
   - first:
       213: -6963276781439298275
-    second: shipfinal_BOU
+    second: shipfinal_B0U
   - first:
       213: -389705400811955353
-    second: shipfinal_BOL
+    second: shipfinal_B0L
   - first:
       213: -1549410636860258486
-    second: shipfinal_BOD
+    second: shipfinal_B0D
   - first:
       213: 8506273942188866698
     second: shipfinal_C0R
@@ -26,6 +26,48 @@ TextureImporter:
   - first:
       213: 2943994638748487031
     second: shipfinal_C0D
+  - first:
+      213: -7305094007304967102
+    second: shipfinal_E0R
+  - first:
+      213: -2511159336830352179
+    second: shipfinal_F0R
+  - first:
+      213: -276115874784823800
+    second: shipfinal_D0U
+  - first:
+      213: -8304641967132768284
+    second: shipfinal_D1U
+  - first:
+      213: -5964809299677400288
+    second: shipfinal_E0U
+  - first:
+      213: -8737529139938224398
+    second: shipfinal_F0U
+  - first:
+      213: -5697981671865541475
+    second: shipfinal_D0L
+  - first:
+      213: -4964199597124090357
+    second: shipfinal_D1L
+  - first:
+      213: 7843094204328365038
+    second: shipfinal_E0L
+  - first:
+      213: -8242393639624872632
+    second: shipfinal_F0L
+  - first:
+      213: -6602107645611004852
+    second: shipfinal_D0D
+  - first:
+      213: -6775552406082094050
+    second: shipfinal_D1D
+  - first:
+      213: 177826922978582950
+    second: shipfinal_EOD
+  - first:
+      213: -7087101633253014381
+    second: shipfinal_F0D
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -160,7 +202,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: shipfinal_BOU
+      name: shipfinal_B0U
       rect:
         serializedVersion: 2
         x: 177
@@ -181,7 +223,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: shipfinal_BOL
+      name: shipfinal_B0L
       rect:
         serializedVersion: 2
         x: 161
@@ -202,7 +244,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: shipfinal_BOD
+      name: shipfinal_B0D
       rect:
         serializedVersion: 2
         x: 156
@@ -230,8 +272,8 @@ TextureImporter:
         y: 2200
         width: 100
         height: 300
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.83}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -251,8 +293,8 @@ TextureImporter:
         y: 1516
         width: 100
         height: 300
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.83}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -272,8 +314,8 @@ TextureImporter:
         y: 897
         width: 100
         height: 300
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.83}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -290,11 +332,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 426
-        y: 278
+        y: 270
         width: 100
         height: 300
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.83}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -302,6 +344,342 @@ TextureImporter:
       bones: []
       spriteID: 77d0247a68b2bd820800000000000000
       internalID: 2943994638748487031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D0R
+      rect:
+        serializedVersion: 2
+        x: 703
+        y: 2159
+        width: 200
+        height: 300
+      alignment: 9
+      pivot: {x: 0.25, y: 0.83}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0deb5ed444fd29fa0800000000000000
+      internalID: -5795324286014734640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D1R
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 2177
+        width: 100
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 588cff9ad605fa260800000000000000
+      internalID: 7110990768575072389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_E0R
+      rect:
+        serializedVersion: 2
+        x: 1350
+        y: 2155
+        width: 100
+        height: 500
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24ca0c354b71f9a90800000000000000
+      internalID: -7305094007304967102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_F0R
+      rect:
+        serializedVersion: 2
+        x: 1679
+        y: 2113
+        width: 200
+        height: 400
+      alignment: 9
+      pivot: {x: 0.25, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc442d943e1962dd0800000000000000
+      internalID: -2511159336830352179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D0U
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 1511
+        width: 200
+        height: 300
+      alignment: 9
+      pivot: {x: 0.25, y: 0.83}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 806ba96231a0b2cf0800000000000000
+      internalID: -276115874784823800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D1U
+      rect:
+        serializedVersion: 2
+        x: 1031
+        y: 1492
+        width: 100
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e7004a712cffbc80800000000000000
+      internalID: -8304641967132768284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_E0U
+      rect:
+        serializedVersion: 2
+        x: 1366
+        y: 1488
+        width: 100
+        height: 500
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 02338cb7b8db83da0800000000000000
+      internalID: -5964809299677400288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_F0U
+      rect:
+        serializedVersion: 2
+        x: 1671
+        y: 1461
+        width: 200
+        height: 400
+      alignment: 9
+      pivot: {x: 0.25, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2f69b576a8f0eb680800000000000000
+      internalID: -8737529139938224398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D0L
+      rect:
+        serializedVersion: 2
+        x: 669
+        y: 856
+        width: 200
+        height: 300
+      alignment: 9
+      pivot: {x: 0.25, y: 0.83}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9c94cfcbd3bce0b0800000000000000
+      internalID: -5697981671865541475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D1L
+      rect:
+        serializedVersion: 2
+        x: 1031
+        y: 867
+        width: 100
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b06084394ce9b1bb0800000000000000
+      internalID: -4964199597124090357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_E0L
+      rect:
+        serializedVersion: 2
+        x: 1351
+        y: 837
+        width: 100
+        height: 500
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eebcae4df9448dc60800000000000000
+      internalID: 7843094204328365038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_F0L
+      rect:
+        serializedVersion: 2
+        x: 1698
+        y: 875
+        width: 200
+        height: 400
+      alignment: 9
+      pivot: {x: 0.25, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84d6833a7a22d9d80800000000000000
+      internalID: -8242393639624872632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D0D
+      rect:
+        serializedVersion: 2
+        x: 673
+        y: 266
+        width: 200
+        height: 300
+      alignment: 9
+      pivot: {x: 0.25, y: 0.83}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4c2776631a9064a0800000000000000
+      internalID: -6602107645611004852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_D1D
+      rect:
+        serializedVersion: 2
+        x: 993
+        y: 238
+        width: 100
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1cfe6e2cf668f1a0800000000000000
+      internalID: -6775552406082094050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_EOD
+      rect:
+        serializedVersion: 2
+        x: 1343
+        y: 165
+        width: 100
+        height: 500
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a1a3afe4a4c77200800000000000000
+      internalID: 177826922978582950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shipfinal_F0D
+      rect:
+        serializedVersion: 2
+        x: 1702
+        y: 208
+        width: 200
+        height: 400
+      alignment: 9
+      pivot: {x: 0.25, y: 0.875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3940dd61d9e85ad90800000000000000
+      internalID: -7087101633253014381
       vertices: []
       indices: 
       edges: []
