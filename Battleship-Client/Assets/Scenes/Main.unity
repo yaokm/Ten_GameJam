@@ -150,12 +150,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 270076533}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f6f411e67445c146b11ef1c40c166c1, type: 3}
+  m_Script: {fileID: 11500000, guid: e3fbc3e6d504fba4f872c6ea132f74c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   bgmClips:
-  - {fileID: 8300000, guid: ed12b1534cff0874ba0926e33989b60b, type: 3}
-  - {fileID: 8300000, guid: cc6679257f089154f9bbd7ae3299a148, type: 3}
+  - {fileID: 8300000, guid: d69827b5c09e5ae4c97b237af467b2f7, type: 3}
+  - {fileID: 8300000, guid: 7cb9320d3faf411498dc2d9567108ed7, type: 3}
 --- !u!4 &270076535
 Transform:
   m_ObjectHideFlags: 0
