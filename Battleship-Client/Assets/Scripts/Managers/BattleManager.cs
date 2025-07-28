@@ -49,6 +49,7 @@ namespace BattleshipGame.Managers
         [SerializeField]
         private TextMeshProUGUI debugTip;
         [SerializeField] private UnityEngine.UI.Image EnemyHero;
+        [SerializeField] private GameObject[] boomTxts;
  private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
         private readonly List<int> _shotsInCurrentTurn = new List<int>();
         private IClient _client;
@@ -64,6 +65,10 @@ namespace BattleshipGame.Managers
         private bool _resultShown = false; // 防止重复显示结果
         private int _pendingEffects = 0; // 待播放的特效数量
         private bool _waitingForEffects = false; // 是否正在等待特效播放完成
+        private bool _isPlayerStunned = false; // 我方是否被眩晕
+        private bool _isEnemyStunned = false; // 敌方是否被眩晕
+        private bool _willPlayerBeStunned = false; // 我方下回合是否会被眩晕
+        private bool _willEnemyBeStunned = false; // 敌方下回合是否会被眩晕
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -108,6 +113,9 @@ namespace BattleshipGame.Managers
             opponentMap.SetClickListener(this);
             opponentTurnHighlighter.SetClickListener(this);
             opponentStatusMapTurnHighlighter.SetClickListener(this);
+            
+            // 初始化boomTxts，确保所有图片都隐藏
+            InitializeBoomTxts();
 
             foreach (var placement in placementMap.GetPlacements())
             {
@@ -230,6 +238,9 @@ namespace BattleshipGame.Managers
             _client.GamePhaseChanged -= OnGamePhaseChanged;
 
             UnRegisterFromStateEvents();
+            
+            // 清理所有boomTxts
+            HideAllBoomTxts();
 
             void UnRegisterFromStateEvents()
             {
@@ -245,7 +256,9 @@ namespace BattleshipGame.Managers
 
         public void OnOpponentMapClicked(Vector3Int cell)
         {
-            if (_state.playerTurn != _client.GetSessionId()) return;
+            // 检查是否是我方回合且没有被眩晕
+            if (_state.playerTurn != _client.GetSessionId() || _isPlayerStunned) return;
+            
             int cellIndex = CoordinateToCellIndex(cell, rules.areaSize);
             if (_isMultiShotActive && mSkillType == 4)
             {
@@ -410,6 +423,13 @@ namespace BattleshipGame.Managers
 
         private void FireShots()
         {
+            // 检查是否被眩晕
+            if (_isPlayerStunned)
+            {
+                Debug.Log("我方被眩晕，无法开火");
+                return;
+            }
+            
             fireButton.SetInteractable(false);
             if (_isMultiShotActive && _shotsInCurrentTurn.Count == 2)
             {
@@ -467,6 +487,9 @@ namespace BattleshipGame.Managers
 
         private void SwitchTurns()
         {
+            // 检查眩晕状态
+            CheckStunStatus();
+            
             if (_state.playerTurn == _client.GetSessionId())
                 TurnToPlayer();
             else
@@ -474,29 +497,86 @@ namespace BattleshipGame.Managers
 
             void TurnToPlayer()
             {
-                opponentMap.IsMarkingTargets = true;
-                statusData.State = PlayerTurn;
-                opponentMap.FlashGrids();
-                
-                // 显示我方回合UI
-                myTurn.SetActive(true);
-                oppoTurn.SetActive(false);
+                // 检查我方是否被眩晕
+                if (_isPlayerStunned)
+                {
+                    // 我方被眩晕，无法行动
+                    ShowBoomTxt(0); // 显示"陷阱生效我方本回合不能行动"
+                    statusData.State = OpponentTurn; // 直接切换到敌方回合
+                    Debug.Log("我方被眩晕，跳过回合");
+                    
+                    // 清除眩晕状态
+                    _isPlayerStunned = false;
+                    HideBoomTxt(0);
+                    
+                    // 显示对方回合UI
+                    myTurn.SetActive(false);
+                    oppoTurn.SetActive(true);
+                }
+                else
+                {
+                    opponentMap.IsMarkingTargets = true;
+                    statusData.State = PlayerTurn;
+                    opponentMap.FlashGrids();
+                    
+                    // 显示我方回合UI
+                    myTurn.SetActive(true);
+                    oppoTurn.SetActive(false);
 
 #if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
-                if (options.vibration && _client is NetworkClient _)
-                {
-                    Handheld.Vibrate();
-                }
+                    if (options.vibration && _client is NetworkClient _)
+                    {
+                        Handheld.Vibrate();
+                    }
 #endif
+                }
             }
 
             void TurnToEnemy()
             {
-                statusData.State = OpponentTurn;
-                
-                // 显示对方回合UI
-                myTurn.SetActive(false);
-                oppoTurn.SetActive(true);
+                // 检查敌方是否被眩晕
+                if (_isEnemyStunned)
+                {
+                    // 敌方被眩晕，无法行动
+                    ShowBoomTxt(1); // 显示"陷阱生效中，敌方本回合不能行动"
+                    statusData.State = PlayerTurn; // 直接切换到我方回合
+                    Debug.Log("敌方被眩晕，跳过回合");
+                    
+                    // 清除眩晕状态
+                    _isEnemyStunned = false;
+                    HideBoomTxt(1);
+                    
+                    // 显示我方回合UI
+                    myTurn.SetActive(true);
+                    oppoTurn.SetActive(false);
+                }
+                else
+                {
+                    statusData.State = OpponentTurn;
+                    
+                    // 显示对方回合UI
+                    myTurn.SetActive(false);
+                    oppoTurn.SetActive(true);
+                }
+            }
+        }
+        
+        // 检查眩晕状态
+        private void CheckStunStatus()
+        {
+            // 检查是否需要应用眩晕效果
+            if (_willPlayerBeStunned)
+            {
+                _isPlayerStunned = true;
+                _willPlayerBeStunned = false;
+                Debug.Log("应用我方眩晕效果");
+            }
+            
+            if (_willEnemyBeStunned)
+            {
+                _isEnemyStunned = true;
+                _willEnemyBeStunned = false;
+                Debug.Log("应用敌方眩晕效果");
             }
         }
 
@@ -796,6 +876,13 @@ namespace BattleshipGame.Managers
         // 技能按钮点击回调
         private void OnUseSkillButtonClicked()
         {
+            // 检查是否被眩晕
+            if (_isPlayerStunned)
+            {
+                Debug.Log("我方被眩晕，无法使用技能");
+                return;
+            }
+            
             // 使用技能时自动关闭二次确认框
             if (maskBox != null)
             {
@@ -866,6 +953,22 @@ namespace BattleshipGame.Managers
                     string target = paramDict["target"] as string;
                     Debug.Log($"玩家{player}使用了眩晕技能，目标：{target}");
                     debugTip.text = $"玩家{player}使用了眩晕技能，目标：{target}";
+                    
+                    // 处理眩晕效果
+                    if (player == _client.GetSessionId())
+                    {
+                        // 我方使用眩晕技能，敌方下回合无法行动
+                        _willEnemyBeStunned = true;
+                        ShowBoomTxt(2); // 显示"陷阱生效中，敌方本回合不能行动"
+                        Debug.Log("我方使用眩晕技能，敌方下回合将被眩晕");
+                    }
+                    else
+                    {
+                        // 敌方使用眩晕技能，我方下回合无法行动
+                        _willPlayerBeStunned = true;
+                        ShowBoomTxt(3); // 显示"技能已生效敌方下回合无法行动"
+                        Debug.Log("敌方使用眩晕技能，我方下回合将被眩晕");
+                    }
                     break;
                 case "scan":
                     // 程昱照明技能：只有使用技能的玩家才能看到照明效果
@@ -1165,6 +1268,50 @@ namespace BattleshipGame.Managers
         private void ClearChengyuScanArea()
         {
             opponentMap.ClearChengyuScanArea();
+        }
+        
+        // 初始化boomTxts，隐藏所有图片
+        private void InitializeBoomTxts()
+        {
+            if (boomTxts != null && boomTxts.Length >= 4)
+            {
+                for (int i = 0; i < boomTxts.Length; i++)
+                {
+                    if (boomTxts[i] != null)
+                    {
+                        boomTxts[i].SetActive(false);
+                    }
+                }
+            }
+        }
+        
+        // 显示boomTxts图片
+        private void ShowBoomTxt(int index)
+        {
+            if (boomTxts != null && index >= 0 && index < boomTxts.Length && boomTxts[index] != null)
+            {
+                // 先隐藏所有图片
+                InitializeBoomTxts();
+                // 显示指定图片
+                boomTxts[index].SetActive(true);
+                Debug.Log($"显示boomTxts图片 {index}");
+            }
+        }
+        
+        // 隐藏boomTxts图片
+        private void HideBoomTxt(int index)
+        {
+            if (boomTxts != null && index >= 0 && index < boomTxts.Length && boomTxts[index] != null)
+            {
+                boomTxts[index].SetActive(false);
+                Debug.Log($"隐藏boomTxts图片 {index}");
+            }
+        }
+        
+        // 隐藏所有boomTxts图片
+        private void HideAllBoomTxts()
+        {
+            InitializeBoomTxts();
         }
     }
       
