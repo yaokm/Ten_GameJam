@@ -154,8 +154,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmClips:
-  - {fileID: 8300000, guid: d69827b5c09e5ae4c97b237af467b2f7, type: 3}
-  - {fileID: 8300000, guid: 7cb9320d3faf411498dc2d9567108ed7, type: 3}
+  - {fileID: 8300000, guid: 0a5e25c936ac2ec48a7a74016f2c45e3, type: 3}
+  - {fileID: 8300000, guid: be7e2c881ea50f7459bdb389ad9db9f9, type: 3}
 --- !u!4 &270076535
 Transform:
   m_ObjectHideFlags: 0
@@ -396,28 +396,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 661881616}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9eb516dffff110147baf737e49ed171b, type: 3}
+  m_Script: {fileID: 11500000, guid: 8ac99acd24585e842977296859f8fc13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fireSound: {fileID: 0}
-  hitSound: {fileID: 8300000, guid: c6367e0343afc174181c4486b9137e13, type: 3}
-  missSound: {fileID: 8300000, guid: 925d706c69f01dd45b00884792f1809a, type: 3}
-  shipSunkSound: {fileID: 8300000, guid: eb4aacc1170a53147b003de5a244520d, type: 3}
-  skillSound: {fileID: 0}
-  buttonClickSound: {fileID: 8300000, guid: e8e6f64fa8b8865488bd93f4c2dfa86d, type: 3}
-  turnSwitchSound: {fileID: 0}
-  victorySound: {fileID: 8300000, guid: 5df0b75256d8f3f43a5debe3c691bf80, type: 3}
-  defeatSound: {fileID: 8300000, guid: 6ca1547fe88359a4783af2ccfc11944e, type: 3}
-  heroSelectSound: {fileID: 0}
-  guoJiaSkillSound: {fileID: 8300000, guid: 7657d34ca363e8847bd0ddb3eb4b9626, type: 3}
-  chengyuSkillSound: {fileID: 8300000, guid: fe626274ee185fa4295d55f54afe076b, type: 3}
-  zhugeliangSkillSound: {fileID: 8300000, guid: 8ba435460c63cae4aa3d2468bf74ba00,
-    type: 3}
-  zhouyuSkillSound: {fileID: 8300000, guid: f6e00b627f2709d419703802a746e7e2, type: 3}
-  chooseGuoJia: {fileID: 8300000, guid: 8573a4660e2807244a302dd7c60e7ccc, type: 3}
-  chooseChengyu: {fileID: 8300000, guid: e01451268af6faa458bdc1d147a7ba33, type: 3}
-  chooseZhugeliang: {fileID: 8300000, guid: 8aa10d47f8e499c43ac9b7dea0b6843a, type: 3}
-  chooseZhouyu: {fileID: 8300000, guid: ce920e19128e991428aa71e28322b716, type: 3}
 --- !u!4 &661881618
 Transform:
   m_ObjectHideFlags: 0
@@ -441,37 +422,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 661881616}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f19dc29db8303714d9853910d132e1ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 38ee1c91c268c9f4aa977344ef24808d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundEffectClips:
-  - {fileID: 0}
-  - {fileID: 8300000, guid: c6367e0343afc174181c4486b9137e13, type: 3}
-  - {fileID: 8300000, guid: 925d706c69f01dd45b00884792f1809a, type: 3}
-  - {fileID: 8300000, guid: eb4aacc1170a53147b003de5a244520d, type: 3}
-  - {fileID: 8300000, guid: 5df0b75256d8f3f43a5debe3c691bf80, type: 3}
-  - {fileID: 8300000, guid: 6ca1547fe88359a4783af2ccfc11944e, type: 3}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  heroSkillClips:
-  - {fileID: 8300000, guid: 7657d34ca363e8847bd0ddb3eb4b9626, type: 3}
-  - {fileID: 8300000, guid: fe626274ee185fa4295d55f54afe076b, type: 3}
-  - {fileID: 8300000, guid: 8ba435460c63cae4aa3d2468bf74ba00, type: 3}
-  - {fileID: 8300000, guid: f6e00b627f2709d419703802a746e7e2, type: 3}
-  heroSelectClips:
-  - {fileID: 8300000, guid: 8573a4660e2807244a302dd7c60e7ccc, type: 3}
-  - {fileID: 8300000, guid: e01451268af6faa458bdc1d147a7ba33, type: 3}
-  - {fileID: 8300000, guid: 8aa10d47f8e499c43ac9b7dea0b6843a, type: 3}
-  - {fileID: 8300000, guid: ce920e19128e991428aa71e28322b716, type: 3}
-  masterVolume: 0.889
-  heroSelectVolume: 0.927
-  heroSkillVolume: 1
-  gamePlayVolume: 0.959
-  resultVolume: 0.972
-  showVolumeSettings: 1
-  enableVolumeSettings: 1
 --- !u!1 &1068387792
 GameObject:
   m_ObjectHideFlags: 0
