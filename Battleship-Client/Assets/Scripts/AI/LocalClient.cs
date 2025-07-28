@@ -103,7 +103,7 @@ namespace BattleshipGame.AI
                 ship._enemyDirection=(Direction)directions[ship.rankOrder];
                 var basePosition=basePositions[ship.rankOrder];
                 ship.EnemyCoordinate=new Vector2Int(basePosition[0],basePosition[1]);
-            }
+            }           
             
             // 触发敌方信息接收事件，使用默认武将类型1
             OnOpponentInfoReceived?.Invoke(basePositions, directions, 1);

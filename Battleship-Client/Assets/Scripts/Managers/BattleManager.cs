@@ -433,8 +433,8 @@ namespace BattleshipGame.Managers
                 _firstMultiShotCell = null;
                 _validSecondCells.Clear();
                 
-                // 清除瞄准标记
-                ClearAllMarkers();
+                // 清除瞄准标记，但保持一个瞄准状态
+                ClearMultiShotMarkers();
             }
             else if (_shotsInCurrentTurn.Count == rules.shotsPerTurn)
             {
@@ -920,6 +920,26 @@ namespace BattleshipGame.Managers
             opponentMap.IsMarkingTargets = true;
             
             Debug.Log("已清除所有瞄准标记");
+        }
+        
+        // 清除多方向开火标记，但保持一个瞄准状态
+        private void ClearMultiShotMarkers()
+        {
+            // 清除当前回合的所有瞄准标记
+            foreach (int shotIndex in _shotsInCurrentTurn)
+            {
+                Vector3Int shotCell = CellIndexToCoordinate(shotIndex, rules.areaSize.x);
+                opponentMap.ClearMarker(shotCell);
+            }
+            
+            // 清空瞄准列表，准备重新瞄准
+            _shotsInCurrentTurn.Clear();
+            
+            // 重置按钮状态
+            fireButton.SetInteractable(false);
+            opponentMap.IsMarkingTargets = true;
+            
+            Debug.Log("已清除多方向开火标记，准备重新瞄准");
         }
         
 

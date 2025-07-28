@@ -8431,12 +8431,14 @@ MonoBehaviour:
   maskBox: {fileID: 1495052909}
   closeMaskBoxButton: {fileID: 68695163}
   HeroImage: {fileID: 1920093428}
+  shotEffect: {fileID: 0}
   heroSprites:
   - {fileID: -6146700129834819302, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   - {fileID: 2632276121321243838, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   - {fileID: 9138555137054584332, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   - {fileID: 2805043176163793281, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   debugTip: {fileID: 1898171687}
+  EnemyHero: {fileID: 0}
 --- !u!1 &1832477925
 GameObject:
   m_ObjectHideFlags: 0
@@ -8829,6 +8831,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1893644477}
   - component: {fileID: 1893644476}
+  - component: {fileID: 1893644478}
   m_Layer: 0
   m_Name: EffectManager
   m_TagString: Untagged
@@ -8868,6 +8871,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1893644478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1893644475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd81d4a8ebe77344db9c6655745819a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitEffect: {fileID: 8736933726175771871, guid: 5b3dec4bb2e018c41a322a7a7bbb2dd4,
+    type: 3}
+  missEffect: {fileID: 1920536597572242469, guid: 22068224bccd0ac40b5b7b320b56ea91,
+    type: 3}
+  sunkEffect: {fileID: 9106120071114346749, guid: 17f2f180247ec074187bd775f112e9d6,
+    type: 3}
 --- !u!114 &1895034772
 MonoBehaviour:
   m_ObjectHideFlags: 0

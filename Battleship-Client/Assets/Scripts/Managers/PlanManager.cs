@@ -89,7 +89,7 @@ namespace BattleshipGame.Managers
                 SceneManager.LoadScene(0);
             }
         }
-
+        
         private void Start()
         {
             planMap.SetPlaceListener(this);
@@ -100,7 +100,7 @@ namespace BattleshipGame.Managers
             _cellCount = MapAreaSize.x * MapAreaSize.y;
             leaveButton.AddListener(LeaveGame);
             clearButton.AddListener(OnClearButtonPressed);
-            randomButton.AddListener(PlaceShipsRandomly);
+            randomButton.AddListener(randomss);
             continueButton.AddListener(CompletePlacement);
             btnHero.onClick.AddListener(OnHeroButtonClicked);
             
@@ -204,91 +204,7 @@ namespace BattleshipGame.Managers
                 ResetPlacementMap();
             }
 
-            void PlaceShipsRandomly()
-            {
-                Debug.Log("开始随机放置船只");
-                _isRandomPlacing = true; // 标记开始随机放置
-                ResetPlacementMap();
-
-                if (_shipsNotDragged.Count == 0) _shipsNotDragged = _pool.Keys.ToList();
-
-                // 避免放置玩家已拖拽的船只
-                foreach (var placement in _placements.Where(placement => !_shipsNotDragged.Contains(placement.shipId)))
-                {
-                    planMap.SetShip(placement.ship, placement.Coordinate);
-                    RegisterShipToCells(placement.shipId, placement.ship, placement.Coordinate);
-                    placementMap.PlaceShip(placement.shipId, placement.ship, placement.Coordinate);
-                }
-
-                // 随机放置剩余船只
-                List<int> placedShipIds = new List<int>();
-                foreach (int shipId in _shipsNotDragged)
-                {
-                    var uncheckedCells = new List<int>();
-                    for (var i = 0; i < _cellCount; i++) uncheckedCells.Add(i);
-                    var isPlaced = false;
-                    while (!isPlaced)
-                    {
-                        if (uncheckedCells.Count == 0) break;
-
-                        int cell = uncheckedCells[Random.Range(0, uncheckedCells.Count)];
-                        uncheckedCells.Remove(cell);
-                        isPlaced = PlaceShip(_pool[shipId], default, CellIndexToCoordinate(cell, MapAreaSize.x), false, false,
-                            shipId);
-                        
-                        if (isPlaced)
-                        {
-                            placedShipIds.Add(shipId);
-                            Debug.Log($"成功随机放置船只 {shipId} (rankOrder={_pool[shipId].rankOrder})");
-                        }
-                    }
-
-                    if (!isPlaced)
-                    {
-                        _isRandomPlacing = false; // 重置标志
-                        statusData.State = PlacementImpossible;
-                        clearButton.SetInteractable(true);
-                        randomButton.SetInteractable(false);
-                        Debug.LogError($"无法随机放置船只 {shipId}");
-                        return;
-                    }
-                }
-
-                // 从池中移除所有已放置的船只
-                foreach (int shipId in placedShipIds)
-                {
-                    _pool.Remove(shipId);
-                    Debug.Log($"移除船只 {shipId} 从池中");
-                }
-                _shipsNotDragged.Clear();
-                
-                _isRandomPlacing = false; // 标记随机放置结束
-                
-                // 确保_placements是最新的
-                _placements = placementMap.GetPlacements();
-                
-                Debug.Log($"随机放置完成，已放置 {_placements.Count} 艘船，池中剩余 {_pool.Count} 艘船");
-
-                gridSpriteMapper.CacheSpritePositions();
-                poolGridSpriteMapper.CacheSpritePositions();
-                
-                // 更新所有船只状态
-                UpdateAllShipStates();
-                
-                // 更新Continue按钮状态
-                UpdateContinueButtonState();
-                
-                statusData.State = PlacementReady;
-                
-                // 如果所有船只都已放置且有效，则启用Continue按钮
-                if (_pool.Count == 0)
-                {
-                    randomButton.SetInteractable(false);
-                    continueButton.SetInteractable(true);
-                    Debug.Log("所有船只已成功放置，Continue按钮已启用");
-                }
-            }
-
+            
             void CompletePlacement()
             {
                 continueButton.SetInteractable(false);
@@ -327,18 +243,8 @@ namespace BattleshipGame.Managers
                 _client.SendPlacement(_cells, directions, coordinates, heroType);
                 statusData.State = WaitingOpponentPlacement;
             }
-
-            void ResetPlacementMap()
-            {
-                BeginShipPlacement();
-                planMap.ClearAllShips();
-                gridSpriteMapper.ClearSpritePositions();
-                gridSpriteMapper.CacheSpritePositions();
-                poolGridSpriteMapper.ClearSpritePositions();
-                poolGridSpriteMapper.CacheSpritePositions();
-            }
-
-            void BeginShipPlacement()
+        }
+        public void BeginShipPlacement()
             {
                 randomButton.SetInteractable(true);
                 clearButton.SetInteractable(false);
@@ -367,8 +273,107 @@ namespace BattleshipGame.Managers
                     Debug.Log($"初始化船只池，共 {_pool.Count} 艘船");
                 }
             }
+        public void ResetPlacementMap()
+            {
+                BeginShipPlacement();
+                planMap.ClearAllShips();
+                gridSpriteMapper.ClearSpritePositions();
+                gridSpriteMapper.CacheSpritePositions();
+                poolGridSpriteMapper.ClearSpritePositions();
+                poolGridSpriteMapper.CacheSpritePositions();
+            }
+                public void PlaceShipsRandomly()
+        {
+            Debug.Log("开始随机放置船只");
+            _isRandomPlacing = true; // 标记开始随机放置
+            ResetPlacementMap();
+
+            if (_shipsNotDragged.Count == 0) _shipsNotDragged = _pool.Keys.ToList();
+
+            // 避免放置玩家已拖拽的船只
+            foreach (var placement in _placements.Where(placement => !_shipsNotDragged.Contains(placement.shipId)))
+            {
+                planMap.SetShip(placement.ship, placement.Coordinate);
+                RegisterShipToCells(placement.shipId, placement.ship, placement.Coordinate);
+                placementMap.PlaceShip(placement.shipId, placement.ship, placement.Coordinate);
+            }
+
+            // 随机放置剩余船只
+            List<int> placedShipIds = new List<int>();
+            foreach (int shipId in _shipsNotDragged)
+            {
+                var uncheckedCells = new List<int>();
+                for (var i = 0; i < _cellCount; i++) uncheckedCells.Add(i);
+                var isPlaced = false;
+                while (!isPlaced)
+                {
+                    if (uncheckedCells.Count == 0) break;
+
+                    int cell = uncheckedCells[Random.Range(0, uncheckedCells.Count)];
+                    uncheckedCells.Remove(cell);
+                    isPlaced = PlaceShip(_pool[shipId], default, CellIndexToCoordinate(cell, MapAreaSize.x), false, false,
+                        shipId);
+                    
+                    if (isPlaced)
+                    {
+                        placedShipIds.Add(shipId);
+                        Debug.Log($"成功随机放置船只 {shipId} (rankOrder={_pool[shipId].rankOrder})");
+                    }
+                }
+
+                if (!isPlaced)
+                {
+                    _isRandomPlacing = false; // 重置标志
+                    statusData.State = PlacementImpossible;
+                    clearButton.SetInteractable(true);
+                    randomButton.SetInteractable(false);
+                    Debug.LogError($"无法随机放置船只 {shipId}");
+                    return;
+                }
+            }
+
+            // 从池中移除所有已放置的船只
+            foreach (int shipId in placedShipIds)
+            {
+                _pool.Remove(shipId);
+                Debug.Log($"移除船只 {shipId} 从池中");
+            }
+            _shipsNotDragged.Clear();
+            
+            _isRandomPlacing = false; // 标记随机放置结束
+            
+            // 确保_placements是最新的
+            _placements = placementMap.GetPlacements();
+            
+            Debug.Log($"随机放置完成，已放置 {_placements.Count} 艘船，池中剩余 {_pool.Count} 艘船");
+
+            // 重要：更新UI显示
+            gridSpriteMapper.ClearSpritePositions();
+            gridSpriteMapper.CacheSpritePositions();
+            poolGridSpriteMapper.ClearSpritePositions();
+            poolGridSpriteMapper.CacheSpritePositions();
+            
+            // 更新所有船只状态
+            UpdateAllShipStates();
+            
+            // 更新Continue按钮状态
+            UpdateContinueButtonState();
+            
+            statusData.State = PlacementReady;
+            
+            // 如果所有船只都已放置且有效，则启用Continue按钮
+            if (_pool.Count == 0)
+            {
+                randomButton.SetInteractable(false);
+                continueButton.SetInteractable(true);
+                Debug.Log("所有船只已成功放置，Continue按钮已启用");
+            }
         }
 
+        public void randomss(){
+            PlaceShipsRandomly();
+            PlaceShipsRandomly();
+        }
         private void Update()
         {
             if (Keyboard.current.escapeKey.wasPressedThisFrame) LeaveGame();
@@ -925,6 +930,7 @@ namespace BattleshipGame.Managers
                 gameManager.SelectedHeroId = selectedHeroId;
                 Debug.Log($"确认选择武将：{selectedHeroId}");
             }
+            randomss();
         }
     }
 }
