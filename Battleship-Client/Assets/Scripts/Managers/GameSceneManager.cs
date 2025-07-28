@@ -94,6 +94,13 @@ namespace BattleshipGame.Managers
                     BGMManager.Instance.PlayBGM(BGMType.Loading);
                 }
             }
+            
+            // 确保音效管理器在场景切换时不会被销毁
+            if (SoundEffectManager.Instance != null)
+            {
+                // 音效管理器已经设置了DontDestroyOnLoad，所以不需要额外处理
+                Debug.Log("SoundEffectManager 在场景切换时保持活跃");
+            }
         }
     }
 }

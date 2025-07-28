@@ -57,6 +57,19 @@ namespace BattleshipGame.UI
         public void AddListener(UnityAction call)
         {
             _button.onClick.AddListener(call);
+            // 添加点击音效
+            _button.onClick.AddListener(PlayClickSound);
+        }
+
+        /// <summary>
+        /// 播放按钮点击音效
+        /// </summary>
+        private void PlayClickSound()
+        {
+            if (SoundEffectManager.Instance != null)
+            {
+                SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
+            }
         }
 
         public void ChangeText(Key text)
