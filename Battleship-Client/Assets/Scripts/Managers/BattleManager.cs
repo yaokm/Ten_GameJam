@@ -61,6 +61,9 @@ namespace BattleshipGame.Managers
         private string _multiShotDirection = null;
         private Vector3Int? _firstMultiShotCell = null;
         private List<Vector3Int> _validSecondCells = new List<Vector3Int>(); // 第二个格子的有效选择范围
+        private bool _resultShown = false; // 防止重复显示结果
+        private int _pendingEffects = 0; // 待播放的特效数量
+        private bool _waitingForEffects = false; // 是否正在等待特效播放完成
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -299,12 +302,14 @@ namespace BattleshipGame.Managers
 
         private void OnGamePhaseChanged(string phase)
         {
+            Debug.Log($"OnGamePhaseChanged: phase = {phase}");
             switch (phase)
             {
                 case RoomPhase.Battle:
                     SwitchTurns();
                     break;
                 case RoomPhase.Result:
+                    Debug.Log("OnGamePhaseChanged: 调用ShowResult");
                     ShowResult();
                     break;
                 case RoomPhase.Waiting:
@@ -321,26 +326,85 @@ namespace BattleshipGame.Managers
             {
                 GameSceneManager.Instance.GoToLobby();
             }
-
-            void ShowResult()
+        }
+        
+        private void ShowResult()
+        {
+            Debug.Log($"ShowResult called. Current state: {_state?.phase}, winningPlayer: {_state?.winningPlayer}, resultShown: {_resultShown}, pendingEffects: {_pendingEffects}, waitingForEffects: {_waitingForEffects}");
+            
+            if (_resultShown)
             {
-                statusData.State = BattleResult;
+                Debug.LogWarning("ShowResult called multiple times. Ignoring.");
+                return;
+            }
+            
+            // 检查游戏是否真的结束了
+            if (_state == null || string.IsNullOrEmpty(_state.winningPlayer) || _state.phase != RoomPhase.Result)
+            {
+                Debug.LogWarning($"ShowResult called but game is not finished yet. State: {_state?.phase}, winningPlayer: {_state?.winningPlayer}. Ignoring.");
+                return;
+            }
+            
+            // 给特效一些时间来开始播放（防止游戏结束事件在特效开始播放之前触发）
+            StartCoroutine(ShowResultWithDelay());
+        }
+        
+        private System.Collections.IEnumerator ShowResultWithDelay()
+        {
+            // 等待一帧，确保所有特效都有机会开始播放
+            yield return null;
+            
+            // 如果还有特效在播放，等待特效完成
+            if (_pendingEffects > 0)
+            {
+                Debug.Log($"还有 {_pendingEffects} 个特效在播放，等待特效完成后再显示结果");
+                _waitingForEffects = true;
+                yield break;
+            }
+            
+            Debug.Log("开始显示战斗结果");
+            _resultShown = true;
+            statusData.State = BattleResult;
+            
+            // 暂停BGM，为音效腾出空间
+            if (BGMManager.Instance != null)
+            {
+                BGMManager.Instance.PauseBGM();
+                Debug.Log("已暂停BGM，为胜负音效腾出空间");
+            }
+            
+            // 播放胜利或失败音效
+            if (SoundEffectManager.Instance != null)
+            {
                 if (_state.winningPlayer == _client.GetSessionId())
-                    winnerOptionDialog.Show(Rematch, Leave);
+                {
+                    // 播放胜利音效
+                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Victory);
+                    Debug.Log("播放胜利音效");
+                }
                 else
-                    loserOptionDialog.Show(Rematch, Leave);
-
-                void Rematch()
                 {
-                    _client.SendRematch(true);
-                    statusData.State = WaitingOpponentRematchDecision;
+                    // 播放失败音效
+                    SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.Defeat);
+                    Debug.Log("播放失败音效");
                 }
+            }
+            
+            if (_state.winningPlayer == _client.GetSessionId())
+                winnerOptionDialog.Show(Rematch, Leave);
+            else
+                loserOptionDialog.Show(Rematch, Leave);
 
-                void Leave()
-                {
-                    _client.SendRematch(false);
-                    LeaveGame();
-                }
+            void Rematch()
+            {
+                _client.SendRematch(true);
+                statusData.State = WaitingOpponentRematchDecision;
+            }
+
+            void Leave()
+            {
+                _client.SendRematch(false);
+                LeaveGame();
             }
         }
 
@@ -438,8 +502,25 @@ namespace BattleshipGame.Managers
 
         private void OnStateChanged(List<DataChange> changes)
         {
-            foreach (var _ in changes.Where(change => change.Field == RoomState.PlayerTurn))
-                SwitchTurns();
+            foreach (var change in changes)
+            {
+                Debug.Log($"State change detected: {change.Field} = {change.Value}");
+                
+                if (change.Field == RoomState.PlayerTurn)
+                {
+                    SwitchTurns();
+                }
+                else if (change.Field == "winningPlayer")
+                {
+                    Debug.Log($"Game finished! Winning player: {change.Value}");
+                    // 只有当winningPlayer不为空且游戏阶段为Result时才显示结果
+                    if (!string.IsNullOrEmpty(change.Value?.ToString()))
+                    {
+                        Debug.Log("OnStateChanged: 调用ShowResult");
+                        ShowResult();
+                    }
+                }
+            }
         }
 
         private void OnPlayerShotsChanged(int turn, int cellIndex)
@@ -467,11 +548,13 @@ namespace BattleshipGame.Managers
             {
                 opponentMap.SetMarker(cellIndex, Marker.ShotFleet);
                 // 播放命中特效
-                PlayShotEffectOnOpponentMap(cellIndex);
+                PlayHitEffectOnOpponentMap(cellIndex);
             }
             else
             {
                 opponentMap.SetMarker(cellIndex, Marker.ShotTarget);
+                // 播放未命中特效
+                PlayMissEffectOnOpponentMap(cellIndex);
             }
             // 记录回合与射击位置（用于后续回合高亮）
             if (_shots.ContainsKey(turn))
@@ -480,20 +563,139 @@ namespace BattleshipGame.Managers
                 _shots.Add(turn, new List<int> { cellIndex });
         }
 
-        // 新增：在opponentMap格子中心播放命中特效
-        private void PlayShotEffectOnOpponentMap(int cellIndex)
+        // 在opponentMap格子中心播放命中特效
+        private void PlayHitEffectOnOpponentMap(int cellIndex)
         {
-            if (shotEffect == null) return;
             // 获取格子中心的世界坐标
             Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
-            // 需要opponentMap暴露Tilemap引用
-            var tilemap = opponentMap.markerLayer;//GetComponent<UnityEngine.Tilemaps.Tilemap>();
+            var tilemap = opponentMap.markerLayer;
             if (tilemap == null) return;
             Vector3 worldPos = tilemap.GetCellCenterWorld(cell);
-            var effect = Instantiate(shotEffect, worldPos, Quaternion.identity);
-            effect.Play(true);
-            Debug.Log($"Instantiate shotEffect at {worldPos}, shotEffect null? {shotEffect == null}");
-            //Destroy(effect.gameObject, effect.main.duration);
+            
+            // 往上移动半个格子的距离
+            worldPos += Vector3.up * 1.3f;
+            
+            Debug.Log($"尝试播放命中特效，格子索引: {cellIndex}, 世界坐标: {worldPos}, 当前pendingEffects: {_pendingEffects}");
+            
+            // 增加待播放特效计数
+            _pendingEffects++;
+            Debug.Log($"命中特效开始播放，pendingEffects增加到: {_pendingEffects}");
+            
+            // 使用EffectManager播放命中特效
+            if (EffectManager.Instance != null)
+            {
+                EffectManager.Instance.PlayHitEffect(worldPos, OnHitEffectComplete);
+            }
+            else
+            {
+                Debug.LogError("EffectManager.Instance 为空！");
+                OnHitEffectComplete();
+            }
+        }
+        
+        // 命中特效播放完成回调
+        private void OnHitEffectComplete()
+        {
+            _pendingEffects--;
+            Debug.Log($"命中特效播放完成，剩余特效数量: {_pendingEffects}, waitingForEffects: {_waitingForEffects}");
+            
+            // 如果正在等待特效完成且所有特效都播放完毕，显示结果
+            if (_waitingForEffects && _pendingEffects <= 0)
+            {
+                Debug.Log("所有特效播放完成，现在显示结果");
+                _waitingForEffects = false;
+                ShowResult();
+            }
+        }
+        
+        // 在opponentMap格子中心播放未命中特效
+        private void PlayMissEffectOnOpponentMap(int cellIndex)
+        {
+            // 获取格子中心的世界坐标
+            Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
+            var tilemap = opponentMap.markerLayer;
+            if (tilemap == null) return;
+            Vector3 worldPos = tilemap.GetCellCenterWorld(cell);
+            
+            // 往上移动半个格子的距离
+            worldPos += Vector3.up * 1.3f;
+            
+            Debug.Log($"尝试播放未命中特效，格子索引: {cellIndex}, 世界坐标: {worldPos}, 当前pendingEffects: {_pendingEffects}");
+            
+            // 增加待播放特效计数
+            _pendingEffects++;
+            Debug.Log($"未命中特效开始播放，pendingEffects增加到: {_pendingEffects}");
+            
+            // 使用EffectManager播放未命中特效
+            if (EffectManager.Instance != null)
+            {
+                EffectManager.Instance.PlayMissEffect(worldPos, OnMissEffectComplete);
+            }
+            else
+            {
+                Debug.LogError("EffectManager.Instance 为空！");
+                OnMissEffectComplete();
+            }
+        }
+        
+        // 未命中特效播放完成回调
+        private void OnMissEffectComplete()
+        {
+            _pendingEffects--;
+            Debug.Log($"未命中特效播放完成，剩余特效数量: {_pendingEffects}, waitingForEffects: {_waitingForEffects}");
+            
+            // 如果正在等待特效完成且所有特效都播放完毕，显示结果
+            if (_waitingForEffects && _pendingEffects <= 0)
+            {
+                Debug.Log("所有特效播放完成，现在显示结果");
+                _waitingForEffects = false;
+                ShowResult();
+            }
+        }
+        
+        // 新增：在opponentMap格子中心播放射击特效（保留原方法名以兼容）
+        private void PlayShotEffectOnOpponentMap(int cellIndex)
+        {
+            // 获取格子中心的世界坐标
+            Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
+            var tilemap = opponentMap.markerLayer;
+            if (tilemap == null) return;
+            Vector3 worldPos = tilemap.GetCellCenterWorld(cell);
+            
+            // 往上移动半个格子的距离
+            worldPos += Vector3.up * 1.3f;
+            
+            Debug.Log($"尝试播放射击特效，格子索引: {cellIndex}, 世界坐标: {worldPos}, 当前pendingEffects: {_pendingEffects}");
+            
+            // 增加待播放特效计数
+            _pendingEffects++;
+            Debug.Log($"射击特效开始播放，pendingEffects增加到: {_pendingEffects}");
+            
+            // 使用EffectManager播放命中特效
+            if (EffectManager.Instance != null)
+            {
+                EffectManager.Instance.PlayHitEffect(worldPos, OnShotEffectComplete);
+            }
+            else
+            {
+                Debug.LogError("EffectManager.Instance 为空！");
+                OnShotEffectComplete();
+            }
+        }
+        
+        // 射击特效播放完成回调
+        private void OnShotEffectComplete()
+        {
+            _pendingEffects--;
+            Debug.Log($"射击特效播放完成，剩余特效数量: {_pendingEffects}, waitingForEffects: {_waitingForEffects}");
+            
+            // 如果正在等待特效完成且所有特效都播放完毕，显示结果
+            if (_waitingForEffects && _pendingEffects <= 0)
+            {
+                Debug.Log("所有特效播放完成，现在显示结果");
+                _waitingForEffects = false;
+                ShowResult();
+            }
         }
 
         private void OnEnemyShotsChanged(int turn, int cellIndex)
@@ -528,7 +730,67 @@ namespace BattleshipGame.Managers
 
         private void OnEnemyShipsChanged(int turn, int part)
         {
+            // 检查是否击沉船只
+            int rankOrder = opponentStatus.getShipRankOrder(part);
+            bool wasShipSunk = opponentStatus.isAllShipPartShot(rankOrder);
+            
+            // 显示敌方船只被击中情况
             opponentStatus.DisplayShotEnemyShipParts(part, turn);
+            
+            // 如果船只被击沉，播放击沉特效
+            if (wasShipSunk)
+            {
+                PlaySunkEffectOnShip(rankOrder);
+                Debug.Log($"播放击沉特效：船只 {rankOrder} 被击沉");
+            }
+        }
+        
+        // 在船头位置播放击沉特效
+        private void PlaySunkEffectOnShip(int rankOrder)
+        {
+            // 根据rankOrder找到对应的船只
+            var ship = rules.ships.FirstOrDefault(s => s.rankOrder == rankOrder);
+            if (ship == null) return;
+            
+            // 获取船头位置（EnemyCoordinate）
+            Vector3Int shipHeadPosition = new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0);
+            var tilemap = opponentMap.markerLayer;
+            if (tilemap == null) return;
+            Vector3 worldPos = tilemap.GetCellCenterWorld(shipHeadPosition);
+            
+            // 往上移动半个格子的距离
+            worldPos += Vector3.up * 1.3f;
+            
+            Debug.Log($"尝试播放击沉特效，船只rankOrder: {rankOrder}, 世界坐标: {worldPos}, 当前pendingEffects: {_pendingEffects}");
+            
+            // 增加待播放特效计数
+            _pendingEffects++;
+            Debug.Log($"击沉特效开始播放，pendingEffects增加到: {_pendingEffects}");
+            
+            // 使用EffectManager播放击沉特效
+            if (EffectManager.Instance != null)
+            {
+                EffectManager.Instance.PlaySunkEffect(worldPos, OnSunkEffectComplete);
+            }
+            else
+            {
+                OnSunkEffectComplete();
+            }
+        }
+        
+        // 击沉特效播放完成回调
+        private void OnSunkEffectComplete()
+        {
+            _pendingEffects--;
+            Debug.Log($"击沉特效播放完成，剩余特效数量: {_pendingEffects}, waitingForEffects: {_waitingForEffects}");
+            
+            // 如果正在等待特效完成且所有特效都播放完毕，显示结果
+            if (_waitingForEffects && _pendingEffects <= 0)
+            {
+                Debug.Log("所有特效播放完成，现在显示结果");
+                _waitingForEffects = false;
+                ShowResult();
+            }
         }
 
         // 技能按钮点击回调

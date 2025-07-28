@@ -46,7 +46,7 @@ namespace BattleshipGame.Tiling
         [SerializeField] private Tile chengyu6Tip;//程昱的6点提示
         [Space] 
         // @formatter:on
-        private readonly WaitForSecondsRealtime _flashGridInterval = new WaitForSecondsRealtime(0.3f);
+        private readonly WaitForSecondsRealtime _flashGridInterval = new WaitForSecondsRealtime(0.5f);
 
         private IBattleMapClickListener _clickListener;
         private Grid _grid;
@@ -214,7 +214,8 @@ namespace BattleshipGame.Tiling
         {
             _isFlashingGrids = true;
             var colorCache = gridsLayer.color;
-            var flashGridColor = new Color(0.9f, 0.5f, 0.5f);
+            // 使用更温和的颜色，降低饱和度和亮度
+            var flashGridColor = new Color(0.7f, 0.6f, 0.6f, 0.8f);
             for (var i = 0; i < FlashGridCount; i++)
             {
                 yield return _flashGridInterval;

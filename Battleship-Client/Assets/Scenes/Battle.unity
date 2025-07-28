@@ -709,7 +709,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1229521231}
   m_HandleRect: {fileID: 1229521230}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2320,8 +2320,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 162.385, y: 0}
-  m_SizeDelta: {x: 284.77, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &535866609
 MonoBehaviour:
@@ -2487,8 +2487,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 141.86499, y: 0}
-  m_SizeDelta: {x: 243.73, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &612094241
 MonoBehaviour:
@@ -2654,8 +2654,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 168.12256, y: 0}
-  m_SizeDelta: {x: 296.24512, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &617791991
 MonoBehaviour:
@@ -3019,8 +3019,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 131.60501, y: 0}
-  m_SizeDelta: {x: 223.21, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &632118912
 MonoBehaviour:
@@ -3679,8 +3679,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 168.12256, y: 0}
-  m_SizeDelta: {x: 296.24512, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1076921951
 MonoBehaviour:
@@ -8431,14 +8431,12 @@ MonoBehaviour:
   maskBox: {fileID: 1495052909}
   closeMaskBoxButton: {fileID: 68695163}
   HeroImage: {fileID: 1920093428}
-  shotEffect: {fileID: 0}
   heroSprites:
   - {fileID: -6146700129834819302, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   - {fileID: 2632276121321243838, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   - {fileID: 9138555137054584332, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   - {fileID: 2805043176163793281, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
   debugTip: {fileID: 1898171687}
-  EnemyHero: {fileID: 1909331029}
 --- !u!1 &1832477925
 GameObject:
   m_ObjectHideFlags: 0
@@ -8475,8 +8473,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 168.12256, y: 0}
-  m_SizeDelta: {x: 296.24512, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1832477927
 MonoBehaviour:
@@ -8821,6 +8819,55 @@ Sprite:
   m_PhysicsShape: []
   m_Bones: []
   m_SpriteID: 
+--- !u!1 &1893644475
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1893644477}
+  - component: {fileID: 1893644476}
+  m_Layer: 0
+  m_Name: EffectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1893644476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1893644475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8a72cfe8c87c814ba22bb8db9e89e8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitEffect: {fileID: 8736933726175771871, guid: 31c3c8d34683b564f963d1b109c54f28,
+    type: 3}
+  missEffect: {fileID: 1920536597572242469, guid: 8450462ba3dfc754da7708bcb7d0346b,
+    type: 3}
+  sunkEffect: {fileID: 9106120071114346749, guid: b745d344acebfc548aae2b665c92bf9e,
+    type: 3}
+--- !u!4 &1893644477
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1893644475}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.56688774, y: 3.5634713, z: -7.8473487}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1895034772
 MonoBehaviour:
   m_ObjectHideFlags: 0
