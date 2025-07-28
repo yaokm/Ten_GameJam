@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: NetworkOptions
   m_EditorClassIdentifier: 
   localEndpoint: ws://localhost:2567
-  onlineEndpoint: ws://192.168.87.54:2567
-  serverType: 0
+  onlineEndpoint: ws://8.141.119.155:2567
+  serverType: 1

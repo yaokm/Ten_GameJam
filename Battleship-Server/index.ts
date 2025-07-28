@@ -30,7 +30,7 @@ gameServer.onShutdown(function(){
 
   console.log(`Listening on http://0.0.0.0:${ port }`);
   console.log(`Server should accept connections from any IP address`);
-  console.log(`Test with: ws://localhost:${port} or ws://192.168.87.54:${port}`);
+  //console.log(`Test with: ws://localhost:${port} or ws://192.168.87.54:${port}`);
 ;
 
 app.get('/test', (req, res) => res.send('ok'));
