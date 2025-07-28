@@ -164,6 +164,13 @@ namespace BattleshipGame.Managers
             // 初始化默认武将显示
             UpdateHeroDisplay(selectedHeroId);
             
+            // 进入Plan界面时播放默认武将（郭嘉）的选择音效
+            if (SoundEffectManager.Instance != null)
+            {
+                Debug.Log("进入Plan界面，播放默认武将（郭嘉）的选择音效");
+                SoundEffectManager.Instance.PlayHeroSelectSoundById(selectedHeroId);
+            }
+            
             // 确保初始状态下只显示默认武将的名字和技能内容
             if (HeroName != null && HeroName.Count > 0)
             {
@@ -830,6 +837,18 @@ namespace BattleshipGame.Managers
         {
             selectedHeroId = heroId;
             Debug.Log($"选择了武将：{heroId}");
+            
+            // 播放武将选择音效
+            if (SoundEffectManager.Instance != null)
+            {
+                Debug.Log("尝试播放武将选择音效...");
+                // 使用武将特定的选择音效
+                SoundEffectManager.Instance.PlayHeroSelectSoundById(heroId);
+            }
+            else
+            {
+                Debug.LogWarning("SoundEffectManager 实例不存在，无法播放武将选择音效");
+            }
             
             // 更新UI显示
             UpdateHeroDisplay(heroId);

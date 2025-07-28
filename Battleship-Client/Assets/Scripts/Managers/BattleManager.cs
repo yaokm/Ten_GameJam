@@ -661,8 +661,9 @@ namespace BattleshipGame.Managers
             // 播放武将特定的技能音效
             if (SoundEffectManager.Instance != null)
             {
-                // 使用当前武将ID播放对应的技能音效
-                SoundEffectManager.Instance.PlayHeroSkillSoundById(mSkillType);
+                // 使用当前选择的武将ID播放对应的技能音效
+                int currentHeroId = GameManager.Instance?.SelectedHeroId ?? 1;
+                SoundEffectManager.Instance.PlayHeroSkillSoundById(currentHeroId);
             }
             
             if (skillType == 4)
@@ -718,6 +719,12 @@ namespace BattleshipGame.Managers
         private void OnSkillUsed(string player, int skillType, object param)
         {
             Debug.Log($"玩家{player}使用了技能{skillType}，原始参数：{param}");
+
+            // 播放技能音效（无论是自己还是对方使用技能都播放）
+            if (SoundEffectManager.Instance != null)
+            {
+                SoundEffectManager.Instance.PlayHeroSkillSoundById(skillType);
+            }
 
             var paramDict = param as GameDevWare.Serialization.IndexedDictionary<string, object>;
             string effect = paramDict["effect"] as string;
