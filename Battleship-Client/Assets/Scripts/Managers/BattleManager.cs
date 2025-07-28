@@ -868,23 +868,39 @@ namespace BattleshipGame.Managers
                     debugTip.text = $"玩家{player}使用了眩晕技能，目标：{target}";
                     break;
                 case "scan":
-                    var region = paramDict["region"] as GameDevWare.Serialization.IndexedDictionary<string, object>;
-                    int shipTypeCount = Convert.ToInt32(paramDict["shipTypeCount"]);
-                    int x = Convert.ToInt32(region["x"]);
-                    int y = Convert.ToInt32(region["y"]);
-                    debugTip.text = $"玩家{player}使用了照明技能，区域：{x},{y}，船只类型数量：{shipTypeCount}";
-                    opponentMap.ShowChengyuScanArea(new Vector3Int(x, y, 0), shipTypeCount);
-                    Invoke(nameof(ClearChengyuScanArea), 3f);
+                    // 程昱照明技能：只有使用技能的玩家才能看到照明效果
+                    if (player == _client.GetSessionId())
+                    {
+                        var region = paramDict["region"] as GameDevWare.Serialization.IndexedDictionary<string, object>;
+                        int shipTypeCount = Convert.ToInt32(paramDict["shipTypeCount"]);
+                        int x = Convert.ToInt32(region["x"]);
+                        int y = Convert.ToInt32(region["y"]);
+                        debugTip.text = $"你使用了照明技能，区域：{x},{y}，船只类型数量：{shipTypeCount}";
+                        opponentMap.ShowChengyuScanArea(new Vector3Int(x, y, 0), shipTypeCount);
+                        Invoke(nameof(ClearChengyuScanArea), 3f);
+                    }
+                    else
+                    {
+                        debugTip.text = $"敌方使用了照明技能";
+                    }
                     break;
                 case "reveal":
-                    int cellIndex = Convert.ToInt32(paramDict["cellIndex"]);
-                    Debug.Log($"玩家{player}使用了揭示技能，目标：{cellIndex}");
-                    debugTip.text = $"玩家{player}使用了揭示技能，目标：{cellIndex}";
-                    // 诸葛亮揭示技能：在opponentMap的cursorLayer上显示zhugeliangTip
-                    Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
-                    opponentMap.ShowZhugeliangTip(cell);
-                    // 3秒后自动清除
-                    Invoke(nameof(ClearZhugeliangTips), 3f);
+                    // 诸葛亮揭示技能：只有使用技能的玩家才能看到揭示效果
+                    if (player == _client.GetSessionId())
+                    {
+                        int cellIndex = Convert.ToInt32(paramDict["cellIndex"]);
+                        Debug.Log($"你使用了揭示技能，目标：{cellIndex}");
+                        debugTip.text = $"你使用了揭示技能，目标：{cellIndex}";
+                        // 诸葛亮揭示技能：在opponentMap的cursorLayer上显示zhugeliangTip
+                        Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
+                        opponentMap.ShowZhugeliangTip(cell);
+                        // 3秒后自动清除
+                        Invoke(nameof(ClearZhugeliangTips), 3f);
+                    }
+                    else
+                    {
+                        debugTip.text = $"敌方使用了揭示技能";
+                    }
                     break;
                 case "multishot":
                     string direction = paramDict["direction"] as string;
