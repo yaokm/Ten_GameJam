@@ -34,6 +34,16 @@ namespace BattleshipGame.Tiling
         [SerializeField] private Tile markedTargetMarker;
         [SerializeField] private Tile shotTargetMarker;
         [SerializeField] private Tile shotFleetMarker;
+        [SerializeField] private Tile zhouyufireMarker;//周瑜火标
+        [SerializeField] private Tile zhouyuFireTip;//周瑜火标的四象提示
+        [SerializeField] private Tile zhugeliangTip;//诸葛亮的单点提示
+        [SerializeField] private Tile chengyu0Tip;//程昱的0点提示
+        [SerializeField] private Tile chengyu1Tip;//程昱的1点提示
+        [SerializeField] private Tile chengyu2Tip;//程昱的2点提示
+        [SerializeField] private Tile chengyu3Tip;//程昱的3点提示
+        [SerializeField] private Tile chengyu4Tip;//程昱的4点提示
+        [SerializeField] private Tile chengyu5Tip;//程昱的5点提示
+        [SerializeField] private Tile chengyu6Tip;//程昱的6点提示
         [Space] 
         // @formatter:on
         private readonly WaitForSecondsRealtime _flashGridInterval = new WaitForSecondsRealtime(0.3f);
@@ -63,12 +73,12 @@ namespace BattleshipGame.Tiling
         {
             if (sceneCamera == null) sceneCamera = Camera.main;
             _grid = GetComponent<Grid>();
-            GenerateGridLines(); // 动态生成网格线
+            //GenerateGridLines(); // 动态生成网格线
         }
 #if UNITY_EDITOR
         public void Print()
         {
-            GenerateGridLines();
+            //GenerateGridLines();
         }
 #endif
         public void OnPointerClick(PointerEventData eventData)
@@ -156,28 +166,35 @@ namespace BattleshipGame.Tiling
             if (markerLayer.HasTile(coordinate)) markerLayer.SetTile(coordinate, null);
         }
 
-        public bool SetMarker(int index, Marker marker)
+        public bool SetMarker(int index, Marker marker, bool useZhouyuFire = false)
         {
             Tile markerTile;
-            switch (marker)
+            if (useZhouyuFire)
             {
-                case Marker.Missed:
-                    markerTile = missedMarker;
-                    break;
-                case Marker.Hit:
-                    markerTile = hitMarker;
-                    break;
-                case Marker.MarkedTarget:
-                    markerTile = markedTargetMarker;
-                    break;
-                case Marker.ShotTarget:
-                    markerTile = shotTargetMarker;
-                    break;
-                case Marker.ShotFleet:
-                    markerTile = shotFleetMarker;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(marker), marker, null);
+                markerTile = zhouyufireMarker;
+            }
+            else
+            {
+                switch (marker)
+                {
+                    case Marker.Missed:
+                        markerTile = missedMarker;
+                        break;
+                    case Marker.Hit:
+                        markerTile = hitMarker;
+                        break;
+                    case Marker.MarkedTarget:
+                        markerTile = markedTargetMarker;
+                        break;
+                    case Marker.ShotTarget:
+                        markerTile = shotTargetMarker;
+                        break;
+                    case Marker.ShotFleet:
+                        markerTile = shotFleetMarker;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(marker), marker, null);
+                }
             }
 
             var coordinate = CellIndexToCoordinate(index, rules.areaSize.x);
@@ -208,6 +225,89 @@ namespace BattleshipGame.Tiling
             }
 
             _isFlashingGrids = false;
+        }
+
+        public void ShowZhouyuTips(Vector3Int center)
+        {
+            if (zhouyuFireTip == null) return;
+            Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+            foreach (var dir in directions)
+            {
+                var pos = center + dir;
+                cursorLayer.SetTile(pos, zhouyuFireTip);
+            }
+        }
+        public void ClearZhouyuTips(Vector3Int center)
+        {
+            Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+            foreach (var dir in directions)
+            {
+                var pos = center + dir;
+                if (cursorLayer.GetTile(pos) == zhouyuFireTip)
+                    cursorLayer.SetTile(pos, null);
+            }
+        }
+        public void ClearAllZhouyuTips()
+        {
+            for (int x = 0; x < rules.areaSize.x; x++)
+            for (int y = 0; y < rules.areaSize.y; y++)
+            {
+                var pos = new Vector3Int(x, y, 0);
+                if (cursorLayer.GetTile(pos) == zhouyuFireTip)
+                    cursorLayer.SetTile(pos, null);
+            }
+        }
+
+        public void ShowZhugeliangTip(Vector3Int cell)
+        {
+            if (zhugeliangTip == null) return;
+            cursorLayer.SetTile(cell, zhugeliangTip);
+        }
+        public void ClearZhugeliangTip(Vector3Int cell)
+        {
+            if (cursorLayer.GetTile(cell) == zhugeliangTip)
+                cursorLayer.SetTile(cell, null);
+        }
+        public void ClearAllZhugeliangTips()
+        {
+            for (int x = 0; x < rules.areaSize.x; x++)
+            for (int y = 0; y < rules.areaSize.y; y++)
+            {
+                var pos = new Vector3Int(x, y, 0);
+                if (cursorLayer.GetTile(pos) == zhugeliangTip)
+                    cursorLayer.SetTile(pos, null);
+            }
+        }
+
+        /// <summary>
+        /// 在cursorLayer上高亮2*3区域的每个格子，显示同一个程昱技能提示tile
+        /// </summary>
+        /// <param name="leftTop">区域左上角坐标</param>
+        /// <param name="type">类型编号（0-6）</param>
+        public void ShowChengyuScanArea(Vector3Int leftTop, int type)
+        {
+            Tile[] tips = { chengyu0Tip, chengyu1Tip, chengyu2Tip, chengyu3Tip, chengyu4Tip, chengyu5Tip, chengyu6Tip };
+            if (type < 0 || type >= tips.Length) return;
+            Tile tip = tips[type];
+            if (tip == null) return;
+            for (int dx = 0; dx < 2; dx++)
+            for (int dy = 0; dy < 3; dy++)
+            {
+                var pos = new Vector3Int(leftTop.x + dx, leftTop.y + dy, 0);
+                cursorLayer.SetTile(pos, tip);
+            }
+        }
+        public void ClearChengyuScanArea()
+        {
+            Tile[] tips = { chengyu0Tip, chengyu1Tip, chengyu2Tip, chengyu3Tip, chengyu4Tip, chengyu5Tip, chengyu6Tip };
+            for (int x = 0; x < rules.areaSize.x; x++)
+            for (int y = 0; y < rules.areaSize.y; y++)
+            {
+                var pos = new Vector3Int(x, y, 0);
+                var tile = cursorLayer.GetTile(pos);
+                if (tile != null && Array.IndexOf(tips, tile) >= 0)
+                    cursorLayer.SetTile(pos, null);
+            }
         }
 
         public enum ScreenType

@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 5a03c4b0d9db0de46a88e89ec4c106d3
+guid: 02d1e797cc8dd0545b0840c4eeb71099
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -611080008490860090
-    second: opppGrid_0
+      213: 1623481048343612374
+    second: skill_zhouyv_tip
+  - first:
+      213: -1399174383563324466
+    second: skill_zhouyv_fire
+  - first:
+      213: 6016606674299013149
+    second: skill_zhugeliang
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -50,7 +56,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 127, z: 0, w: 0}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -118,13 +124,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: opppGrid_0
+      name: skill_zhouyv_tip
       rect:
         serializedVersion: 2
-        x: 1
-        y: 958
-        width: 93
-        height: 93
+        x: 491
+        y: 301
+        width: 90
+        height: 90
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -132,8 +138,50 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6c14f8c48f10587f0800000000000000
-      internalID: -611080008490860090
+      spriteID: 6db89127963c78610800000000000000
+      internalID: 1623481048343612374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_zhouyv_fire
+      rect:
+        serializedVersion: 2
+        x: 366
+        y: 183
+        width: 101
+        height: 101
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec3c1e0bf42259ce0800000000000000
+      internalID: -1399174383563324466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: skill_zhugeliang
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 445
+        width: 99
+        height: 99
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1846d694e74f7350800000000000000
+      internalID: 6016606674299013149
       vertices: []
       indices: 
       edges: []
