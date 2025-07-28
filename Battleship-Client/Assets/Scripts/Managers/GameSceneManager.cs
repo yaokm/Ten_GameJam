@@ -1,6 +1,7 @@
 ﻿using BattleshipGame.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static BGMManager;
 
 namespace BattleshipGame.Managers
 {
@@ -16,14 +17,14 @@ namespace BattleshipGame.Managers
         {
             base.Awake();
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            SceneManager.sceneLoaded += SetSelfActive;
+            SceneManager.sceneLoaded += OnSceneLoadedWithBGM;
             if (SceneManager.sceneCount > 1) UnloadAllScenesExcept(main);
             GoToMenu();
         }
 
         protected override void OnDestroy()
         {
-            SceneManager.sceneLoaded -= SetSelfActive;
+            SceneManager.sceneLoaded -= OnSceneLoadedWithBGM;
             base.OnDestroy();
         }
 
@@ -78,9 +79,21 @@ namespace BattleshipGame.Managers
             }
         }
 
-        private static void SetSelfActive(Scene scene, LoadSceneMode mode)
+        private static void OnSceneLoadedWithBGM(Scene scene, LoadSceneMode mode)
         {
             SceneManager.SetActiveScene(scene);
+            // 自动切换BGM
+            if (BGMManager.Instance != null)
+            {
+                if (scene.name == "Battle")
+                {
+                    BGMManager.Instance.PlayBGM(BGMType.Battle);
+                }
+                else
+                {
+                    BGMManager.Instance.PlayBGM(BGMType.Loading);
+                }
+            }
         }
     }
 }
