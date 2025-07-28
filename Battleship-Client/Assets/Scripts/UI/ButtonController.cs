@@ -66,10 +66,11 @@ namespace BattleshipGame.UI
         /// </summary>
         private void PlayClickSound()
         {
-            if (SoundEffectManager.Instance != null)
-            {
-                SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
-            }
+            // 按钮音效已移除，暂时静音
+            // if (SoundEffectManager.Instance != null)
+            // {
+            //     SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
+            // }
         }
 
         public void ChangeText(Key text)

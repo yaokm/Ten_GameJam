@@ -441,11 +441,11 @@ namespace BattleshipGame.Managers
 
         private void SwitchTurns()
         {
-            // 播放回合切换音效
-            if (SoundEffectManager.Instance != null)
-            {
-                SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.TurnSwitch);
-            }
+            // 回合切换音效已移除
+            // if (SoundEffectManager.Instance != null)
+            // {
+            //     SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.TurnSwitch);
+            // }
             
             if (_state.playerTurn == _client.GetSessionId())
                 TurnToPlayer();

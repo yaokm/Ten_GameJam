@@ -54,9 +54,9 @@ public class SoundEffectManagerTest : MonoBehaviour
         Debug.Log($"基础音效数量: {SoundEffectManager.Instance.soundEffectClips?.Length ?? 0}");
         Debug.Log($"武将技能音效数量: {SoundEffectManager.Instance.heroSkillClips?.Length ?? 0}");
         
-        // 测试播放按钮点击音效
-        SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
-        Debug.Log("播放按钮点击音效");
+        // 按钮点击音效已移除
+        // SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
+        Debug.Log("按钮点击音效已移除");
     }
 
     [ContextMenu("测试胜利音效")]
@@ -82,11 +82,13 @@ public class SoundEffectManagerTest : MonoBehaviour
     [ContextMenu("测试按钮点击音效")]
     public void TestButtonClickSound()
     {
-        if (SoundEffectManager.Instance != null)
-        {
-            SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
-            Debug.Log("测试播放按钮点击音效");
-        }
+        // 按钮点击音效已移除
+        // if (SoundEffectManager.Instance != null)
+        // {
+        //     SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
+        //     Debug.Log("测试播放按钮点击音效");
+        // }
+        Debug.Log("按钮点击音效已移除");
     }
 
     [ContextMenu("测试击沉音效")]
