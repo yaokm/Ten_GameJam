@@ -30,12 +30,13 @@ namespace BattleshipGame.Network
             return _room?.SessionId;
         }
 
-        public void SendPlacement(int[] placement, int[] directions = null, int[][] basePositions = null)
+        public void SendPlacement(int[] placement, int[] directions = null, int[][] basePositions = null, int heroType = 1)
         {
             var message = new Dictionary<string, object>();
             message.Add("placement", placement);
             message.Add("directions", directions);
             message.Add("basePositions", basePositions);
+            message.Add("heroType", heroType);
             _room.Send(RoomMessage.Place, message);
         }
         public void SendGetOpponentInfoRequest()

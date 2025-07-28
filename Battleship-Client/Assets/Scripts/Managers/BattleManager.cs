@@ -44,6 +44,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private GameObject maskBox;//二次确认框
         [SerializeField] private ButtonController closeMaskBoxButton;
         [SerializeField] private UnityEngine.UI.Image HeroImage;
+        [SerializeField] private ParticleSystem shotEffect;
         [SerializeField] private Sprite[] heroSprites; // 武将图片数组，索引对应武将编号-1
         [SerializeField]
         private TextMeshProUGUI debugTip;
@@ -461,6 +462,8 @@ namespace BattleshipGame.Managers
             if (isHit)
             {
                 opponentMap.SetMarker(cellIndex, Marker.ShotFleet);
+                // 播放命中特效
+                PlayShotEffectOnOpponentMap(cellIndex);
             }
             else
             {
@@ -471,6 +474,21 @@ namespace BattleshipGame.Managers
                 _shots[turn].Add(cellIndex);
             else
                 _shots.Add(turn, new List<int> { cellIndex });
+        }
+
+        // 新增：在opponentMap格子中心播放命中特效
+        private void PlayShotEffectOnOpponentMap(int cellIndex)
+        {
+            if (shotEffect == null) return;
+            // 获取格子中心的世界坐标
+            Vector3Int cell = CellIndexToCoordinate(cellIndex, rules.areaSize.x);
+            // 需要opponentMap暴露Tilemap引用
+            var tilemap = opponentMap.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+            if (tilemap == null) return;
+            Vector3 worldPos = tilemap.GetCellCenterWorld(cell);
+            var effect = Instantiate(shotEffect, worldPos, Quaternion.identity);
+            effect.Play();
+            //Destroy(effect.gameObject, effect.main.duration);
         }
 
         private void OnEnemyShotsChanged(int turn, int cellIndex)

@@ -297,9 +297,11 @@ namespace BattleshipGame.Managers
                     directions[idx] = (int)placements[idx].ship.CurrentDirection;
                     Debug.Log($"Placement: rankOrder={placement.ship.rankOrder}, position={placement.Coordinate}, direction={placement.ship.CurrentDirection}");
                 }
-                
-                // 发送舰队位置、方向和单元格数据
-                _client.SendPlacement(_cells, directions, coordinates);
+                // 发送舰队位置、方向和单元格数据，并带上武将类型
+                int heroType = 1;
+                if (GameManager.TryGetInstance(out var gameManager))
+                    heroType = gameManager.SelectedHeroId;
+                _client.SendPlacement(_cells, directions, coordinates, heroType);
                 statusData.State = WaitingOpponentPlacement;
             }
 

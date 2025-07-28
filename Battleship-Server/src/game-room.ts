@@ -18,6 +18,7 @@ export class GameRoom extends Room<State> {
     playerCount: number = 0;
     eDirections: any={};//敌军方向
     eBasePositions: any={};//敌军基座位置
+    eHeroType: any={};//敌军英雄类型
     playerSkipNextTurn: {[key: string]: boolean} = {}; // 用于跟踪玩家是否需要跳过下一回合
     multiShotDirections: { [key: string]: string } = {};
     isAIMode: boolean = false;
@@ -56,7 +57,7 @@ export class GameRoom extends Room<State> {
         // 获取对手的方向和基点信息
         const enemyDirections = this.eDirections[enemyId] || [];
         const enemyBasePositions = this.eBasePositions[enemyId] || [];
-
+        const enemyHeroType = this.eHeroType[enemyId] || 1;
         // 发送对手信息给请求的客户端
         client.send("opponentInfo", {
             directions: enemyDirections,
@@ -118,11 +119,12 @@ export class GameRoom extends Room<State> {
         this.placements = this.placements || {};
         this.eDirections = this.eDirections || {};
         this.eBasePositions = this.eBasePositions || {};
+        this.eHeroType = this.eHeroType || {};
         //cell,direction,basePositions
         this.placements[player.sessionId] = message.placement;
         this.eDirections[player.sessionId] = message.directions;
         this.eBasePositions[player.sessionId] = message.basePositions;
-        
+        this.eHeroType[player.sessionId] = message.heroType;
         this.playersPlaced++;
 
         if (this.isAIMode && !this.aiPlaced && this.playersPlaced === 1) {
@@ -145,9 +147,11 @@ export class GameRoom extends Room<State> {
                     if (client) {
                         console.log("eDirections:", this.eDirections[enemyId]);
                         console.log("eBasePositions:", this.eBasePositions[enemyId]);
+                        console.log("eHeroType:", this.eHeroType[enemyId]);
                         client.send("opponentInfo", {
                             directions: this.eDirections[enemyId] || [],
-                            basePositions: this.eBasePositions[enemyId] || []
+                            basePositions: this.eBasePositions[enemyId] || [],
+                            heroType: this.eHeroType[enemyId] || 1
                         });
                     }
                 }
@@ -320,6 +324,7 @@ export class GameRoom extends Room<State> {
         this.setState(state);
         this.eDirections = {};
         this.eBasePositions = {};
+        this.eHeroType = {};
     }
 
     updateShips(arr: number[], s: number, e: number, t: number) {
@@ -542,6 +547,7 @@ export class GameRoom extends Room<State> {
         this.placements[this.aiSessionId] = placement;
         this.eDirections[this.aiSessionId] = directionsArr;
         this.eBasePositions[this.aiSessionId] = basePositionsArr;
+        this.eHeroType[this.aiSessionId] = 1;
         this.playersPlaced++;
     }
 

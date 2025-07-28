@@ -8,7 +8,7 @@ namespace BattleshipGame.Network
         State GetRoomState();
         string GetSessionId();
         void Connect(string endPoint = null, Action success = null, Action<Exception> error = null);
-        void SendPlacement(int[] placement,int[] direction=null,int[][] basePositions=null);
+        void SendPlacement(int[] placement, int[] directions = null, int[][] basePositions = null, int heroType = 1);
 
         void SendTurn(int[] targetIndexes);
         void SendRematch(bool isRematching);
