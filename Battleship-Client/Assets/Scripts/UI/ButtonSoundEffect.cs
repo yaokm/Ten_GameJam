@@ -34,10 +34,11 @@ public class ButtonSoundEffect : MonoBehaviour
     {
         if (!enableClickSound) return;
         
-        if (SoundEffectManager.Instance != null)
-        {
-            SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
-        }
+        // 按钮音效已移除，暂时静音
+        // if (SoundEffectManager.Instance != null)
+        // {
+        //     SoundEffectManager.Instance.PlaySoundEffect(SoundEffectManager.SoundEffectType.ButtonClick);
+        // }
     }
 
     /// <summary>
