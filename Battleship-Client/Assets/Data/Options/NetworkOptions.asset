@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   localEndpoint: ws://localhost:2567
   onlineEndpoint: ws://192.168.87.54:2567
-  serverType: 1
+  serverType: 0

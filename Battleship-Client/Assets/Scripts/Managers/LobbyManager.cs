@@ -19,6 +19,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private ButtonController joinButton;
         [SerializeField] private ButtonController leaveButton;
         [SerializeField] private StatusData statusData;
+        [SerializeField] private Options options; // 添加Options引用
         private string _cachedRoomId = string.Empty;
         private bool _cachedRoomIdIsNotValid;
         private NetworkClient _networkClient;
@@ -59,7 +60,7 @@ namespace BattleshipGame.Managers
             {
                 newRoomDialog.Show(true, (gameName, password) =>
                 {
-                    _networkClient.CreateRoom(gameName, password, () =>
+                    _networkClient.CreateRoom(gameName, password, options.enableAiMode, () =>
                     {
                         WaitForOpponent();
                         joinButton.SetInteractable(false);

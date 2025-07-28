@@ -94,6 +94,7 @@ namespace BattleshipGame.UI
             {
                 options.aiDifficulty = Difficulty.Easy;
                 options.vibration = true;
+                options.enableAiMode = false; // 默认关闭AI模式
             }
         }
 
@@ -101,12 +102,14 @@ namespace BattleshipGame.UI
         {
             _lastSavedOptions.aiDifficulty = options.aiDifficulty;
             _lastSavedOptions.vibration = options.vibration;
+            _lastSavedOptions.enableAiMode = options.enableAiMode;
         }
 
         private bool IsAnyOptionChanged()
         {
             return _lastSavedOptions.aiDifficulty != options.aiDifficulty ||
-                   _lastSavedOptions.vibration != options.vibration;
+                   _lastSavedOptions.vibration != options.vibration ||
+                   _lastSavedOptions.enableAiMode != options.enableAiMode;
         }
     }
 }

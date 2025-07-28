@@ -439,6 +439,7 @@ MonoBehaviour:
     type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
 --- !u!114 &168741385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,6 +520,7 @@ MonoBehaviour:
   joinButton: {fileID: 89234409}
   leaveButton: {fileID: 673905443}
   statusData: {fileID: 11400000, guid: 0e5833eefdd94fd47972715dff1481c2, type: 2}
+  options: {fileID: 11400000, guid: 1876bb38ec668184ca7bf39de1057257, type: 2}
 --- !u!1 &403501903
 GameObject:
   m_ObjectHideFlags: 0
@@ -921,7 +923,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 547862899}
   m_HandleRect: {fileID: 547862898}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

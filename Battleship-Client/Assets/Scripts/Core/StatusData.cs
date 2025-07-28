@@ -27,6 +27,7 @@ namespace BattleshipGame.Core
             OptionsMenu,
             LanguageOptionsMenu,
             AiSelectionMenu,
+            DeepseekConfigMenu, // 新增：deepseek配置菜单
             NetworkError,
             BeginLobby,
             Connecting,

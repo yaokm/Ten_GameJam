@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aiDifficulty: 0
   vibration: 1
+  enableAiMode: 1

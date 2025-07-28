@@ -7,5 +7,10 @@ namespace BattleshipGame.Core
     {
         public Difficulty aiDifficulty = Difficulty.Easy;
         public bool vibration = true;
+        
+        // AI模式配置
+        [Header("AI模式配置")]
+        [SerializeField]
+        public bool enableAiMode = true; // 是否在创建房间时启用AI模式
     }
 }
