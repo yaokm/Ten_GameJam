@@ -61,7 +61,8 @@ export class GameRoom extends Room<State> {
         // 发送对手信息给请求的客户端
         client.send("opponentInfo", {
             directions: enemyDirections,
-            basePositions: enemyBasePositions
+            basePositions: enemyBasePositions,
+            heroType: enemyHeroType
         });
     }
     onJoin(client: Client) {

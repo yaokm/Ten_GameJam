@@ -9738,6 +9738,11 @@ MonoBehaviour:
   - {fileID: 1553933935}
   - {fileID: 593011440}
   - {fileID: 979399546}
+  enmyHeroImages:
+  - {fileID: 1635744749237841209, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
+  - {fileID: 3530003579022248241, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
+  - {fileID: 8960899199633546546, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
+  - {fileID: 4360131077223874234, guid: cf99a3d4d1d4ea14b933a3439df5be6e, type: 3}
 --- !u!1 &1832477925
 GameObject:
   m_ObjectHideFlags: 0

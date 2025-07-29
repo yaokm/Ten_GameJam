@@ -52,6 +52,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private GameObject[] boomTxts;
         [SerializeField] private GameObject[] SkillBtns;
         [SerializeField] private GameObject[] Skillctxs;
+        [SerializeField] private Sprite[] enmyHeroImages;
  private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
         private readonly List<int> _shotsInCurrentTurn = new List<int>();
         private IClient _client;
@@ -1268,6 +1269,7 @@ namespace BattleshipGame.Managers
         // 新增：更新敌方武将图片
         private void UpdateEnemyHeroImage(int enemyHeroId)
         {
+            Debug.Log("UpdateEnemyHeroImage"+enemyHeroId);
             if (EnemyHero == null)
             {
                 Debug.LogWarning("EnemyHero 未在Inspector中赋值！");
@@ -1275,23 +1277,23 @@ namespace BattleshipGame.Managers
             }
             
             // 优先使用Inspector中设置的图片数组
-            if (heroSprites != null && heroSprites.Length > 0)
+            if (enmyHeroImages != null && enmyHeroImages.Length > 0)
             {
                 int spriteIndex = enemyHeroId - 1; // 武将编号1对应数组索引0
-                if (spriteIndex >= 0 && spriteIndex < heroSprites.Length && heroSprites[spriteIndex] != null)
+                if (spriteIndex >= 0 && spriteIndex < enmyHeroImages.Length && enmyHeroImages[spriteIndex] != null)
                 {
-                    EnemyHero.sprite = heroSprites[spriteIndex];
+                    EnemyHero.sprite = enmyHeroImages[spriteIndex];
                     Debug.Log($"成功更换敌方武将 {enemyHeroId} 的图片（使用Inspector设置）");
                     return;
                 }
             }
             // 如果Inspector中没有设置，则尝试从Resources加载
             string imagePath = $"Heroes/hero_{enemyHeroId}"; // 假设图片路径格式为 "Heroes/hero_1", "Heroes/hero_2" 等
-            Sprite heroSprite = Resources.Load<Sprite>(imagePath);
+            Sprite enmyHeroSprite = Resources.Load<Sprite>(imagePath);
             
-            if (heroSprite != null)
+            if (enmyHeroSprite != null)
             {
-                EnemyHero.sprite = heroSprite;
+                EnemyHero.sprite = enmyHeroSprite;
                 Debug.Log($"成功更换敌方武将 {enemyHeroId} 的图片（使用Resources加载）");
             }
             else

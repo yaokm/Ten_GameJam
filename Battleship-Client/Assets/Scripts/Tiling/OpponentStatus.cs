@@ -229,6 +229,7 @@ namespace BattleshipGame.Tiling
                     {
                         Debug.Log("ship:" + ship + "EnemyCoordinate:" + ship.EnemyCoordinate + "_enemyDirection:" + ship._enemyDirection);
                         SetShip(ship, new Vector3Int(ship.EnemyCoordinate.x, ship.EnemyCoordinate.y, 0));
+                        //增加逻辑，把击中的图标设置为透明
                         break;
                     }
                 }
