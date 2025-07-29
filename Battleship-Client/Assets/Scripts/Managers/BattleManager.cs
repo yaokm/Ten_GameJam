@@ -50,6 +50,8 @@ namespace BattleshipGame.Managers
         private TextMeshProUGUI debugTip;
         [SerializeField] private UnityEngine.UI.Image EnemyHero;
         [SerializeField] private GameObject[] boomTxts;
+        [SerializeField] private GameObject[] SkillBtns;
+        [SerializeField] private GameObject[] Skillctxs;
  private readonly Dictionary<int, List<int>> _shots = new Dictionary<int, List<int>>();
         private readonly List<int> _shotsInCurrentTurn = new List<int>();
         private IClient _client;

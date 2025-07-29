@@ -41,6 +41,7 @@ namespace BattleshipGame.Managers
         [SerializeField] private List<Image> HeroName;
         [SerializeField] private List<GameObject> skillContent;
         [SerializeField] private List<GameObject> Heros;
+        [SerializeField] private GameObject continueMask;
         // 新增：保存选择的武将编号
         private int selectedHeroId = 1;
         private int _cellCount;
@@ -242,6 +243,10 @@ namespace BattleshipGame.Managers
 
                 _client.SendPlacement(_cells, directions, coordinates, heroType);
                 statusData.State = WaitingOpponentPlacement;
+
+                // 新增：显示continueMask
+                if (continueMask != null)
+                    continueMask.SetActive(true);
             }
         }
         public void BeginShipPlacement()
