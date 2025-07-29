@@ -197,9 +197,22 @@ export class GameRoom extends Room<State> {
                 if (shots[idx] == -1) {
                     shots[idx] = this.state.currentTurn;
                     if (targetedPlacement[idx] >= 0) {
-                        hit = true;
-                        this.playerHealth[enemy.sessionId]--;
-                        // 这里只处理一次updateShips，实际可根据需求调整
+                        // 检查是否是炸弹
+                        if (targetedPlacement[idx] === 6) {
+                            // 炸弹，设置跳过回合
+                            this.playerSkipNextTurn[player.sessionId] = true;
+                            console.log("多方向开火踩中炸弹了");
+                            // 发送炸弹消息
+                            this.broadcast("xBombHit", {
+                                player: player.sessionId,
+                                victim: player.sessionId
+                            });
+                        } else {
+                            // 普通船只，扣血
+                            hit = true;
+                            this.playerHealth[enemy.sessionId]--;
+                            // 这里只处理一次updateShips，实际可根据需求调整
+                        }
                     }
                 }
             }
@@ -210,7 +223,6 @@ export class GameRoom extends Room<State> {
                 shots[targetIndex] = this.state.currentTurn;
                 if (targetedPlacement[targetIndex] >= 0) {
                     hit = true;
-                    this.playerHealth[enemy.sessionId]--;
                     switch (targetedPlacement[targetIndex]) {
                         case 0: // F0
                             this.updateShips(targetShips, 0, 6, this.state.currentTurn);
@@ -246,6 +258,11 @@ export class GameRoom extends Room<State> {
                             break;
                         case 8: // S
                             break;
+                    }
+                    
+                    // 只有在真正命中船只时才扣血（不包括炸弹）
+                    if (hit) {
+                        this.playerHealth[enemy.sessionId]--;
                     }
                 }
             }
