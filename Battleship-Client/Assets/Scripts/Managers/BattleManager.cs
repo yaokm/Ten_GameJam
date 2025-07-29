@@ -1235,7 +1235,7 @@ namespace BattleshipGame.Managers
                 {
                     HeroImage.sprite = heroSprites[spriteIndex];
                     Debug.Log($"成功更换武将 {heroId} 的图片（使用Inspector设置）");
-                    return;
+                    //return; // 不return，后面还要处理技能按钮
                 }
             }
             // 如果Inspector中没有设置，则尝试从Resources加载
@@ -1250,6 +1250,18 @@ namespace BattleshipGame.Managers
             else
             {
                 Debug.LogWarning($"未找到武将 {heroId} 的图片资源：{imagePath}");
+            }
+
+            // 新增：只显示对应武将的技能按钮和技能内容
+            if (SkillBtns != null && SkillBtns.Length == 4)
+            {
+                for (int i = 0; i < SkillBtns.Length; i++)
+                    SkillBtns[i].SetActive(i == heroId - 1);
+            }
+            if (Skillctxs != null && Skillctxs.Length == 4)
+            {
+                for (int i = 0; i < Skillctxs.Length; i++)
+                    Skillctxs[i].SetActive(i == heroId - 1);
             }
         }
         
