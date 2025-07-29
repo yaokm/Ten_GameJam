@@ -69,6 +69,8 @@ namespace BattleshipGame.Managers
         private bool _isEnemyStunned = false; // 敌方是否被眩晕
         private bool _willPlayerBeStunned = false; // 我方下回合是否会被眩晕
         private bool _willEnemyBeStunned = false; // 敌方下回合是否会被眩晕
+        private bool _isPlayerHitBomb = false; // 我方是否踩中炸弹
+        private bool _isEnemyHitBomb = false; // 敌方是否踩中炸弹
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -145,6 +147,7 @@ namespace BattleshipGame.Managers
             if (_client is NetworkClient netClient)
             {
                 netClient.OnSkillUsed += OnSkillUsed;
+                netClient.OnXBombHit += OnXBombHit;
             }
             
             // 英雄按钮和关闭按钮绑定
@@ -241,6 +244,12 @@ namespace BattleshipGame.Managers
             
             // 清理所有boomTxts
             HideAllBoomTxts();
+            
+            // 取消注册炸弹消息
+            if (_client is NetworkClient netClient)
+            {
+                netClient.OnXBombHit -= OnXBombHit;
+            }
 
             void UnRegisterFromStateEvents()
             {
@@ -494,6 +503,9 @@ namespace BattleshipGame.Managers
                 TurnToPlayer();
             else
                 TurnToEnemy();
+                
+            // 在回合切换完成后显示眩晕提示
+            ShowStunNotificationAtTurnStart();
 
             void TurnToPlayer()
             {
@@ -501,7 +513,6 @@ namespace BattleshipGame.Managers
                 if (_isPlayerStunned)
                 {
                     // 我方被眩晕，无法行动
-                    ShowBoomTxt(0); // 显示"陷阱生效我方本回合不能行动"
                     statusData.State = OpponentTurn; // 直接切换到敌方回合
                     Debug.Log("我方被眩晕，跳过回合");
                     
@@ -537,7 +548,6 @@ namespace BattleshipGame.Managers
                 if (_isEnemyStunned)
                 {
                     // 敌方被眩晕，无法行动
-                    ShowBoomTxt(1); // 显示"陷阱生效中，敌方本回合不能行动"
                     statusData.State = PlayerTurn; // 直接切换到我方回合
                     Debug.Log("敌方被眩晕，跳过回合");
                     
@@ -575,6 +585,37 @@ namespace BattleshipGame.Managers
                 _isEnemyStunned = true;
                 _willEnemyBeStunned = false;
                 Debug.Log("应用敌方眩晕效果");
+            }
+            
+            // 检查炸弹状态
+            if (_isPlayerHitBomb)
+            {
+                _isPlayerStunned = true;
+                _isPlayerHitBomb = false;
+                Debug.Log("应用我方炸弹眩晕效果");
+            }
+            
+            if (_isEnemyHitBomb)
+            {
+                _isEnemyStunned = true;
+                _isEnemyHitBomb = false;
+                Debug.Log("应用敌方炸弹眩晕效果");
+            }
+        }
+        
+        // 在回合开始时显示眩晕提示
+        private void ShowStunNotificationAtTurnStart()
+        {
+            if (_isPlayerStunned)
+            {
+                ShowBoomTxt(0); // 显示"陷阱生效中我方无法行动"
+                Debug.Log("回合开始时显示我方眩晕提示");
+            }
+            
+            if (_isEnemyStunned)
+            {
+                ShowBoomTxt(1); // 显示"陷阱生效中，敌方本回合无法行动"
+                Debug.Log("回合开始时显示敌方眩晕提示");
             }
         }
 
@@ -964,7 +1005,7 @@ namespace BattleshipGame.Managers
                     {
                         // 敌方使用眩晕技能，我方下回合无法行动
                         _willPlayerBeStunned = true;
-                        ShowBoomTxt(3); // 显示"敌方技能已生效，我方下回合无法行动"
+                        ShowBoomTxt(3); // 显示"敌方技能已生效我方下回合无法行动"
                         Debug.Log("敌方使用眩晕技能，我方下回合将被眩晕");
                     }
                     break;
@@ -1268,10 +1309,31 @@ namespace BattleshipGame.Managers
             opponentMap.ClearChengyuScanArea();
         }
         
+        // 处理炸弹消息
+        private void OnXBombHit(string player, string victim)
+        {
+            Debug.Log($"炸弹消息：玩家{player}，受害者{victim}");
+            
+            if (player == _client.GetSessionId())
+            {
+                // 我方踩中炸弹
+                _isPlayerHitBomb = true;
+                ShowBoomTxt(4); // 显示"糟糕是炸弹"
+                Debug.Log("我方踩中炸弹");
+            }
+            else
+            {
+                // 敌方踩中炸弹
+                _isEnemyHitBomb = true;
+                ShowBoomTxt(5); // 显示"敌方踩中了你的炸弹"
+                Debug.Log("敌方踩中炸弹");
+            }
+        }
+        
         // 初始化boomTxts，隐藏所有图片
         private void InitializeBoomTxts()
         {
-            if (boomTxts != null && boomTxts.Length >= 4)
+            if (boomTxts != null && boomTxts.Length >= 6)
             {
                 for (int i = 0; i < boomTxts.Length; i++)
                 {
