@@ -507,7 +507,6 @@ namespace BattleshipGame.Managers
                     
                     // 清除眩晕状态
                     _isPlayerStunned = false;
-                    HideBoomTxt(0);
                     
                     // 显示对方回合UI
                     myTurn.SetActive(false);
@@ -544,7 +543,6 @@ namespace BattleshipGame.Managers
                     
                     // 清除眩晕状态
                     _isEnemyStunned = false;
-                    HideBoomTxt(1);
                     
                     // 显示我方回合UI
                     myTurn.SetActive(true);
@@ -959,14 +957,14 @@ namespace BattleshipGame.Managers
                     {
                         // 我方使用眩晕技能，敌方下回合无法行动
                         _willEnemyBeStunned = true;
-                        ShowBoomTxt(2); // 显示"陷阱生效中，敌方本回合不能行动"
+                        ShowBoomTxt(2); // 显示"技能已生效敌方下回合无法行动"
                         Debug.Log("我方使用眩晕技能，敌方下回合将被眩晕");
                     }
                     else
                     {
                         // 敌方使用眩晕技能，我方下回合无法行动
                         _willPlayerBeStunned = true;
-                        ShowBoomTxt(3); // 显示"技能已生效敌方下回合无法行动"
+                        ShowBoomTxt(3); // 显示"敌方技能已生效，我方下回合无法行动"
                         Debug.Log("敌方使用眩晕技能，我方下回合将被眩晕");
                     }
                     break;
@@ -1290,11 +1288,17 @@ namespace BattleshipGame.Managers
         {
             if (boomTxts != null && index >= 0 && index < boomTxts.Length && boomTxts[index] != null)
             {
+                // 取消之前的自动隐藏调用
+                CancelInvoke(nameof(HideAllBoomTxts));
+                
                 // 先隐藏所有图片
                 InitializeBoomTxts();
                 // 显示指定图片
                 boomTxts[index].SetActive(true);
                 Debug.Log($"显示boomTxts图片 {index}");
+                
+                // 3.5秒后自动隐藏
+                Invoke(nameof(HideAllBoomTxts), 3.5f);
             }
         }
         
