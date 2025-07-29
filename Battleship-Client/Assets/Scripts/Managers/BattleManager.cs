@@ -65,10 +65,11 @@ namespace BattleshipGame.Managers
         private bool _resultShown = false; // 防止重复显示结果
         private int _pendingEffects = 0; // 待播放的特效数量
         private bool _waitingForEffects = false; // 是否正在等待特效播放完成
-        private bool _isPlayerStunned = false; // 我方是否被眩晕
-        private bool _isEnemyStunned = false; // 敌方是否被眩晕
-        private bool _willPlayerBeStunned = false; // 我方下回合是否会被眩晕
-        private bool _willEnemyBeStunned = false; // 敌方下回合是否会被眩晕
+        // 眩晕效果现在完全由服务器处理，这些变量保留用于其他可能的客户端效果
+        private bool _isPlayerStunned = false; // 我方是否被眩晕（保留用于其他效果）
+        private bool _isEnemyStunned = false; // 敌方是否被眩晕（保留用于其他效果）
+        private bool _willPlayerBeStunned = false; // 我方下回合是否会被眩晕（保留用于其他效果）
+        private bool _willEnemyBeStunned = false; // 敌方下回合是否会被眩晕（保留用于其他效果）
         private void Awake()
         {
             Debug.Log("BattleManager Awake");
@@ -145,6 +146,7 @@ namespace BattleshipGame.Managers
             if (_client is NetworkClient netClient)
             {
                 netClient.OnSkillUsed += OnSkillUsed;
+                netClient.OnTurnSkipped += OnTurnSkipped;
             }
             
             // 英雄按钮和关闭按钮绑定
@@ -237,6 +239,13 @@ namespace BattleshipGame.Managers
             if (_client == null) return;
             _client.GamePhaseChanged -= OnGamePhaseChanged;
 
+            // 取消网络事件订阅
+            if (_client is NetworkClient netClient)
+            {
+                netClient.OnSkillUsed -= OnSkillUsed;
+                netClient.OnTurnSkipped -= OnTurnSkipped;
+            }
+
             UnRegisterFromStateEvents();
             
             // 清理所有boomTxts
@@ -256,8 +265,8 @@ namespace BattleshipGame.Managers
 
         public void OnOpponentMapClicked(Vector3Int cell)
         {
-            // 检查是否是我方回合且没有被眩晕
-            if (_state.playerTurn != _client.GetSessionId() || _isPlayerStunned) return;
+            // 检查是否是我方回合
+            if (_state.playerTurn != _client.GetSessionId()) return;
             
             int cellIndex = CoordinateToCellIndex(cell, rules.areaSize);
             if (_isMultiShotActive && mSkillType == 4)
@@ -423,12 +432,7 @@ namespace BattleshipGame.Managers
 
         private void FireShots()
         {
-            // 检查是否被眩晕
-            if (_isPlayerStunned)
-            {
-                Debug.Log("我方被眩晕，无法开火");
-                return;
-            }
+            // 眩晕效果现在由服务器处理，客户端不需要检查
             
             fireButton.SetInteractable(false);
             if (_isMultiShotActive && _shotsInCurrentTurn.Count == 2)
@@ -487,7 +491,7 @@ namespace BattleshipGame.Managers
 
         private void SwitchTurns()
         {
-            // 检查眩晕状态
+            // 检查眩晕状态（只用于显示提示，不干预回合切换）
             CheckStunStatus();
             
             if (_state.playerTurn == _client.GetSessionId())
@@ -500,19 +504,30 @@ namespace BattleshipGame.Managers
 
             void TurnToPlayer()
             {
-                // 检查我方是否被眩晕
+                // 检查我方是否被眩晕（只用于显示提示，不跳过回合）
                 if (_isPlayerStunned)
                 {
-                    // 我方被眩晕，无法行动
-                    statusData.State = OpponentTurn; // 直接切换到敌方回合
-                    Debug.Log("我方被眩晕，跳过回合");
+                    // 我方被眩晕，显示提示但保持正常回合流程
+                    Debug.Log("我方被眩晕，显示提示");
                     
                     // 清除眩晕状态
                     _isPlayerStunned = false;
                     
-                    // 显示对方回合UI
-                    myTurn.SetActive(false);
-                    oppoTurn.SetActive(true);
+                    // 正常设置我方回合状态
+                    opponentMap.IsMarkingTargets = true;
+                    statusData.State = PlayerTurn;
+                    opponentMap.FlashGrids();
+                    
+                    // 显示我方回合UI
+                    myTurn.SetActive(true);
+                    oppoTurn.SetActive(false);
+
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
+                    if (options.vibration && _client is NetworkClient _)
+                    {
+                        Handheld.Vibrate();
+                    }
+#endif
                 }
                 else
                 {
@@ -535,19 +550,21 @@ namespace BattleshipGame.Managers
 
             void TurnToEnemy()
             {
-                // 检查敌方是否被眩晕
+                // 检查敌方是否被眩晕（只用于显示提示，不跳过回合）
                 if (_isEnemyStunned)
                 {
-                    // 敌方被眩晕，无法行动
-                    statusData.State = PlayerTurn; // 直接切换到我方回合
-                    Debug.Log("敌方被眩晕，跳过回合");
+                    // 敌方被眩晕，显示提示但保持正常回合流程
+                    Debug.Log("敌方被眩晕，显示提示");
                     
                     // 清除眩晕状态
                     _isEnemyStunned = false;
                     
-                    // 显示我方回合UI
-                    myTurn.SetActive(true);
-                    oppoTurn.SetActive(false);
+                    // 正常设置敌方回合状态
+                    statusData.State = OpponentTurn;
+                    
+                    // 显示对方回合UI
+                    myTurn.SetActive(false);
+                    oppoTurn.SetActive(true);
                 }
                 else
                 {
@@ -560,39 +577,20 @@ namespace BattleshipGame.Managers
             }
         }
         
-        // 检查眩晕状态
+        // 检查眩晕状态（现在只用于显示提示，实际效果由服务器处理）
         private void CheckStunStatus()
         {
-            // 检查是否需要应用眩晕效果
-            if (_willPlayerBeStunned)
-            {
-                _isPlayerStunned = true;
-                _willPlayerBeStunned = false;
-                Debug.Log("应用我方眩晕效果");
-            }
-            
-            if (_willEnemyBeStunned)
-            {
-                _isEnemyStunned = true;
-                _willEnemyBeStunned = false;
-                Debug.Log("应用敌方眩晕效果");
-            }
+            // 眩晕效果现在完全由服务器处理，客户端只负责显示提示
+            // 这里可以保留用于其他可能的客户端眩晕效果
+            Debug.Log("检查眩晕状态（由服务器处理）");
         }
         
-        // 在回合开始时显示眩晕提示
+        // 在回合开始时显示眩晕提示（现在主要用于炸弹等陷阱效果）
         private void ShowStunNotificationAtTurnStart()
         {
-            if (_isPlayerStunned)
-            {
-                ShowBoomTxt(0); // 显示"陷阱生效我方本回合不能行动"
-                Debug.Log("回合开始时显示我方眩晕提示");
-            }
-            
-            if (_isEnemyStunned)
-            {
-                ShowBoomTxt(1); // 显示"陷阱生效中，敌方本回合不能行动"
-                Debug.Log("回合开始时显示敌方眩晕提示");
-            }
+            // 眩晕效果现在完全由服务器处理，这里可以用于显示其他类型的提示
+            // 比如炸弹陷阱等效果
+            Debug.Log("回合开始时检查是否需要显示特殊提示");
         }
 
         private void OnStateChanged(List<DataChange> changes)
@@ -891,12 +889,7 @@ namespace BattleshipGame.Managers
         // 技能按钮点击回调
         private void OnUseSkillButtonClicked()
         {
-            // 检查是否被眩晕
-            if (_isPlayerStunned)
-            {
-                Debug.Log("我方被眩晕，无法使用技能");
-                return;
-            }
+            // 眩晕效果现在由服务器处理，客户端不需要检查
             
             // 使用技能时自动关闭二次确认框
             if (maskBox != null)
@@ -969,20 +962,18 @@ namespace BattleshipGame.Managers
                     Debug.Log($"玩家{player}使用了眩晕技能，目标：{target}");
                     debugTip.text = $"玩家{player}使用了眩晕技能，目标：{target}";
                     
-                    // 处理眩晕效果
+                    // 处理眩晕效果（只显示提示，实际回合跳过由服务器处理）
                     if (player == _client.GetSessionId())
                     {
-                        // 我方使用眩晕技能，敌方下回合无法行动
-                        _willEnemyBeStunned = true;
+                        // 我方使用眩晕技能，显示提示
                         ShowBoomTxt(2); // 显示"技能已生效敌方下回合无法行动"
-                        Debug.Log("我方使用眩晕技能，敌方下回合将被眩晕");
+                        Debug.Log("我方使用眩晕技能，敌方下回合将被眩晕（由服务器处理）");
                     }
                     else
                     {
-                        // 敌方使用眩晕技能，我方下回合无法行动
-                        _willPlayerBeStunned = true;
+                        // 敌方使用眩晕技能，显示提示
                         ShowBoomTxt(3); // 显示"敌方技能已生效，我方下回合无法行动"
-                        Debug.Log("敌方使用眩晕技能，我方下回合将被眩晕");
+                        Debug.Log("敌方使用眩晕技能，我方下回合将被眩晕（由服务器处理）");
                     }
                     break;
                 case "scan":
@@ -1032,6 +1023,26 @@ namespace BattleshipGame.Managers
                 useSkillButton?.SetInteractable(false);
             }
             Invoke(nameof(ClearDebugTip), 3f);
+        }
+        
+        // 回合跳过回调
+        private void OnTurnSkipped(string playerId)
+        {
+            Debug.Log($"玩家 {playerId} 的回合被跳过");
+            
+            // 显示相应的提示
+            if (playerId == _client.GetSessionId())
+            {
+                // 我方回合被跳过
+                ShowBoomTxt(0); // 显示"陷阱生效我方本回合不能行动"
+                Debug.Log("我方回合被跳过，显示提示");
+            }
+            else
+            {
+                // 敌方回合被跳过
+                ShowBoomTxt(1); // 显示"陷阱生效中，敌方本回合不能行动"
+                Debug.Log("敌方回合被跳过，显示提示");
+            }
         }
 
         private void ClearDebugTip()
